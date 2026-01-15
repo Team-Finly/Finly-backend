@@ -101,18 +101,19 @@ feat/{도메인-이슈번호-기능명}
   - 상세 내용
   - 체크리스트
   - 참고 사항
-
+- Labels, Assignees 지정
+  
 ### Pull Request (PR)
 ```
 [Tag] Title
 ```
-
 - PR 내용에는 다음을 포함:
   - 관련 이슈
   - 작업 내용
   - 테스트 결과
   - 스크린샷
   - 참고 사항
+- Labels, Assignees, Reviewers 지정
 
 #### Issue/PR Tag 종류
 | Tag      | 설명                         |
