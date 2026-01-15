@@ -204,7 +204,7 @@ Feat: 감정 기록 상세 조회 API 추가 (#12)
 
   <!-- 이름 행 (링크 포함) -->
   <tr>
-    <td align="center"><a href="https://github.com/yjhss"><b>토리/박예진</b></a></td>
+    <td align="center"><a href="https://github.com/ye-zin"><b>토리/박예진</b></a></td>
     <td align="center"><a href="https://github.com/wonee1"><b>위니/김채원</b></a></td>
     <td align="center"><a href="https://github.com/na311ng"><b>나미/이나영</b></a></td>
     <td align="center"><a href="https://github.com/jangsh7"><b>헤카/장서현</b></a></td>
