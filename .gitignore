@@ -39,6 +39,5 @@ out/
 ### MacOS ###
 *.DS_Store
 
-### 민감 정보 ###
-src/main/resources/**/application-secret.yml
-src/main/resources/**/application-*-secret.yml
+### 환경 변수 ###
+.env
