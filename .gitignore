@@ -41,3 +41,6 @@ out/
 
 ### 환경 변수 ###
 .env
+
+### 초기 DB SQL ###
+/src/main/resources/db/*.sql
