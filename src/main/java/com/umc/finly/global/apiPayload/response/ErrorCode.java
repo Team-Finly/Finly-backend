@@ -18,6 +18,9 @@ public enum ErrorCode implements BaseCode {
     REQUEST_TIMEOUT(HttpStatus.REQUEST_TIMEOUT, "COMMON408", "요청 시간이 초과되었습니다."),
     CONFLICT(HttpStatus.CONFLICT, "COMMON409", "서버 상태와 충돌하는 요청입니다."),
 
+    // AUTH 4xx
+    EMAIL_ALREADY_EXISTS(HttpStatus.CONFLICT, "AUTH409", "이미 가입된 이메일입니다."),
+
     // COMMON 5xx (서버 오류)
     INTERNAL_SERVER_ERROR(HttpStatus.INTERNAL_SERVER_ERROR, "COMMON500", "서버 내부 오류가 발생했습니다."),
     BAD_GATEWAY(HttpStatus.BAD_GATEWAY, "COMMON502", "잘못된 게이트웨이 오류가 발생했습니다."),
