@@ -6,7 +6,8 @@ import lombok.Getter;
 
 import java.util.List;
 
-@Getter@Builder
+@Getter
+@Builder
 public class PersonasTestQuestionRes {
 
     private Long id;

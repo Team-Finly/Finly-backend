@@ -8,7 +8,8 @@ import lombok.*;
 @Entity
 @NoArgsConstructor(access = AccessLevel.PROTECTED)
 @AllArgsConstructor
-@Getter@Builder
+@Getter
+@Builder
 @Table(name = "personas_test_question")
 public class PersonasTestQuestion extends CreatedBaseEntity {
 

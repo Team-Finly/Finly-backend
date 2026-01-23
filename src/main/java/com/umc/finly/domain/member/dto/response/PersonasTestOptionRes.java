@@ -4,7 +4,8 @@ import com.umc.finly.domain.member.entity.PersonasTestOption;
 import lombok.Builder;
 import lombok.Getter;
 
-@Getter@Builder
+@Getter
+@Builder
 public class PersonasTestOptionRes {
 
     private Long id;
