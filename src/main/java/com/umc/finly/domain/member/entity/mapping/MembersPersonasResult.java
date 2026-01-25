@@ -5,6 +5,7 @@ import com.umc.finly.global.entity.BaseEntity;
 import jakarta.persistence.*;
 import lombok.*;
 
+// 멤버-페르소나 테스트 결과
 @Entity
 @NoArgsConstructor(access = AccessLevel.PROTECTED)
 @AllArgsConstructor
