@@ -14,7 +14,7 @@ import org.springframework.web.client.RestClient;
 public class NaverStockPriceProvider implements StockPriceProvider {
     private static final String NAVER_API_URL = "https://polling.finance.naver.com/api/realtime/domestic/stock/%s";
     private final ObjectMapper objectMapper; // JSON 문자열을 자바 객체로 변환해주는 객체
-    private final RestClient restClient = RestClient.create(); // 외부 HTTP API를 호출하는 클라이언트
+    private final RestClient restClient; // 외부 HTTP API를 호출하는 클라이언트
 
     @Override
     public Integer getCurrentPrice(String stockCode) {
@@ -51,7 +51,7 @@ public class NaverStockPriceProvider implements StockPriceProvider {
         } catch (CustomException e) {
             throw e;
         } catch (Exception e) {
-            throw new CustomException(ErrorCode.BAD_GATEWAY, "네이버 주식 API 처리 중 오류가 발생했습니다: " + e.getMessage());
+            throw new CustomException(ErrorCode.BAD_GATEWAY, "네이버 주식 API 처리 중 오류가 발생했습니다: " + e);
         }
     }
 }
