@@ -3,18 +3,24 @@ package com.umc.finly.domain.record.entity;
 import java.time.LocalTime;
 
 public enum Session {
-    MORNING,    // 06:00 ~ 11:59
-    AFTERNOON,  // 12:00 ~ 17:59
-    EVENING;    // 18:00 ~ 05:59
+    PRE_MARKET,   // 00:00 ~ 09:00 (장전 브리핑 - 예측의 시간)
+    MORNING,      // 09:00 ~ 12:00 (오전 - 변동성의 시간)
+    AFTERNOON,    // 12:00 ~ 15:30 (오후 - 이성의 시간)
+    POST_MARKET;  // 15:30 ~ 00:00 (장후 복기 - 정리의 시간)
+
+    private static final LocalTime MARKET_OPEN = LocalTime.of(9, 0);
+    private static final LocalTime NOON = LocalTime.of(12, 0);
+    private static final LocalTime MARKET_CLOSE = LocalTime.of(15, 30);
 
     public static Session fromTime(LocalTime time) {
-        int hour = time.getHour();
-        if (hour >= 6 && hour < 12) {
+        if (time.isBefore(MARKET_OPEN)) {
+            return PRE_MARKET;
+        } else if (time.isBefore(NOON)) {
             return MORNING;
-        } else if (hour >= 12 && hour < 18) {
+        } else if (time.isBefore(MARKET_CLOSE)) {
             return AFTERNOON;
         } else {
-            return EVENING;
+            return POST_MARKET;
         }
     }
 }
