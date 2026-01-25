@@ -16,6 +16,7 @@ import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RequestParam;
 import org.springframework.web.bind.annotation.RestController;
 
+// 인증 관련 비즈니스 로직 담당 서비스
 @Validated
 @RequiredArgsConstructor
 @RestController
@@ -24,6 +25,7 @@ public class AuthController {
 
     private final AuthService authService;
 
+    // 이메일 중복 확인
     @GetMapping("/check-email")
     public ApiResponse<CheckEmailRes> checkEmail(
             @RequestParam("email")
@@ -33,6 +35,7 @@ public class AuthController {
     ) {
         boolean available = authService.isEmailAvailable(email);
 
+        // 이미 가입된 이메일인 경우 에러 응답
         if(!available){
             throw new CustomException(ErrorCode.EMAIL_ALREADY_EXISTS);
         }
