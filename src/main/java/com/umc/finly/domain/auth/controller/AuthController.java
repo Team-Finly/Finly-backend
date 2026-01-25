@@ -25,7 +25,7 @@ public class AuthController {
     private final AuthService authService;
 
     @GetMapping("/check-email")
-    public ResponseEntity<ApiResponse<CheckEmailRes>> checkEmail(
+    public ApiResponse<CheckEmailRes> checkEmail(
             @RequestParam("email")
             @NotBlank(message = "유효한 이메일을 입력해 주세요.")
             @Email(message = "유효한 이메일을 입력해 주세요.")
@@ -37,10 +37,8 @@ public class AuthController {
             throw new CustomException(ErrorCode.EMAIL_ALREADY_EXISTS);
         }
 
-        ApiResponse<CheckEmailRes> body = ApiResponse.onSuccess(
-                CheckEmailRes.of(available),
+        return ApiResponse.onSuccess(CheckEmailRes.of(true),
                 SuccessCode.OK
         );
-        return ResponseEntity.status(SuccessCode.OK.getHttpStatus()).body(body);
     }
 }
