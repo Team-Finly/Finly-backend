@@ -7,33 +7,38 @@ import org.springframework.context.annotation.Configuration;
 import org.springframework.security.config.annotation.web.builders.HttpSecurity;
 import org.springframework.security.web.SecurityFilterChain;
 import org.springframework.security.web.authentication.UsernamePasswordAuthenticationFilter;
+import org.springframework.security.web.util.matcher.RequestMatcher;
 
 @Configuration
 @RequiredArgsConstructor
 public class SecurityConfig {
-    // 인증/인가 규칙, 필터 체인 구성
 
     private final JwtProvider jwtProvider;
 
     @Bean
-    public SecurityFilterChain filterChain(HttpSecurity http) throws Exception{
+    public SecurityFilterChain filterChain(HttpSecurity http) throws Exception {
+
+        RequestMatcher signupMatcher = request ->
+                "/api/persona-test/submit".equals(request.getServletPath()) &&
+                        "signup".equals(request.getParameter("mode"));
+
+        RequestMatcher retestMatcher = request ->
+                "/api/persona-test/submit".equals(request.getServletPath()) &&
+                        "retest".equals(request.getParameter("mode"));
 
         http
                 .csrf(csrf -> csrf.disable())
                 .formLogin(form -> form.disable())
                 .httpBasic(basic -> basic.disable())
                 .authorizeHttpRequests(auth -> auth
-                        // 로그인 없이 접근 허용 (PUBLIC APIs)
-                        .requestMatchers(
-                                "/api/persona-test/questions",
-                                "/api/persona-test/submit?mode=signup",
-                                "/api/auth/check-email",
-                                "/api/persona-test/submit?mode=signup"
+                        // PUBLIC
+                        .requestMatchers("/api/persona-test/questions", "/api/auth/check-email").permitAll()
+                        .requestMatchers(signupMatcher).permitAll()
 
-                        ).permitAll()
-                        // JWT 필요 (PROTECTED APIs)
-                        .requestMatchers("/api/persona-test/submit?mode=retest").authenticated()
-                        // 그 외는 일단 허용 (추후 운영 단계에서 authenticated()로 점진 강화 예정)
+                        // PROTECTED
+                        .requestMatchers(retestMatcher).authenticated()
+
+                        // 나머지
                         .anyRequest().permitAll()
                 )
                 .addFilterBefore(
