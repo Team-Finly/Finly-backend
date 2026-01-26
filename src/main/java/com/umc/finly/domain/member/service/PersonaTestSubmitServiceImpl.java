@@ -33,49 +33,24 @@ import static com.umc.finly.domain.member.enums.QuestionCode.Q3;
 @RequiredArgsConstructor
 @Transactional
 public class PersonaTestSubmitServiceImpl implements PersonaTestSubmitService{
-    private final PersonasTestQuestionRepository questionRepository;
-    private final PersonasTestOptionRepository optionRepository;
+    private final PersonaScoringService personaScoringService;
     private final MemberPersonaResultRepository memberPersonaResultRepository;
-    private final PersonaRepository personaRepository;
 
     @Override
     public PersonaTestSubmitRes submit(String mode, PersonaTestSubmitReq request){
 
-        // answers 개수 검증
-        if(request.getAnswers().size() != 3){
-            throw new CustomException(MemberErrorCode.PERSONA_ANSWERS_REQUIRED);
-        }
-
-        // questionsId -> ChoiceCode 매핑
-        Map<QuestionCode, ChoiceCode> answerMap = new EnumMap<>(QuestionCode.class);
-
-        for (PersonaAnswerReq answer : request.getAnswers()) {
-            PersonaTestQuestion question = questionRepository.findById(answer.getQuestionId())
-                    .orElseThrow(()-> new CustomException(MemberErrorCode.INVALID_PERSONA_ANSWER));
-
-            PersonaTestOption option = optionRepository.findById(answer.getOptionId())
-                    .orElseThrow(()-> new CustomException(MemberErrorCode.INVALID_PERSONA_ANSWER));
-
-            if(!option.getQuestion().getId().equals(question.getId())) {
-                throw new CustomException(MemberErrorCode.INVALID_PERSONA_ANSWER);
-            }
-
-            answerMap.put(question.getQuestionCode(), option.getChoiceCode());
-        }
-
-        // 페르소나 결정 로직
-        PersonaType resultType = decidePersona(answerMap);
-
-        Persona persona = personaRepository.findByPersonaType(resultType)
-                .orElseThrow(()-> new CustomException(MemberErrorCode.PERSONA_RESULT_NOT_FOUND));
+        // 공용 채점/검증 로직 재사용
+        Persona persona = personaScoringService.resolvePersona(request.getAnswers());
 
         // mode 분기
         if ("signup".equals(mode)) {
+            // 회원가입 전 페르소나 테스트 결과 미리보기: 저장 안 됨
             return buildResponse(persona, false, null, null);
         }
 
         if ("retest".equals(mode)) {
-            Long memberId = SecurityUtil.getCurrentMemberId(); // ← JWT
+            // 로그인 후 재테스트: JWT필요
+            Long memberId = SecurityUtil.getCurrentMemberId();
 
             MemberPersonaResult result =
                     memberPersonaResultRepository.findByMemberId(memberId)
@@ -93,14 +68,6 @@ public class PersonaTestSubmitServiceImpl implements PersonaTestSubmitService{
         }
 
         throw new CustomException(MemberErrorCode.INVALID_PERSONA_ANSWER);
-    }
-
-    private PersonaType decidePersona(Map<QuestionCode, ChoiceCode> a) {
-
-        if (a.get(Q1) == B) return PersonaType.WORRIED_DEER;
-        if (a.get(Q3) == A) return PersonaType.CAUTIOUS_TURTLE;
-        if (a.get(Q3) == C) return PersonaType.SHARP_EAGLE;
-        return PersonaType.FIERY_LION;
     }
 
     private PersonaTestSubmitRes buildResponse(
