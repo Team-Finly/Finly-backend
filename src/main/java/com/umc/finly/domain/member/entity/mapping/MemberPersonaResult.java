@@ -31,4 +31,18 @@ public class MemberPersonaResult extends BaseEntity {
     @ManyToOne(fetch = FetchType.LAZY)
     @JoinColumn(name = "persona_id", nullable = false)
     private Persona persona;
+
+    // 기존 결과 갱신
+    public MemberPersonaResult updatePersona(Persona newPersona){
+        this.persona = newPersona;
+        return this;
+    }
+
+    // 최초 생성
+    public static MemberPersonaResult create(Long memberId, Persona persona){
+        return MemberPersonaResult.builder()
+                .memberId(memberId)
+                .persona(persona)
+                .build();
+    }
 }
