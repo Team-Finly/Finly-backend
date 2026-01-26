@@ -1,15 +1,14 @@
 package com.umc.finly.domain.auth.controller;
 
 import com.umc.finly.domain.auth.dto.CheckEmailRes;
+import com.umc.finly.domain.auth.exception.AuthErrorCode;
 import com.umc.finly.domain.auth.service.AuthService;
 import com.umc.finly.global.apiPayload.exception.CustomException;
 import com.umc.finly.global.apiPayload.response.ApiResponse;
-import com.umc.finly.global.apiPayload.response.ErrorCode;
 import com.umc.finly.global.apiPayload.response.SuccessCode;
 import jakarta.validation.constraints.Email;
 import jakarta.validation.constraints.NotBlank;
 import lombok.RequiredArgsConstructor;
-import org.springframework.http.ResponseEntity;
 import org.springframework.validation.annotation.Validated;
 import org.springframework.web.bind.annotation.GetMapping;
 import org.springframework.web.bind.annotation.RequestMapping;
@@ -37,7 +36,7 @@ public class AuthController {
 
         // 이미 가입된 이메일인 경우 에러 응답
         if(!available){
-            throw new CustomException(ErrorCode.EMAIL_ALREADY_EXISTS);
+            throw new CustomException(AuthErrorCode.EMAIL_ALREADY_EXISTS);
         }
 
         return ApiResponse.onSuccess(CheckEmailRes.of(true),
