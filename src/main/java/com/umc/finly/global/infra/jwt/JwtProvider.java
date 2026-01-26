@@ -6,7 +6,6 @@ import io.jsonwebtoken.Jwts;
 import io.jsonwebtoken.SignatureAlgorithm;
 import io.jsonwebtoken.security.Keys;
 import org.springframework.beans.factory.annotation.Value;
-import org.springframework.security.core.parameters.P;
 import org.springframework.stereotype.Component;
 
 import java.security.Key;
@@ -17,21 +16,21 @@ public class JwtProvider {
     // 토큰 생성 / 파싱 / 검증
 
     private final Key key;
-    private final long accessToeknExpireMs;
+    private final long accessTokenExpireMs;
 
     public JwtProvider(@Value("${jwt.secret}") String secretKey,
                        @Value("${jwt.access-token-expire-ms}") long accessTokenExpireMs
     ){
         this.key = Keys.hmacShaKeyFor(secretKey.getBytes());
-        this.accessToeknExpireMs = accessTokenExpireMs;
+        this.accessTokenExpireMs = accessTokenExpireMs;
     }
 
-    public String createAccessToken(Long memberId, String email, long expiresMs){
+    public String createAccessToken(Long memberId, String email){
         return Jwts.builder()
                 .claim("memberId", memberId)
                 .claim("email", email)
                 .setIssuedAt(new Date())
-                .setExpiration(new Date(System.currentTimeMillis() + accessToeknExpireMs))
+                .setExpiration(new Date(System.currentTimeMillis() + accessTokenExpireMs))
                 .signWith(key, SignatureAlgorithm.HS256)
                 .compact();
     }

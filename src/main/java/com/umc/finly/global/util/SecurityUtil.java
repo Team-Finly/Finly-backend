@@ -6,15 +6,19 @@ import org.springframework.security.core.Authentication;
 import org.springframework.security.core.context.SecurityContextHolder;
 
 public class SecurityUtil {
-    // Service에서 memberId 추출
 
     public static Long getCurrentMemberId() {
         Authentication auth = SecurityContextHolder.getContext().getAuthentication();
 
-        if (auth == null || auth.getPrincipal() == null) {
+        if (auth == null || !auth.isAuthenticated() || auth.getPrincipal() == null) {
             throw new CustomException(ErrorCode.UNAUTHORIZED);
         }
 
-        return (Long) auth.getPrincipal();
+        Object principal = auth.getPrincipal();
+        if (!(principal instanceof Long)) {
+            throw new CustomException(ErrorCode.UNAUTHORIZED);
+        }
+
+        return (Long) principal;
     }
 }
