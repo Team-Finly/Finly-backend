@@ -76,6 +76,7 @@ public class ExceptionAdvice extends ResponseEntityExceptionHandler {
     // 도메인 CustomException
     @ExceptionHandler(CustomException.class)
     public ResponseEntity<Object> handleCustomException(CustomException e, HttpServletRequest request) {
+        log.error("CustomException 발생", e);
         ApiResponse<Object> body = ApiResponse.onFailure(e.getErrorCode(), null);
         WebRequest webRequest = new ServletWebRequest(request);
         return handleExceptionInternal(e, body, new HttpHeaders(), e.getErrorCode().getHttpStatus(), webRequest);

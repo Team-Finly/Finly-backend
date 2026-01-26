@@ -19,12 +19,14 @@ public class PersonasTestServiceImpl implements PersonasTestService{
     private final PersonasTestQuestionRepository questionRepository;
     private final PersonasTestOptionRepository optionRepository;
 
+    // 페르소나 테스트 질문 전체 조회
     @Override
     public List<PersonasTestQuestionRes> getPersonasTestQuestions(){
 
         List<PersonasTestQuestion> questions =
                  questionRepository.findAllByOrderByQuestionCodeAsc();
 
+        // 각 질문에 대한 선택지 조회 후 DTO 변환
         return questions.stream()
                 .map(question->{
                     List<PersonasTestOptionRes> options =
