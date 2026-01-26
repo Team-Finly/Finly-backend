@@ -2,8 +2,8 @@ package com.umc.finly.domain.analysis.infra;
 
 import com.fasterxml.jackson.databind.JsonNode;
 import com.fasterxml.jackson.databind.ObjectMapper;
+import com.umc.finly.domain.analysis.exception.code.AnalysisErrorCode;
 import com.umc.finly.global.apiPayload.exception.CustomException;
-import com.umc.finly.global.apiPayload.response.ErrorCode;
 import lombok.RequiredArgsConstructor;
 import org.springframework.stereotype.Component;
 import org.springframework.web.client.RestClient;
@@ -32,26 +32,26 @@ public class NaverStockPriceProvider implements StockPriceProvider {
             JsonNode root = objectMapper.readTree(response);
             JsonNode stockSnapshots = root.get("datas");
 
-            if (stockSnapshots == null || !stockSnapshots.isArray()) {
-                throw new CustomException(ErrorCode.BAD_GATEWAY, "네이버 주식 API 응답에 주식 데이터가 없습니다.");
+            if (stockSnapshots == null || !stockSnapshots.isArray()) { // 네이버 주식 API 응답에 주식 데이터가 없음
+                throw new CustomException(AnalysisErrorCode.STOCK_CURRENT_PRICE_RESPONSE_INVALID);
             }
 
-            if (stockSnapshots.isEmpty()) {
-                throw new CustomException(ErrorCode.NOT_FOUND, "존재하지 않는 종목 코드입니다.");
+            if (stockSnapshots.isEmpty()) { // 존재하지 않는 종목 코드에 대한 요청인 경우
+                throw new CustomException(AnalysisErrorCode.STOCK_CURRENT_PRICE_NOT_FOUND);
             }
 
             JsonNode stock = stockSnapshots.get(0);
             JsonNode closePriceRaw = stock.get("closePriceRaw");
 
-            if (closePriceRaw == null) {
-                throw new CustomException(ErrorCode.BAD_GATEWAY, "closePriceRaw 데이터가 없습니다.");
+            if (closePriceRaw == null) { // closePriceRaw 데이터가 없음
+                throw new CustomException(AnalysisErrorCode.STOCK_CURRENT_PRICE_RESPONSE_INVALID);
             }
 
             return closePriceRaw.asInt();
         } catch (CustomException e) {
             throw e;
         } catch (Exception e) {
-            throw new CustomException(ErrorCode.BAD_GATEWAY, "네이버 주식 API 처리 중 오류가 발생했습니다: " + e);
+            throw new CustomException(AnalysisErrorCode.STOCK_CURRENT_PRICE_API_FAILED);
         }
     }
 }
