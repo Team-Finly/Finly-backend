@@ -1,19 +1,19 @@
 package com.umc.finly.domain.member.dto.response;
 
-import com.umc.finly.domain.member.entity.PersonasTestOption;
+import com.umc.finly.domain.member.entity.PersonaTestOption;
 import lombok.Builder;
 import lombok.Getter;
 
 @Getter
 @Builder
-public class PersonasTestOptionRes {
+public class PersonaTestOptionRes {
 
     private Long id;
     private String choiceCode;
     private String content;
 
-    public static PersonasTestOptionRes from(PersonasTestOption option){
-        return PersonasTestOptionRes.builder()
+    public static PersonaTestOptionRes from(PersonaTestOption option){
+        return PersonaTestOptionRes.builder()
                 .id(option.getId())
                 .choiceCode(option.getChoiceCode().name())
                 .content(option.getContent())

@@ -1,12 +1,12 @@
 package com.umc.finly.domain.member.repository;
 
-import com.umc.finly.domain.member.entity.PersonasTestQuestion;
+import com.umc.finly.domain.member.entity.PersonaTestQuestion;
 import org.springframework.data.jpa.repository.JpaRepository;
 
 import java.util.List;
 
 public interface PersonasTestQuestionRepository
-        extends JpaRepository<PersonasTestQuestion, Long> {
+        extends JpaRepository<PersonaTestQuestion, Long> {
 
-    List<PersonasTestQuestion> findAllByOrderByQuestionCodeAsc();
+    List<PersonaTestQuestion> findAllByOrderByQuestionCodeAsc();
 }

@@ -1,6 +1,6 @@
 package com.umc.finly.domain.member.entity.mapping;
 
-import com.umc.finly.domain.member.entity.Personas;
+import com.umc.finly.domain.member.entity.Persona;
 import com.umc.finly.global.entity.BaseEntity;
 import jakarta.persistence.*;
 import lombok.*;
@@ -11,7 +11,7 @@ import lombok.*;
 @Getter
 @Builder
 @Table(
-        name = "members_personas_result",
+        name = "member_persona_results",
         uniqueConstraints = {
                 @UniqueConstraint(
                         name = "uk_member_persona",
@@ -19,7 +19,7 @@ import lombok.*;
                 )
         }
 )
-public class MembersPersonasResult extends BaseEntity {
+public class MemberPersonaResult extends BaseEntity {
 
     @Id
     @GeneratedValue(strategy = GenerationType.IDENTITY)
@@ -30,5 +30,5 @@ public class MembersPersonasResult extends BaseEntity {
 
     @ManyToOne(fetch = FetchType.LAZY)
     @JoinColumn(name = "persona_id", nullable = false)
-    private Personas persona;
+    private Persona persona;
 }

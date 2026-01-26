@@ -1,8 +1,8 @@
 package com.umc.finly.domain.member.service;
 
-import com.umc.finly.domain.member.dto.response.PersonasTestOptionRes;
-import com.umc.finly.domain.member.dto.response.PersonasTestQuestionRes;
-import com.umc.finly.domain.member.entity.PersonasTestQuestion;
+import com.umc.finly.domain.member.dto.response.PersonaTestOptionRes;
+import com.umc.finly.domain.member.dto.response.PersonaTestQuestionRes;
+import com.umc.finly.domain.member.entity.PersonaTestQuestion;
 import com.umc.finly.domain.member.repository.PersonasTestOptionRepository;
 import com.umc.finly.domain.member.repository.PersonasTestQuestionRepository;
 import lombok.RequiredArgsConstructor;
@@ -14,26 +14,26 @@ import java.util.List;
 @Service
 @RequiredArgsConstructor
 @Transactional(readOnly = true)
-public class PersonasTestServiceImpl implements PersonasTestService{
+public class PersonaTestServiceImpl implements PersonaTestService {
 
     private final PersonasTestQuestionRepository questionRepository;
     private final PersonasTestOptionRepository optionRepository;
 
     @Override
-    public List<PersonasTestQuestionRes> getPersonasTestQuestions(){
+    public List<PersonaTestQuestionRes> getPersonasTestQuestions(){
 
-        List<PersonasTestQuestion> questions =
+        List<PersonaTestQuestion> questions =
                  questionRepository.findAllByOrderByQuestionCodeAsc();
 
         return questions.stream()
                 .map(question->{
-                    List<PersonasTestOptionRes> options =
+                    List<PersonaTestOptionRes> options =
                             optionRepository
                                     .findByQuestionIdOrderByChoiceCodeAsc(question.getId())
                                     .stream()
-                                    .map(PersonasTestOptionRes::from)
+                                    .map(PersonaTestOptionRes::from)
                                     .toList();
-                    return PersonasTestQuestionRes.of(question, options);
+                    return PersonaTestQuestionRes.of(question, options);
                 })
                 .toList();
     }

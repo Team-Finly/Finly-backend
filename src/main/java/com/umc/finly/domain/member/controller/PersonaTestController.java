@@ -1,7 +1,7 @@
 package com.umc.finly.domain.member.controller;
 
-import com.umc.finly.domain.member.dto.response.PersonasTestQuestionRes;
-import com.umc.finly.domain.member.service.PersonasTestService;
+import com.umc.finly.domain.member.dto.response.PersonaTestQuestionRes;
+import com.umc.finly.domain.member.service.PersonaTestService;
 import com.umc.finly.global.apiPayload.response.ApiResponse;
 import com.umc.finly.global.apiPayload.response.SuccessCode;
 import lombok.RequiredArgsConstructor;
@@ -14,13 +14,13 @@ import java.util.List;
 @RequiredArgsConstructor
 @RestController
 @RequestMapping("/api/persona-test")
-public class PersonasTestController {
+public class PersonaTestController {
 
-    private final PersonasTestService personasTestService;
+    private final PersonaTestService personasTestService;
 
     @GetMapping("/questions")
     public ApiResponse<QuestionListResponse> getPersonasTestQuestions(){
-        List<PersonasTestQuestionRes> questions =
+        List<PersonaTestQuestionRes> questions =
                 personasTestService.getPersonasTestQuestions();
 
         return ApiResponse.onSuccess(
@@ -30,6 +30,6 @@ public class PersonasTestController {
     }
 
     private record QuestionListResponse(
-            List<PersonasTestQuestionRes> questions
+            List<PersonaTestQuestionRes> questions
     ){}
 }
