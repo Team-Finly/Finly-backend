@@ -20,8 +20,11 @@ public class NaverStockRestClientConfig {
                 .connectTimeout(Duration.ofSeconds(5)) // 연결 타임아웃
                 .build();
 
+        JdkClientHttpRequestFactory requestFactory = new JdkClientHttpRequestFactory(httpClient);
+        requestFactory.setReadTimeout(Duration.ofSeconds(5)); // 응답 타임아웃
+
         return RestClient.builder()
-                .requestFactory(new JdkClientHttpRequestFactory(httpClient))
+                .requestFactory(requestFactory)
                 .build();
     }
 }
