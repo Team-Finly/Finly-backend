@@ -67,7 +67,7 @@ public class PersonaTestSubmitServiceImpl implements PersonaTestSubmitService{
             );
         }
 
-        throw new CustomException(MemberErrorCode.INVALID_PERSONA_ANSWER);
+        throw new CustomException(MemberErrorCode.INVALID_PERSONA_MODE);
     }
 
     private PersonaTestSubmitRes buildResponse(
