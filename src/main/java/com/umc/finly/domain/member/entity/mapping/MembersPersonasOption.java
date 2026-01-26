@@ -5,6 +5,7 @@ import com.umc.finly.domain.member.entity.PersonasTestQuestion;
 import jakarta.persistence.*;
 import lombok.*;
 
+// 멤버-페르소나 테스트 질문에 대한 선택지
 @Entity
 @NoArgsConstructor(access = AccessLevel.PROTECTED)
 @AllArgsConstructor

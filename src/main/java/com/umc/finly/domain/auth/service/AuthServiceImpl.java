@@ -9,6 +9,7 @@ import org.springframework.stereotype.Service;
 public class AuthServiceImpl implements AuthService {
     private final MemberRepository memberRepository;
 
+    // 이메일 중복 확인
     @Override
     public boolean isEmailAvailable(String email) {
         return !memberRepository.existsByEmail(email);

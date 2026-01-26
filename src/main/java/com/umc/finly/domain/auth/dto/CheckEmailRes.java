@@ -11,6 +11,7 @@ public class CheckEmailRes {
 
     private final boolean available;
 
+    // 이메일 중복 확인
     public static CheckEmailRes of(boolean available){
         return CheckEmailRes.builder()
                 .available(available)
