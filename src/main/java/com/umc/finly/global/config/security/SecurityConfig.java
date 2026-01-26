@@ -27,10 +27,12 @@ public class SecurityConfig {
                         .requestMatchers(
                                 "/api/persona-test/questions",
                                 "/api/persona-test/submit?mode=signup",
-                                "/api/auth/check-email"
+                                "/api/auth/check-email",
+                                "/api/persona-test/submit?mode=signup"
+
                         ).permitAll()
                         // JWT 필요 (PROTECTED APIs)
-                        .requestMatchers("/api/persona-test/submit").authenticated()
+                        .requestMatchers("/api/persona-test/submit?mode=retest").authenticated()
                         // 그 외는 일단 허용 (추후 운영 단계에서 authenticated()로 점진 강화 예정)
                         .anyRequest().permitAll()
                 )
