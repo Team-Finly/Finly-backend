@@ -9,8 +9,8 @@ import com.umc.finly.domain.member.enums.PersonaType;
 import com.umc.finly.domain.member.enums.QuestionCode;
 import com.umc.finly.domain.member.exception.MemberErrorCode;
 import com.umc.finly.domain.member.repository.PersonaRepository;
-import com.umc.finly.domain.member.repository.PersonasTestOptionRepository;
-import com.umc.finly.domain.member.repository.PersonasTestQuestionRepository;
+import com.umc.finly.domain.member.repository.PersonaTestOptionsRepository;
+import com.umc.finly.domain.member.repository.PersonaTestQuestionsRepository;
 import com.umc.finly.global.apiPayload.exception.CustomException;
 import lombok.RequiredArgsConstructor;
 import org.springframework.stereotype.Service;
@@ -28,8 +28,8 @@ import static com.umc.finly.domain.member.enums.QuestionCode.*;
 @Transactional(readOnly = true)
 public class PersonaScoringService {
 
-    private final PersonasTestQuestionRepository questionRepository;
-    private final PersonasTestOptionRepository optionRepository;
+    private final PersonaTestQuestionsRepository questionRepository;
+    private final PersonaTestOptionsRepository optionRepository;
     private final PersonaRepository personaRepository;
 
     /**

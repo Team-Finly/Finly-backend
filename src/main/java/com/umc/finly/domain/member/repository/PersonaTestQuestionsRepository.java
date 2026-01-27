@@ -5,7 +5,7 @@ import org.springframework.data.jpa.repository.JpaRepository;
 
 import java.util.List;
 
-public interface PersonasTestQuestionRepository
+public interface PersonaTestQuestionsRepository
         extends JpaRepository<PersonaTestQuestion, Long> {
 
     List<PersonaTestQuestion> findAllByOrderByQuestionCodeAsc();
