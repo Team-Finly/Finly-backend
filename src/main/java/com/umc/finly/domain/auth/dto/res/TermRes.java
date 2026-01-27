@@ -1,4 +1,4 @@
-package com.umc.finly.domain.auth.dto;
+package com.umc.finly.domain.auth.dto.res;
 
 import lombok.AllArgsConstructor;
 import lombok.Builder;

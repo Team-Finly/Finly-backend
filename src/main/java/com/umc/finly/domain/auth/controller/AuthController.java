@@ -1,6 +1,6 @@
 package com.umc.finly.domain.auth.controller;
 
-import com.umc.finly.domain.auth.dto.CheckEmailRes;
+import com.umc.finly.domain.auth.dto.res.CheckEmailRes;
 import com.umc.finly.domain.auth.exception.AuthErrorCode;
 import com.umc.finly.domain.auth.service.AuthService;
 import com.umc.finly.global.apiPayload.exception.CustomException;
