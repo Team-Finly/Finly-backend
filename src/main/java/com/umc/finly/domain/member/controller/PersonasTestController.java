@@ -1,7 +1,7 @@
 package com.umc.finly.domain.member.controller;
 
-import com.umc.finly.domain.member.dto.response.PersonasTestQuestionRes;
-import com.umc.finly.domain.member.service.PersonasTestService;
+import com.umc.finly.domain.member.dto.response.PersonaTestQuestionRes;
+import com.umc.finly.domain.member.service.PersonaTestService;
 import com.umc.finly.global.apiPayload.response.ApiResponse;
 import com.umc.finly.global.apiPayload.response.SuccessCode;
 import lombok.RequiredArgsConstructor;
@@ -17,13 +17,13 @@ import java.util.List;
 @RequestMapping("/api/persona-test")
 public class PersonasTestController {
 
-    private final PersonasTestService personasTestService;
+    private final PersonaTestService personasTestService;
 
     // 페르소나 테스트 질문 목록 조회 API
     /** 회원가입/재테스트 화면에 사용됨 **/
     @GetMapping("/questions")
     public ApiResponse<QuestionListResponse> getPersonasTestQuestions(){
-        List<PersonasTestQuestionRes> questions =
+        List<PersonaTestQuestionRes> questions =
                 personasTestService.getPersonasTestQuestions();
 
         return ApiResponse.onSuccess(
@@ -34,6 +34,6 @@ public class PersonasTestController {
 
     // questions 리스트 wrapper 응답 DTO
     private record QuestionListResponse(
-            List<PersonasTestQuestionRes> questions
+            List<PersonaTestQuestionRes> questions
     ){}
 }

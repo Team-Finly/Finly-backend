@@ -1,7 +1,7 @@
 package com.umc.finly.domain.member.entity.mapping;
 
-import com.umc.finly.domain.member.entity.PersonasTestOption;
-import com.umc.finly.domain.member.entity.PersonasTestQuestion;
+import com.umc.finly.domain.member.entity.PersonaTestOption;
+import com.umc.finly.domain.member.entity.PersonaTestQuestion;
 import jakarta.persistence.*;
 import lombok.*;
 
@@ -12,7 +12,7 @@ import lombok.*;
 @Getter
 @Builder
 @Table(
-        name = "members_personas_option",
+        name = "member_persona_options",
         uniqueConstraints = {
                 @UniqueConstraint(
                         name = "uk_member_question",
@@ -31,9 +31,9 @@ public class MembersPersonasOption {
 
     @ManyToOne(fetch = FetchType.LAZY)
     @JoinColumn(name = "question_id", nullable = false)
-    private PersonasTestQuestion question;
+    private PersonaTestQuestion question;
 
     @ManyToOne(fetch = FetchType.LAZY)
     @JoinColumn(name = "option_id", nullable = false)
-    private PersonasTestOption option;
+    private PersonaTestOption option;
 }

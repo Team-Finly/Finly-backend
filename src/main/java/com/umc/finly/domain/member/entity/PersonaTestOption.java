@@ -10,8 +10,8 @@ import lombok.*;
 @AllArgsConstructor
 @Getter
 @Builder
-@Table(name = "personas_test_option")
-public class PersonasTestOption extends CreatedBaseEntity {
+@Table(name = "persona_test_options")
+public class PersonaTestOption extends CreatedBaseEntity {
 
     @Id
     @GeneratedValue(strategy = GenerationType.IDENTITY)
@@ -19,7 +19,7 @@ public class PersonasTestOption extends CreatedBaseEntity {
 
     @ManyToOne(fetch = FetchType.LAZY)
     @JoinColumn(name = "question_id", nullable = false)
-    private PersonasTestQuestion question;
+    private PersonaTestQuestion question;
 
     @Enumerated(EnumType.STRING)
     @Column(name = "choice_code", nullable = false)

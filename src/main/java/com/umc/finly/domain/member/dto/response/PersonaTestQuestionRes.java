@@ -1,6 +1,6 @@
 package com.umc.finly.domain.member.dto.response;
 
-import com.umc.finly.domain.member.entity.PersonasTestQuestion;
+import com.umc.finly.domain.member.entity.PersonaTestQuestion;
 import lombok.Builder;
 import lombok.Getter;
 
@@ -8,18 +8,18 @@ import java.util.List;
 
 @Getter
 @Builder
-public class PersonasTestQuestionRes {
+public class PersonaTestQuestionRes {
 
     private Long id;
     private String questionCode;
     private String content;
-    private List<PersonasTestOptionRes> options;
+    private List<PersonaTestOptionRes> options;
 
-    public static PersonasTestQuestionRes of(
-            PersonasTestQuestion question,
-            List<PersonasTestOptionRes> options
+    public static PersonaTestQuestionRes of(
+            PersonaTestQuestion question,
+            List<PersonaTestOptionRes> options
     ){
-        return PersonasTestQuestionRes.builder()
+        return PersonaTestQuestionRes.builder()
                 .id(question.getId())
                 .questionCode(question.getQuestionCode().name())
                 .content(question.getContent())

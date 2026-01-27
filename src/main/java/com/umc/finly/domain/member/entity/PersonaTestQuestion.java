@@ -10,8 +10,8 @@ import lombok.*;
 @AllArgsConstructor
 @Getter
 @Builder
-@Table(name = "personas_test_question")
-public class PersonasTestQuestion extends CreatedBaseEntity {
+@Table(name = "persona_test_questions")
+public class PersonaTestQuestion extends CreatedBaseEntity {
 
     @Id
     @GeneratedValue(strategy = GenerationType.IDENTITY)
