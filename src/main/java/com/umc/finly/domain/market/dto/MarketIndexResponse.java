@@ -5,14 +5,16 @@ import lombok.Builder;
 import lombok.Getter;
 import lombok.NoArgsConstructor;
 
+import java.math.BigDecimal;
+
 @Getter
 @Builder
 @AllArgsConstructor
 @NoArgsConstructor
 public class MarketIndexResponse {
 
-    private Double kospi;
-    private Double kosdaq;
+    private BigDecimal kospi;
+    private BigDecimal kosdaq;
     private Integer fearGreed;
     private String fearGreedStatus;
     private String updatedAt;
