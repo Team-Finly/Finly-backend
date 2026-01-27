@@ -1,5 +1,6 @@
 package com.umc.finly.domain.auth.dto.req;
 
+import com.umc.finly.domain.member.dto.request.PersonaAnswerReq;
 import jakarta.validation.Valid;
 import jakarta.validation.constraints.Email;
 import jakarta.validation.constraints.NotBlank;
@@ -44,12 +45,4 @@ public class AuthSignUpReq {
         private Boolean agreed;
     }
 
-    @Getter
-    @NoArgsConstructor
-    @AllArgsConstructor
-    @Builder
-    public static class PersonaAnswerReq {
-        private Long questionId;
-        private Long optionId;
-    }
 }
