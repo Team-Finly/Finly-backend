@@ -1,6 +1,7 @@
 package com.umc.finly.domain.market.service;
 
 import com.umc.finly.domain.market.dto.MarketIndexResponse;
+import com.umc.finly.domain.market.dto.MarketIndices;
 import com.umc.finly.domain.market.infra.MarketIndexProvider;
 import lombok.RequiredArgsConstructor;
 import org.springframework.cache.annotation.Cacheable;
@@ -16,9 +17,11 @@ public class MarketIndexService {
             unless = "#result == null"
     )
     public MarketIndexResponse getMarketIndex() {
+        MarketIndices indices = marketIndexProvider.getMarketIndices();
+
         return MarketIndexResponse.snapshot(
-                marketIndexProvider.getKospi(),
-                marketIndexProvider.getKosdaq()
+                indices.getKospi(),
+                indices.getKosdaq()
         );
     }
 }

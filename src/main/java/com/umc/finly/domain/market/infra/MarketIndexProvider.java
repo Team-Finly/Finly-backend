@@ -1,8 +1,7 @@
 package com.umc.finly.domain.market.infra;
 
-import java.math.BigDecimal;
+import com.umc.finly.domain.market.dto.MarketIndices;
 
 public interface MarketIndexProvider {
-    BigDecimal getKospi();
-    BigDecimal getKosdaq();
+    MarketIndices getMarketIndices();
 }

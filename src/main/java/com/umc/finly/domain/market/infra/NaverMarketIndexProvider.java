@@ -2,6 +2,7 @@ package com.umc.finly.domain.market.infra;
 
 import com.fasterxml.jackson.databind.JsonNode;
 import com.fasterxml.jackson.databind.ObjectMapper;
+import com.umc.finly.domain.market.dto.MarketIndices;
 import com.umc.finly.domain.market.exception.code.MarketErrorCode;
 import com.umc.finly.global.apiPayload.exception.CustomException;
 import lombok.RequiredArgsConstructor;
@@ -18,16 +19,7 @@ public class NaverMarketIndexProvider implements MarketIndexProvider {
     private final RestClient restClient;
 
     @Override
-    public BigDecimal getKospi() {
-        return getIndexValue("KOSPI");
-    }
-
-    @Override
-    public BigDecimal getKosdaq() {
-        return getIndexValue("KOSDAQ");
-    }
-
-    private BigDecimal getIndexValue(String key) {
+    public MarketIndices getMarketIndices() {
         try {
             String response = restClient.post()
                     .uri(NAVER_API_URL)
@@ -52,17 +44,30 @@ public class NaverMarketIndexProvider implements MarketIndexProvider {
                 throw new CustomException(MarketErrorCode.MARKET_INDEX_RESPONSE_INVALID);
             }
 
-            JsonNode indexNode = marketSnapshots.get(key);
+            BigDecimal kospi = extractIndex(marketSnapshots, "KOSPI");
+            BigDecimal kosdaq = extractIndex(marketSnapshots, "KOSDAQ");
 
-            if (indexNode == null) {
-                throw new CustomException(MarketErrorCode.MARKET_INDEX_NOT_FOUND);
-            }
-
-            return new BigDecimal(indexNode.get("closePriceRaw").asText());
+            return new MarketIndices(kospi, kosdaq);
         } catch (CustomException e) {
             throw e;
         } catch (Exception e) {
             throw new CustomException(MarketErrorCode.MARKET_INDEX_API_FAILED);
         }
+    }
+
+    private BigDecimal extractIndex(JsonNode marketSnapshots, String key) {
+        JsonNode indexNode = marketSnapshots.get(key);
+
+        if (indexNode == null) {
+            throw new CustomException(MarketErrorCode.MARKET_INDEX_NOT_FOUND);
+        }
+
+        JsonNode closePriceNode = indexNode.get("closePriceRaw");
+
+        if (closePriceNode == null || closePriceNode.isNull()) {
+            throw new CustomException(MarketErrorCode.MARKET_INDEX_RESPONSE_INVALID);
+        }
+
+        return new BigDecimal(closePriceNode.asText());
     }
 }
