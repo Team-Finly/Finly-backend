@@ -19,7 +19,7 @@ import lombok.*;
                 )
         }
 )
-public class MemberPersonaResult extends BaseEntity {
+public class MembersPersonasResult extends BaseEntity {
 
     @Id
     @GeneratedValue(strategy = GenerationType.IDENTITY)
@@ -33,14 +33,14 @@ public class MemberPersonaResult extends BaseEntity {
     private Persona persona;
 
     // 기존 결과 갱신
-    public MemberPersonaResult updatePersona(Persona newPersona){
+    public MembersPersonasResult updatePersona(Persona newPersona){
         this.persona = newPersona;
         return this;
     }
 
     // 최초 생성
-    public static MemberPersonaResult create(Long memberId, Persona persona){
-        return MemberPersonaResult.builder()
+    public static MembersPersonasResult create(Long memberId, Persona persona){
+        return MembersPersonasResult.builder()
                 .memberId(memberId)
                 .persona(persona)
                 .build();

@@ -3,7 +3,7 @@ package com.umc.finly.domain.member.service;
 import com.umc.finly.domain.member.dto.request.PersonaTestSubmitReq;
 import com.umc.finly.domain.member.dto.response.PersonaTestSubmitRes;
 import com.umc.finly.domain.member.entity.Persona;
-import com.umc.finly.domain.member.entity.mapping.MemberPersonaResult;
+import com.umc.finly.domain.member.entity.mapping.MembersPersonasResult;
 import com.umc.finly.domain.member.exception.MemberErrorCode;
 import com.umc.finly.domain.member.repository.MemberPersonaResultRepository;
 import com.umc.finly.global.apiPayload.exception.CustomException;
@@ -37,10 +37,10 @@ public class PersonaTestSubmitServiceImpl implements PersonaTestSubmitService{
             // 로그인 후 재테스트: JWT필요
             Long memberId = SecurityUtil.getCurrentMemberId();
 
-            MemberPersonaResult result =
+            MembersPersonasResult result =
                     memberPersonaResultRepository.findByMemberId(memberId)
                             .map(existing -> existing.updatePersona(persona))
-                            .orElseGet(() -> MemberPersonaResult.create(memberId, persona));
+                            .orElseGet(() -> MembersPersonasResult.create(memberId, persona));
 
             memberPersonaResultRepository.save(result);
 

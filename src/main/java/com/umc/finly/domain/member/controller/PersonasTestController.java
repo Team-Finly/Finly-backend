@@ -14,7 +14,7 @@ import java.util.List;
 @RequiredArgsConstructor
 @RestController
 @RequestMapping("/api/persona-test")
-public class PersonaTestController {
+public class PersonasTestController {
 
     private final PersonaTestService personasTestService;
 
