@@ -16,6 +16,16 @@ public enum MarketErrorCode implements BaseCode {
             "MARKET404",
             "시장 지표 데이터가 존재하지 않습니다."
     ),
+    MARKET_INDEX_API_FAILED(
+            ErrorCode.BAD_GATEWAY,
+            "MARKET502",
+            "시장 지표 조회 API 호출에 실패했습니다."
+    ),
+    MARKET_INDEX_RESPONSE_INVALID(
+            ErrorCode.BAD_GATEWAY,
+            "MARKET503",
+            "시장 지표 응답 형식이 올바르지 않습니다."
+    ),
 
     // 인사이트
     MARKET_INSIGHT_NOT_FOUND(

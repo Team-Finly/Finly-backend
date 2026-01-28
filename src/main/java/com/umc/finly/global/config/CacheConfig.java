@@ -14,7 +14,7 @@ import java.util.concurrent.TimeUnit;
 public class CacheConfig {
     @Bean
     public CacheManager cacheManager() {
-        CaffeineCacheManager cacheManager = new CaffeineCacheManager("stockCurrentPrice");
+        CaffeineCacheManager cacheManager = new CaffeineCacheManager("marketIndex", "stockCurrentPrice");
         /**
          * 요청 1 -> 네이버 API 호출 -> 캐시 저장
          * 요청 2 (5초 이내) -> 캐시 반환
