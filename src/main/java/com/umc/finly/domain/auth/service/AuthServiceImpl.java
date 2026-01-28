@@ -117,10 +117,10 @@ public class AuthServiceImpl implements AuthService {
     public LoginTokens login(AuthLoginReq request){
         // 멤버 매칭
         Member member = memberRepository.findByEmail(request.getEmail())
-                .orElseThrow(() -> new CustomException(AuthErrorCode.INVALID_LOGIN_PASSWORD));
+                .orElseThrow(() -> new CustomException(MemberErrorCode.MEMBER_NOT_FOUND));
 
         if(!passwordEncoder.matches(request.getPassword(), member.getPassword())){
-            throw new CustomException(MemberErrorCode.MEMBER_NOT_FOUND);
+            throw new CustomException(AuthErrorCode.INVALID_LOGIN_PASSWORD);
         }
 
         // 토큰 발급
