@@ -1,6 +1,8 @@
 package com.umc.finly.domain.auth.controller;
 
+import com.umc.finly.domain.auth.dto.req.AuthLoginReq;
 import com.umc.finly.domain.auth.dto.req.AuthSignUpReq;
+import com.umc.finly.domain.auth.dto.res.AuthLoginRes;
 import com.umc.finly.domain.auth.dto.res.AuthSignUpRes;
 import com.umc.finly.domain.auth.dto.res.CheckEmailRes;
 import com.umc.finly.domain.auth.exception.AuthErrorCode;
@@ -8,10 +10,13 @@ import com.umc.finly.domain.auth.service.AuthService;
 import com.umc.finly.global.apiPayload.exception.CustomException;
 import com.umc.finly.global.apiPayload.response.ApiResponse;
 import com.umc.finly.global.apiPayload.response.SuccessCode;
+import com.umc.finly.global.util.CookieUtil;
+import jakarta.servlet.http.HttpServletResponse;
 import jakarta.validation.Valid;
 import jakarta.validation.constraints.Email;
 import jakarta.validation.constraints.NotBlank;
 import lombok.RequiredArgsConstructor;
+import org.springframework.beans.factory.annotation.Value;
 import org.springframework.validation.annotation.Validated;
 import org.springframework.web.bind.annotation.*;
 
@@ -23,6 +28,12 @@ import org.springframework.web.bind.annotation.*;
 public class AuthController {
 
     private final AuthService authService;
+
+    private final CookieUtil cookieUtil;
+
+    // 로컬이라 false로 값 부여. 운영 단계에서 true로 키면 됨
+    @Value("${app.cookie.secure:false}")
+    private boolean cookieSecure;
 
     // 이메일 중복 확인
     @GetMapping("/check-email")
@@ -49,5 +60,23 @@ public class AuthController {
     public ApiResponse<AuthSignUpRes> signup(@RequestBody @Valid AuthSignUpReq request){
         AuthSignUpRes result = authService.signup(request);
         return ApiResponse.onSuccess(result, SuccessCode.CREATED);
+    }
+
+    // 로그인
+    @PostMapping("/login")
+    public ApiResponse<AuthLoginRes> login(
+            @RequestBody @Valid AuthLoginReq request,
+            HttpServletResponse response
+            ){
+        AuthService.LoginTokens tokens = authService.login(request);
+
+        cookieUtil.addRefreshTokenCookie(
+                response,
+                tokens.refreshToken(),
+                tokens.refreshMaxAgeSeconds(),
+                cookieSecure
+        );
+
+        return ApiResponse.onSuccess(tokens.body(), SuccessCode.OK);
     }
 }

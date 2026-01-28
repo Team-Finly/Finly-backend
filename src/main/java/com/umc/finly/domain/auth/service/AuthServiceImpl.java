@@ -1,6 +1,8 @@
 package com.umc.finly.domain.auth.service;
 
+import com.umc.finly.domain.auth.dto.req.AuthLoginReq;
 import com.umc.finly.domain.auth.dto.req.AuthSignUpReq;
+import com.umc.finly.domain.auth.dto.res.AuthLoginRes;
 import com.umc.finly.domain.auth.dto.res.AuthSignUpRes;
 import com.umc.finly.domain.auth.entity.Term;
 import com.umc.finly.domain.auth.entity.mapping.MemberTerm;
@@ -8,20 +10,23 @@ import com.umc.finly.domain.auth.enums.TermType;
 import com.umc.finly.domain.auth.exception.AuthErrorCode;
 import com.umc.finly.domain.auth.repository.TermRepository;
 import com.umc.finly.domain.member.dto.request.PersonaAnswerReq;
-import com.umc.finly.domain.member.dto.request.PersonaTestSubmitReq;
 import com.umc.finly.domain.member.entity.Member;
 import com.umc.finly.domain.member.entity.Persona;
 import com.umc.finly.domain.member.entity.mapping.MembersPersonasResult;
+import com.umc.finly.domain.member.exception.MemberErrorCode;
 import com.umc.finly.domain.member.repository.MemberPersonaResultRepository;
 import com.umc.finly.domain.member.repository.MemberRepository;
 import com.umc.finly.domain.member.repository.MemberTermRepository;
 import com.umc.finly.domain.member.service.PersonaScoringService;
 import com.umc.finly.global.apiPayload.exception.CustomException;
+import com.umc.finly.global.infra.jwt.JwtProvider;
 import lombok.RequiredArgsConstructor;
 import org.springframework.security.crypto.password.PasswordEncoder;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
+import java.time.LocalDateTime;
+import java.time.ZoneId;
 import java.util.ArrayList;
 import java.util.EnumSet;
 import java.util.List;
@@ -34,13 +39,13 @@ import java.util.stream.Collectors;
 @Transactional
 public class AuthServiceImpl implements AuthService {
     private final MemberRepository memberRepository;
-    private final PasswordEncoder passwordEncoder;
-
     private final TermRepository termRepository;
     private final MemberTermRepository memberTermRepository;
-
     private final PersonaScoringService personaScoringService;
     private final MemberPersonaResultRepository memberPersonaResultRepository;
+
+    private final PasswordEncoder passwordEncoder;
+    private final JwtProvider jwtProvider;
 
     // 비밀번호 양식
     private static final String PASSWORD_REGEX = "^(?=.*[A-Za-z])(?=.*\\d).{6,}$";
@@ -51,13 +56,13 @@ public class AuthServiceImpl implements AuthService {
     private static final EnumSet<TermType> REQUIRED_TERMS =
             EnumSet.of(TermType.TERMS_AGREED, TermType.PRIVACY_AGREED);
 
-    // 이메일 중복 확인
+    /** 이메일 중복 확인 **/
     @Override
     public boolean isEmailAvailable(String email) {
         return !memberRepository.existsByEmail(email);
     }
 
-    // 회원가입
+    /** 회원가입 **/
     @Override
     public AuthSignUpRes signup(AuthSignUpReq request){
         // 1. 이메일 중복 체크
@@ -107,6 +112,47 @@ public class AuthServiceImpl implements AuthService {
                 .build();
     }
 
+    /** 로그인 **/
+    @Override
+    public LoginTokens login(AuthLoginReq request){
+        // 멤버 매칭
+        Member member = memberRepository.findByEmail(request.getEmail())
+                .orElseThrow(() -> new CustomException(AuthErrorCode.INVALID_LOGIN_PASSWORD));
+
+        if(!passwordEncoder.matches(request.getPassword(), member.getPassword())){
+            throw new CustomException(MemberErrorCode.MEMBER_NOT_FOUND);
+        }
+
+        // 토큰 발급
+        String accessToken = jwtProvider.createAccessToken(member.getId(), member.getEmail());
+        String refreshToken = jwtProvider.createRefreshToken(member.getId(), member.getEmail());
+
+        LocalDateTime refreshExpiredAt = LocalDateTime.ofInstant(
+                jwtProvider.getExpiration(refreshToken).toInstant(),
+                ZoneId.systemDefault()
+        );
+
+        member.updateRefreshToken(refreshToken, refreshExpiredAt);
+        memberRepository.save(member);
+
+        AuthLoginRes result = AuthLoginRes.builder()
+                .accessToken("Bearer " + accessToken)
+                .member(AuthLoginRes.Member.builder()
+                        .memberId(member.getId())
+                        .email(member.getEmail())
+                        .nickname(member.getNickname())
+                        .build())
+                .build();
+
+        long refreshMaxAgeSeconds = Math.max(
+                0,
+                (jwtProvider.getExpiration(refreshToken).getTime() - System.currentTimeMillis())/1000
+        );
+
+        return new LoginTokens(result, refreshToken, refreshMaxAgeSeconds);
+    }
+
+    // -----------------------------------------------------------
     private boolean isValidPassword(String raw) {
         return raw != null && raw.matches(PASSWORD_REGEX);
     }
