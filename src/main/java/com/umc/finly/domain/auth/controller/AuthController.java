@@ -1,19 +1,19 @@
 package com.umc.finly.domain.auth.controller;
 
-import com.umc.finly.domain.auth.dto.CheckEmailRes;
+import com.umc.finly.domain.auth.dto.req.AuthSignUpReq;
+import com.umc.finly.domain.auth.dto.res.AuthSignUpRes;
+import com.umc.finly.domain.auth.dto.res.CheckEmailRes;
 import com.umc.finly.domain.auth.exception.AuthErrorCode;
 import com.umc.finly.domain.auth.service.AuthService;
 import com.umc.finly.global.apiPayload.exception.CustomException;
 import com.umc.finly.global.apiPayload.response.ApiResponse;
 import com.umc.finly.global.apiPayload.response.SuccessCode;
+import jakarta.validation.Valid;
 import jakarta.validation.constraints.Email;
 import jakarta.validation.constraints.NotBlank;
 import lombok.RequiredArgsConstructor;
 import org.springframework.validation.annotation.Validated;
-import org.springframework.web.bind.annotation.GetMapping;
-import org.springframework.web.bind.annotation.RequestMapping;
-import org.springframework.web.bind.annotation.RequestParam;
-import org.springframework.web.bind.annotation.RestController;
+import org.springframework.web.bind.annotation.*;
 
 // 인증 관련 비즈니스 로직 담당 서비스
 @Validated
@@ -42,5 +42,12 @@ public class AuthController {
         return ApiResponse.onSuccess(CheckEmailRes.of(true),
                 SuccessCode.OK
         );
+    }
+
+    // 회원가입
+    @PostMapping("/signup")
+    public ApiResponse<AuthSignUpRes> signup(@RequestBody @Valid AuthSignUpReq request){
+        AuthSignUpRes result = authService.signup(request);
+        return ApiResponse.onSuccess(result, SuccessCode.CREATED);
     }
 }

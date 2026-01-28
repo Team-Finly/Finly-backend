@@ -1,6 +1,6 @@
 package com.umc.finly.domain.auth.service;
 
-import com.umc.finly.domain.auth.dto.TermRes;
+import com.umc.finly.domain.auth.dto.res.TermRes;
 import com.umc.finly.domain.auth.entity.Term;
 import com.umc.finly.domain.auth.repository.TermRepository;
 import lombok.RequiredArgsConstructor;
