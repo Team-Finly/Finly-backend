@@ -1,6 +1,5 @@
 package com.umc.finly.domain.auth.dto.res;
 
-import com.umc.finly.domain.member.entity.Member;
 import lombok.Builder;
 import lombok.Getter;
 
@@ -10,11 +9,11 @@ public class AuthLoginRes {
     // 로그인 응답 DTO
 
     private String accessToken;
-    private Member member;
+    private MemberInfo member;
 
     @Getter
     @Builder
-    public static class Member {
+    public static class MemberInfo {
         private Long memberId;
         private String email;
         private String nickname;

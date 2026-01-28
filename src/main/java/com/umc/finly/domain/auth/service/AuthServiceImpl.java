@@ -137,7 +137,7 @@ public class AuthServiceImpl implements AuthService {
 
         AuthLoginRes result = AuthLoginRes.builder()
                 .accessToken("Bearer " + accessToken)
-                .member(AuthLoginRes.Member.builder()
+                .member(AuthLoginRes.MemberInfo.builder()
                         .memberId(member.getId())
                         .email(member.getEmail())
                         .nickname(member.getNickname())

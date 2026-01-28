@@ -10,7 +10,7 @@ public interface AuthService {
 
     AuthSignUpRes signup(AuthSignUpReq request);
 
-    LoginTokens login(AuthLoginReq reqeust);
+    LoginTokens login(AuthLoginReq request);
 
     record LoginTokens(
             AuthLoginRes body,

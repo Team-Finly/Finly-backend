@@ -22,19 +22,30 @@ public class JwtAuthenticationFilter extends OncePerRequestFilter {
             FilterChain filterChain
     ) throws java.io.IOException, jakarta.servlet.ServletException{
 
+        // 이미 인증이 세팅되어 있으면 스킵 (중복 세팅 방지)
+        if (SecurityContextHolder.getContext().getAuthentication() != null) {
+            filterChain.doFilter(request, response);
+            return;
+        }
+
         String authHeader= request.getHeader("Authorization");
 
         if(authHeader != null && authHeader.startsWith("Bearer ")){
             String token = authHeader.substring(7);
 
-            if(jwtProvider.validate(token)){
-                Long memberId = jwtProvider.getMemberId(token);
+            if(jwtProvider.validateAccessToken(token)) {
+                try {
+                    Long memberId = jwtProvider.getMemberId(token);
 
-                UsernamePasswordAuthenticationToken authentication =
-                        new UsernamePasswordAuthenticationToken(
-                                memberId, null, null
-                        );
-                SecurityContextHolder.getContext().setAuthentication(authentication);
+                    UsernamePasswordAuthenticationToken authentication =
+                            new UsernamePasswordAuthenticationToken(
+                                    memberId, null, null
+                            );
+                    SecurityContextHolder.getContext().setAuthentication(authentication);
+
+                } catch (Exception ignored) {
+                    // 파싱/형변환 등 예외 나면 인증 세팅 없이 통과
+                }
             }
         }
         filterChain.doFilter(request, response);
