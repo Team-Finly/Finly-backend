@@ -13,10 +13,11 @@ import java.net.http.HttpClient;
 import java.net.http.HttpRequest;
 import java.net.http.HttpResponse;
 import java.time.Duration;
+import java.util.zip.ZipEntry;
+import java.util.zip.ZipInputStream;
 
 /**
- * KIS 종목정보파일을 HTTP로 다운로드하는 클라이언트.
- * 코스피/코스닥 각각 URL을 설정 파일에서 주입받는다.
+ * KIS 종목정보 압축파일(.zip)을 다운로드하고 압축을 해제하여 MST 스트림을 반환하는 클라이언트.
  */
 @Component
 @RequiredArgsConstructor
@@ -41,7 +42,7 @@ public class KisStockInfoFileClient {
     }
 
     /**
-     * 공통 다운로드 로직
+     * 공통 다운로드 및 압축 해제 로직
      */
     private InputStream download(String url) {
         try {
@@ -52,12 +53,11 @@ public class KisStockInfoFileClient {
                     .GET()
                     .build();
 
-            // 2. 동기 블로킹 방식으로 데이터 다운로드 시도
-            // BodyHandlers.ofByteArray()를 사용하여 바이트 배열로 응답 수신
+            // 2. ZIP 파일 바이트 배열로 다운로드 (동기 블로킹)
             HttpResponse<byte[]> response =
                     httpClient.send(request, HttpResponse.BodyHandlers.ofByteArray());
 
-            // 3. HTTP 상태 코드 확인 (200 OK가 아니면 에러 발생)
+            // 3. 응답 상태 코드 검증
             if (response.statusCode() != 200) {
                 throw new StockInfoException(
                         StockInfoErrorCode.KIS_FILE_DOWNLOAD_FAILED,
@@ -65,16 +65,30 @@ public class KisStockInfoFileClient {
                 );
             }
 
-            // 4. 다운로드 된 바이트 배열을 InputStream으로 변환하여 반환
-            // 파싱 로직에서 메모리 효율을 위해 스트림 형태로 전달함
-            return new ByteArrayInputStream(response.body());
+            // 4. ZIP 압축 해제 및 MST 파일 추출
+            // 응답받은 바이트 배열을 ZipInputStream으로 변환
+            try (ZipInputStream zis = new ZipInputStream(new ByteArrayInputStream(response.body()))) {
+                ZipEntry entry = zis.getNextEntry();
+
+                if (entry == null) {
+                    throw new StockInfoException(
+                            StockInfoErrorCode.KIS_FILE_DOWNLOAD_FAILED,
+                            "압축 파일 내에 데이터가 존재하지 않습니다. URL: " + url
+                    );
+                }
+
+                // 압축 파일 안의 데이터를 메모리에 적재하여 반환 (파싱을 위해)
+                // zis를 직접 반환하면 try-with-resources에 의해 닫히므로 readAllBytes 사용
+                return new ByteArrayInputStream(zis.readAllBytes());
+            }
 
         } catch (StockInfoException e) {
             throw e;
         } catch (Exception e) {
             throw new StockInfoException(
                     StockInfoErrorCode.KIS_FILE_DOWNLOAD_FAILED,
-                    "KIS 파일 다운로드 중 시스템 예외가 발생했습니다. URL: " + url
+                    "KIS 파일 처리 중 시스템 예외가 발생했습니다. URL: " + url,
+                    e
             );
         }
     }
