@@ -56,4 +56,8 @@ public class Stock extends BaseEntity {
     public void deactivate() {
         this.isActive = false;
     }
+
+    public void updateLogoUrl(String logoUrl) {
+        this.logoUrl = logoUrl;
+    }
 }
