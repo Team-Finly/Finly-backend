@@ -2,12 +2,16 @@ package com.umc.finly.global.config.security;
 
 import com.umc.finly.global.infra.jwt.JwtProvider;
 import jakarta.servlet.FilterChain;
+import jakarta.servlet.ServletException;
 import jakarta.servlet.http.HttpServletRequest;
 import jakarta.servlet.http.HttpServletResponse;
 import lombok.RequiredArgsConstructor;
 import org.springframework.security.authentication.UsernamePasswordAuthenticationToken;
 import org.springframework.security.core.context.SecurityContextHolder;
 import org.springframework.web.filter.OncePerRequestFilter;
+
+import java.io.IOException;
+import java.util.Collections;
 
 @RequiredArgsConstructor
 public class JwtAuthenticationFilter extends OncePerRequestFilter {
@@ -20,21 +24,31 @@ public class JwtAuthenticationFilter extends OncePerRequestFilter {
             HttpServletRequest request,
             HttpServletResponse response,
             FilterChain filterChain
-    ) throws java.io.IOException, jakarta.servlet.ServletException{
+    ) throws IOException, ServletException {
+
+        // 이미 인증이 세팅되어 있으면 스킵 (중복 세팅 방지)
+        if (SecurityContextHolder.getContext().getAuthentication() != null) {
+            filterChain.doFilter(request, response);
+            return;
+        }
 
         String authHeader= request.getHeader("Authorization");
 
         if(authHeader != null && authHeader.startsWith("Bearer ")){
             String token = authHeader.substring(7);
 
-            if(jwtProvider.validate(token)){
-                Long memberId = jwtProvider.getMemberId(token);
+            if(jwtProvider.validateAccessToken(token)) {
 
-                UsernamePasswordAuthenticationToken authentication =
+                Long memberId = jwtProvider.getMemberId(token);
+                String email = jwtProvider.getEmail(token);
+
+                AuthPrincipal principal = new AuthPrincipal(memberId, email);
+
+                UsernamePasswordAuthenticationToken authenticationToken =
                         new UsernamePasswordAuthenticationToken(
-                                memberId, null, null
+                                principal, null, Collections.emptyList()
                         );
-                SecurityContextHolder.getContext().setAuthentication(authentication);
+                SecurityContextHolder.getContext().setAuthentication(authenticationToken);
             }
         }
         filterChain.doFilter(request, response);
