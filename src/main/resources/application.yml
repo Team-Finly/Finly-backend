@@ -51,3 +51,12 @@ management:
   endpoint:
     health:
       show-details: always
+
+kis:
+  info:
+    kospi-url: ${KIS_KOSPI_URL}
+    kosdaq-url: ${KIS_KOSDAQ_URL}
+
+tradingview:
+  symbol-base-url: ${TRADINGVIEW_SYMBOL_URL}
+  s3-logo-base-url: ${TRADINGVIEW_S3_LOGO_URL}
