@@ -34,7 +34,7 @@ public class Stock extends BaseEntity {
     @Column(name = "name", nullable = false)
     private String name;
 
-    // 국제증권식별번호 (ex. KR7000020008)
+    // 국제증권식별번호 ISIN (ex. KR7000020008)
     @Column(name = "isin", nullable = false)
     private String isin;
 
