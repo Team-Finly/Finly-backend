@@ -44,3 +44,6 @@ out/
 
 ### 초기 DB SQL ###
 /src/main/resources/db/*.sql
+
+### /test/resources KIS .mst 파일 ###
+*.mst
