@@ -38,6 +38,7 @@ dependencies {
     compileOnly 'org.projectlombok:lombok'
     implementation 'org.springframework.boot:spring-boot-starter-data-redis' //레디스 설정 추가
     implementation 'org.springframework.boot:spring-boot-starter-cache'
+	implementation 'com.google.guava:guava:33.0.0-jre'
     compileOnly 'org.projectlombok:lombok'
 	runtimeOnly 'com.mysql:mysql-connector-j'
 	annotationProcessor 'org.projectlombok:lombok'
