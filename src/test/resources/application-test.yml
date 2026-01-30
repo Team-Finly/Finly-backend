@@ -1,0 +1,7 @@
+tradingview:
+  symbol-base-url: https://kr.tradingview.com/symbols/
+  s3-logo-base-url: https://s3-symbol-logo.tradingview.com/
+
+logging:
+  level:
+    com.umc.finly.domain.market.stock: DEBUG

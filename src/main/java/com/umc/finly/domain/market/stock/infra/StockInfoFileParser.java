@@ -36,11 +36,9 @@ public class StockInfoFileParser {
                 String isin = new String(bytes, 9, 12, KIS_CHARSET).trim();
 
                 // 2. 종목명 추출 (21바이트 지점부터 40바이트만큼 읽음)
-                // 데이터 확인 결과 종목명 영역은 약 40바이트 할당되어 있음
                 String name = new String(bytes, 21, 40, KIS_CHARSET).trim();
 
                 // 3. 그룹코드 추출 (종목명 영역 바로 뒤인 61바이트 지점에서 2바이트)
-                // 주신 데이터에서 "동화약품" 뒤의 ST 위치를 계산하면 61바이트 부근입니다.
                 String groupCode = new String(bytes, 61, 2, KIS_CHARSET).trim();
 
                 // 4. 주식(ST) 필터링

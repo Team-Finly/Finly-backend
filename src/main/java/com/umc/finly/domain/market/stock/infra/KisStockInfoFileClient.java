@@ -87,7 +87,7 @@ public class KisStockInfoFileClient {
         } catch (Exception e) {
             throw new StockInfoException(
                     StockInfoErrorCode.KIS_FILE_DOWNLOAD_FAILED,
-                    "KIS 파일 처리 중 시스템 예외가 발생했습니다. URL: " + url,
+                    String.format("KIS 파일 다운로드 실패 (URL: %s)", url),
                     e
             );
         }
