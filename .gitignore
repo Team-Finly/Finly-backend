@@ -41,6 +41,7 @@ out/
 
 ### 환경 변수 ###
 .env
+.env.test
 
 ### 초기 DB SQL ###
 /src/main/resources/db/*.sql

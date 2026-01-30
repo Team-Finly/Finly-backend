@@ -3,13 +3,11 @@ package com.umc.finly.domain.market.stock.entity;
 import com.umc.finly.domain.market.stock.enums.MarketType;
 import com.umc.finly.global.entity.BaseEntity;
 import jakarta.persistence.*;
-import lombok.AccessLevel;
-import lombok.AllArgsConstructor;
-import lombok.Getter;
-import lombok.NoArgsConstructor;
+import lombok.*;
 
 @Entity
 @Getter
+@Builder
 @AllArgsConstructor(access = AccessLevel.PRIVATE)
 @NoArgsConstructor(access = AccessLevel.PROTECTED)
 @Table(name = "stock", uniqueConstraints = {
@@ -51,6 +49,18 @@ public class Stock extends BaseEntity {
         if (this.isActive == null) {
             this.isActive = true;
         }
+    }
+
+    public void updateInfo(MarketType marketType, String symbol, String name, String isin) {
+        this.marketType = marketType;
+        this.symbol = symbol;
+        this.name = name;
+        this.isin = isin;
+        this.isActive = true;
+    }
+
+    public void activate() {
+        this.isActive = true;
     }
 
     public void deactivate() {
