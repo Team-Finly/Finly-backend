@@ -19,6 +19,9 @@ public interface StockInfoApiSpecification {
     @Operation(summary = "종목 정보 완전 저장", description = "종목 정보 저장과 로고 이미지 URL 저장을 모두 실행합니다.")
     public ApiResponse<String> syncStockInfoAndUpdateLogos();
 
+    @Operation(summary = "스케줄러 실행", description = "종목 정보 저장과 로고 이미지 URL 저장을 모두 실행하는 스케줄러를 실행합니다.")
+    public ApiResponse<String> triggerScheduler();
+
     @Operation(summary = "저장된 종목 확인", description = "DB에 저장된 모든 종목 정보 리스트를 조회합니다.")
     @ApiResponses(value = {
             @io.swagger.v3.oas.annotations.responses.ApiResponse(responseCode = "200", description = "조회 성공")

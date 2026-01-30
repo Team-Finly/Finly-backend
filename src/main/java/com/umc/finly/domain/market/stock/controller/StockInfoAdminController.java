@@ -2,6 +2,7 @@ package com.umc.finly.domain.market.stock.controller;
 
 import com.umc.finly.domain.market.stock.dto.StockInfoResponse;
 import com.umc.finly.domain.market.stock.repository.StockRepository;
+import com.umc.finly.domain.market.stock.service.StockInfoScheduler;
 import com.umc.finly.domain.market.stock.service.StockInfoSyncService;
 import com.umc.finly.domain.market.stock.service.StockLogoUpdateService;
 import com.umc.finly.global.apiPayload.response.ApiResponse;
@@ -22,6 +23,7 @@ public class StockInfoAdminController implements StockInfoApiSpecification {
     private final StockInfoSyncService stockInfoSyncService;
     private final StockLogoUpdateService stockLogoUpdateService;
     private final StockRepository stockRepository;
+    private final StockInfoScheduler stockInfoScheduler;
 
     // KIS 종목정보 동기화
     @PostMapping("/sync")
@@ -45,6 +47,13 @@ public class StockInfoAdminController implements StockInfoApiSpecification {
         return ApiResponse.onSuccess("종목 정보 동기화 + 로고 URL 업데이트가 완료되었습니다.", SuccessCode.OK);
     }
 
+    // 스케줄러 실행
+    @PostMapping("/scheduler")
+    public ApiResponse<String> triggerScheduler() {
+        stockInfoScheduler.runDailyJob();
+        return ApiResponse.onSuccess("스케줄러가 성공적으로 실행되었습니다.", SuccessCode.OK);
+    }
+
     // DB 모든 종목 리스트 조회
     @GetMapping("/stocks")
     public ApiResponse<List<StockInfoResponse>> getAllStocks() {
@@ -54,6 +63,4 @@ public class StockInfoAdminController implements StockInfoApiSpecification {
 
         return ApiResponse.onSuccess(result, SuccessCode.OK);
     }
-
-    // 스케줄러 실행
 }

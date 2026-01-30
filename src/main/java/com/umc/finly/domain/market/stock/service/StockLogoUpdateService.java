@@ -74,7 +74,7 @@ public class StockLogoUpdateService {
         log.info("✅ 업데이트 완료 - 대상: {}건, 성공: {}건, 로고 없음: {}건, 실패: {}건",
                 total, successCount.get(), notFoundCount.get(), failCount.get());
 
-        log.info("📊 [최종 성능 지표]");
+        log.info("📊 [StockLogoUpdate 작업]");
         log.info(">> 총 소요 시간: {}s", String.format("%.2f", totalSeconds));
         log.info(">> 초당 처리량(TPS): {}건/sec", String.format("%.2f", tps));
         log.info(">> 병렬 처리 방식: ParallelStream (Partition Size: {})", partitionSize);
@@ -107,7 +107,7 @@ public class StockLogoUpdateService {
 
             String detail = (rootCause != null) ? rootCause.getMessage() : e.getMessage();
 
-            log.warn("⚠️ [{}] 실패 | 원인: {}", symbol, detail);
+            log.warn("⚠️ [{}] 로고 업데이트 실패 | 원인: {}", symbol, detail);
 
         } catch (Exception e) {
             fail.incrementAndGet();
