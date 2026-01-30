@@ -30,7 +30,7 @@ class TradingViewIntegrationTest {
         assertThat(html).isNotBlank();
 
         // 2. 로고 추출하기
-        String logoUrl = logoExtractor.extractLogoUrl(html);
+        String logoUrl = logoExtractor.extractLogoUrl(html, symbol);
 
         System.out.println("✅ 추출된 로고 URL: " + logoUrl);
         assertThat(logoUrl).contains(".svg");

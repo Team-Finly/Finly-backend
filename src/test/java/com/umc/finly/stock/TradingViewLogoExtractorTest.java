@@ -32,9 +32,10 @@ class TradingViewLogoExtractorTest {
             </body>
         </html>
         """;
+        String symbol = "005930";
 
         // when
-        String result = extractor.extractLogoUrl(html);
+        String result = extractor.extractLogoUrl(html, symbol);
 
         // then
         assertThat(result).isEqualTo("https://s3-symbol-logo.tradingview.com/samsung-pharmaceutical--big.svg");    }

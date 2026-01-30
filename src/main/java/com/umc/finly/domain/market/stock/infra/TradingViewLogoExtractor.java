@@ -25,7 +25,7 @@ public class TradingViewLogoExtractor {
     @Value("${tradingview.s3-logo-base-url}")
     private String logoBaseUrl;
 
-    public String extractLogoUrl(String html) {
+    public String extractLogoUrl(String html, String symbol) {
         Matcher matcher = LOGO_TAG_PATTERN.matcher(html);
 
         while (matcher.find()) {
@@ -36,10 +36,6 @@ public class TradingViewLogoExtractor {
                 return fullUrl; // 조건에 맞는 첫 번째 주소 반환
             }
         }
-
-        throw new StockInfoException(
-                StockInfoErrorCode.TRADINGVIEW_LOGO_NOT_FOUND,
-                "TradingView 종목 로고 태그를 찾을 수 없습니다."
-        );
+        throw new StockInfoException(StockInfoErrorCode.TRADINGVIEW_LOGO_NOT_FOUND, symbol);
     }
 }
