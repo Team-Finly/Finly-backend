@@ -76,9 +76,35 @@ class StockInfoFileParserTest {
     }
 
     private String createMockRawLine(String symbol, String isin, String name, String groupCode) {
-        // 단축(9) + 표준(12) + 명칭 + 고정부(그룹코드2 + 나머지226)
-        String head = String.format("%-9s%-12s%s", symbol, isin, name);
-        String tail = groupCode + " ".repeat(226);
-        return head + tail;
+        // 1. 단축코드 (9자리) - 예: "455900   "
+        String symbolPart = String.format("%-9s", symbol);
+
+        // 2. 표준코드 (12자리) - 예: "KR7455900001"
+        String isinPart = String.format("%-12s", isin);
+
+        // 3. 종목명 (40자리)
+        // 한글이 섞여있으므로 단순히 %-40s를 쓰면 바이트 수가 틀어집니다.
+        // 아래 별도 메서드로 바이트 길이를 맞춰야 합니다.
+        String namePart = formatFixedByteLength(name, 40);
+
+        // 4. 그룹코드(ST 등) 및 나머지 (KIS 명세 기준 보통 한 줄은 200~300바이트 이상)
+        String groupPart = String.format("%-2s", groupCode);
+
+        // 5. 나머지 더미 데이터
+        String dummy = "2100910270000 NN N    N  0  N    N0000373500000100001NNN00NNN000000100N0900000004150390000000005002024032600000000001521800000000000760902650012       0 NN000000042-00000108-00000100-0100-0000004120241231000005683   NNN";
+
+        return symbolPart + isinPart + namePart + groupPart + dummy;
+    }
+
+    // 한글/영문 섞인 문자열을 고정 바이트 길이로 맞추는 유틸리티
+    private String formatFixedByteLength(String text, int length) {
+        StringBuilder sb = new StringBuilder(text);
+        int currentByteLength = text.getBytes(Charset.forName("MS949")).length;
+
+        while (currentByteLength < length) {
+            sb.append(" ");
+            currentByteLength++;
+        }
+        return sb.toString();
     }
 }
