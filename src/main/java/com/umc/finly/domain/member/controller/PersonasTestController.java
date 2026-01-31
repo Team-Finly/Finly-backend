@@ -1,13 +1,14 @@
 package com.umc.finly.domain.member.controller;
 
+import com.umc.finly.domain.member.dto.request.PersonaTestSubmitReq;
 import com.umc.finly.domain.member.dto.response.PersonaTestQuestionRes;
+import com.umc.finly.domain.member.dto.response.PersonaTestSubmitRes;
 import com.umc.finly.domain.member.service.PersonaTestService;
+import com.umc.finly.domain.member.service.PersonaTestSubmitService;
 import com.umc.finly.global.apiPayload.response.ApiResponse;
 import com.umc.finly.global.apiPayload.response.SuccessCode;
 import lombok.RequiredArgsConstructor;
-import org.springframework.web.bind.annotation.GetMapping;
-import org.springframework.web.bind.annotation.RequestMapping;
-import org.springframework.web.bind.annotation.RestController;
+import org.springframework.web.bind.annotation.*;
 
 import java.util.List;
 
@@ -18,9 +19,9 @@ import java.util.List;
 public class PersonasTestController {
 
     private final PersonaTestService personasTestService;
+    private final PersonaTestSubmitService submitService;
 
-    // 페르소나 테스트 질문 목록 조회 API
-    /** 회원가입/재테스트 화면에 사용됨 **/
+    /** 페르소나 테스트 질문 목록 조회 API **/
     @GetMapping("/questions")
     public ApiResponse<QuestionListResponse> getPersonasTestQuestions(){
         List<PersonaTestQuestionRes> questions =
@@ -28,6 +29,18 @@ public class PersonasTestController {
 
         return ApiResponse.onSuccess(
                 new QuestionListResponse(questions),
+                SuccessCode.OK
+        );
+    }
+
+    /** 페르소나 테스트 제출 API **/
+    @PostMapping("/submit")
+    public ApiResponse<PersonaTestSubmitRes> submit(
+            @RequestParam("mode") String mode,
+            @RequestBody PersonaTestSubmitReq request
+    ){
+        return ApiResponse.onSuccess(
+                submitService.submit(mode, request),
                 SuccessCode.OK
         );
     }
