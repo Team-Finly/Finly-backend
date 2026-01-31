@@ -3,13 +3,12 @@ name: Finly CI/CD (EC2 docker compose build)
 on:
   push:
     branches: [ "develop" ]
-
-concurrency:
-  group: finly-deploy
-  cancel-in-progress: true
+  pull_request:
+    branches: [ "develop" ]
 
 jobs:
-  deploy:
+  build:
+    name: CI - Build
     runs-on: ubuntu-latest
 
     steps:
@@ -28,6 +27,20 @@ jobs:
           chmod +x ./gradlew
           ./gradlew clean build -x test
 
+  deploy:
+    name: Deploy to EC2
+    needs: build
+    runs-on: ubuntu-latest
+
+    # PR에서는 절대 실행 안 됨 -> push develop에서만 배포
+    if: github.event_name == 'push' && github.ref == 'refs/heads/develop'
+
+    # 배포만 중복 방지 -> 같은 브랜치에 연속 push 시 "이전 배포를 취소"하고 최신 배포만 수행
+    concurrency:
+      group: finly-deploy
+      cancel-in-progress: true
+
+    steps:
       # 배포에 필요한 파일만 EC2로 업로드 (전체 소스도 필요하므로 .git 제외하고 올림)
       - name: Upload project to EC2 (exclude .git)
         uses: appleboy/scp-action@v1.0.0
