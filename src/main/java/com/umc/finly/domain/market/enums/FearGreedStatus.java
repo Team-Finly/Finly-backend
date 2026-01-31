@@ -8,8 +8,18 @@ public enum FearGreedStatus {
     EXTREME_GREED;
 
     public static FearGreedStatus getFearGreedStatus(String rating) {
-        return FearGreedStatus.valueOf(
-                rating.toUpperCase().replace(" ", "_")
-        );
+        if (rating == null || rating.trim().isEmpty()) {
+            throw new IllegalArgumentException("rating can't be null or empty");
+        }
+
+        String normalizedRating = rating.toUpperCase().replace(" ", "_");
+
+        for (FearGreedStatus status : FearGreedStatus.values()) {
+            if (status.name().equals(normalizedRating)) {
+                return status;
+            }
+        }
+
+        throw new IllegalArgumentException("Unexpected fear/greed rating: " + rating);
     }
 }

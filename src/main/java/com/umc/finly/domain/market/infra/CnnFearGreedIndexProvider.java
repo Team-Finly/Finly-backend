@@ -46,11 +46,23 @@ public class CnnFearGreedIndexProvider implements FearGreedIndexProvider {
                 throw new CustomException(MarketErrorCode.MARKET_INDEX_RESPONSE_INVALID);
             }
 
+            JsonNode scoreNode = data.get("score");
+
+            if (scoreNode == null || scoreNode.isNull()) {
+                throw new CustomException(MarketErrorCode.MARKET_INDEX_RESPONSE_INVALID);
+            }
+
             // 반올림
-            double rawScore = data.get("score").asDouble();
+            double rawScore = scoreNode.asDouble();
             int score = (int) Math.round(rawScore);
 
-            FearGreedStatus status = FearGreedStatus.getFearGreedStatus(data.get("rating").asText());
+            JsonNode ratingNode = data.get("rating");
+
+            if (ratingNode == null || ratingNode.isNull()) {
+                throw new CustomException(MarketErrorCode.MARKET_INDEX_RESPONSE_INVALID);
+            }
+
+            FearGreedStatus status = FearGreedStatus.getFearGreedStatus(ratingNode.asText());
 
             return new FearGreedResult(score, status);
         } catch (CustomException e) {
