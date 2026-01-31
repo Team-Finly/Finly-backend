@@ -1,0 +1,76 @@
+name: Deploy to EC2 (develop)
+
+on:
+  push:
+    branches: [ "develop" ]
+
+concurrency:
+  group: deploy-develop
+  cancel-in-progress: true
+
+jobs:
+  deploy:
+    runs-on: ubuntu-latest
+
+    steps:
+      - name: Deploy via SSH
+        uses: appleboy/ssh-action@v1.0.3
+        with:
+          host: ${{ secrets.EC2_HOST }}
+          username: ${{ secrets.EC2_USER }}
+          key: ${{ secrets.EC2_SSH_KEY }}
+          script_stop: true
+          script: |
+            set -euo pipefail
+
+            cd /home/ubuntu/Finly-backend
+
+            echo "[1/6] Git pull develop"
+            git fetch origin develop
+            git checkout develop
+            git pull origin develop
+
+            echo "[2/6] Write .env from GitHub Secrets"
+            cat > .env << 'EOF'
+            DB_URL=${{ secrets.DB_URL }}
+            DB_USERNAME=${{ secrets.DB_USERNAME }}
+            DB_PASSWORD=${{ secrets.DB_PASSWORD }}
+
+            JWT_SECRET=${{ secrets.JWT_SECRET }}
+            JWT_ACCESS_TOKEN_EXPIRE_MS=${{ secrets.JWT_ACCESS_TOKEN_EXPIRE_MS }}
+            JWT_REFRESH_TOKEN_EXPIRE_MS=${{ secrets.JWT_REFRESH_TOKEN_EXPIRE_MS }}
+
+            MYSQL_ROOT_PASSWORD=${{ secrets.MYSQL_ROOT_PASSWORD }}
+            MYSQL_DATABASE=${{ secrets.MYSQL_DATABASE }}
+            MYSQL_USER=${{ secrets.MYSQL_USER }}
+            MYSQL_PASSWORD=${{ secrets.MYSQL_PASSWORD }}
+            EOF
+
+            chmod 600 .env
+
+            echo "[3/6] Gradle build (skip tests on server)"
+            ./gradlew build -x test
+
+            echo "[4/6] Docker compose up (no down)"
+            docker compose up -d --build
+
+            echo "[5/6] Show containers"
+            docker compose ps
+
+            echo "[6/6] Health check (try actuator, fallback swagger)"
+            for i in $(seq 1 30); do
+              if curl -fsS http://localhost:8080/actuator/health >/dev/null 2>&1; then
+                echo "✅ Health OK: /actuator/health"
+                exit 0
+              fi
+              if curl -fsS http://localhost:8080/swagger-ui/index.html >/dev/null 2>&1; then
+                echo "✅ Health OK: swagger"
+                exit 0
+              fi
+              echo "Waiting... ($i/30)"
+              sleep 2
+            done
+
+            echo "❌ Health check failed. Printing last logs:"
+            docker logs --tail 200 finly-backend || true
+            exit 1
