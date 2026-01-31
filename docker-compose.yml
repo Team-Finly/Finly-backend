@@ -28,11 +28,9 @@ services:
         condition: service_healthy
     environment:
       SPRING_PROFILES_ACTIVE: prod
-
-      DB_URL: ${DB_URL}
-      DB_USERNAME: ${DB_USERNAME}
-      DB_PASSWORD: ${DB_PASSWORD}
-
+      SPRING_DATASOURCE_URL: jdbc:mysql://mysql:3306/${MYSQL_DATABASE}?useSSL=false&serverTimezone=Asia/Seoul&allowPublicKeyRetrieval=true
+      SPRING_DATASOURCE_USERNAME: ${MYSQL_USER}
+      SPRING_DATASOURCE_PASSWORD: ${MYSQL_PASSWORD}
       JWT_SECRET: ${JWT_SECRET}
       JWT_ACCESS_TOKEN_EXPIRE_MS: ${JWT_ACCESS_TOKEN_EXPIRE_MS}
       JWT_REFRESH_TOKEN_EXPIRE_MS: ${JWT_REFRESH_TOKEN_EXPIRE_MS}

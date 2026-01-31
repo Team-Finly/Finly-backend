@@ -1,11 +1,11 @@
-name: Deploy to EC2 (develop)
+name: Finly CI/CD (EC2 docker compose build)
 
 on:
   push:
     branches: [ "develop" ]
 
 concurrency:
-  group: deploy-develop
+  group: finly-deploy
   cancel-in-progress: true
 
 jobs:
@@ -13,64 +13,54 @@ jobs:
     runs-on: ubuntu-latest
 
     steps:
-      - name: Deploy via SSH
+      - name: Checkout
+        uses: actions/checkout@v4
+
+      - name: Set up JDK 21
+        uses: actions/setup-java@v4
+        with:
+          distribution: temurin
+          java-version: "21"
+          cache: gradle
+
+      - name: Build JAR (skip tests)
+        run: |
+          chmod +x ./gradlew
+          ./gradlew clean build -x test
+
+      # 배포에 필요한 파일만 EC2로 업로드 (전체 소스도 필요하므로 .git 제외하고 올림)
+      - name: Upload project to EC2 (exclude .git)
+        uses: appleboy/scp-action@v0.1.7
+        with:
+          host: ${{ secrets.EC2_HOST }}
+          username: ${{ secrets.EC2_USER || 'ubuntu' }}
+          key: ${{ secrets.EC2_SSH_KEY }}
+          source: ".,!**/.git/**"
+          target: ${{ secrets.EC2_PATH || '/home/ubuntu/Finly-backend' }}
+          overwrite: true
+
+      - name: SSH deploy (docker compose up --build)
         uses: appleboy/ssh-action@v1.0.3
         with:
           host: ${{ secrets.EC2_HOST }}
-          username: ${{ secrets.EC2_USER }}
+          username: ${{ secrets.EC2_USER || 'ubuntu' }}
           key: ${{ secrets.EC2_SSH_KEY }}
-          script_stop: true
           script: |
-            set -euo pipefail
+            set -e
 
-            cd /home/ubuntu/Finly-backend
+            cd ${{ secrets.EC2_PATH || '/home/ubuntu/Finly-backend' }}
 
-            echo "[1/6] Git pull develop"
-            git fetch origin develop
-            git checkout develop
-            git pull origin develop
+            # .env 없으면 중단 
+            if [ ! -f .env ]; then
+              echo "❌ .env 파일이 없어 배포 중단"
+              exit 1
+            fi
 
-            echo "[2/6] Write .env from GitHub Secrets"
-            cat > .env << 'EOF'
-            DB_URL=${{ secrets.DB_URL }}
-            DB_USERNAME=${{ secrets.DB_USERNAME }}
-            DB_PASSWORD=${{ secrets.DB_PASSWORD }}
+            # docker compose 플러그인 기준
+            docker compose down --remove-orphans || true
 
-            JWT_SECRET=${{ secrets.JWT_SECRET }}
-            JWT_ACCESS_TOKEN_EXPIRE_MS=${{ secrets.JWT_ACCESS_TOKEN_EXPIRE_MS }}
-            JWT_REFRESH_TOKEN_EXPIRE_MS=${{ secrets.JWT_REFRESH_TOKEN_EXPIRE_MS }}
+            # build 포함 재기동 
+            docker compose up -d --build backend
 
-            MYSQL_ROOT_PASSWORD=${{ secrets.MYSQL_ROOT_PASSWORD }}
-            MYSQL_DATABASE=${{ secrets.MYSQL_DATABASE }}
-            MYSQL_USER=${{ secrets.MYSQL_USER }}
-            MYSQL_PASSWORD=${{ secrets.MYSQL_PASSWORD }}
-            EOF
-
-            chmod 600 .env
-
-            echo "[3/6] Gradle build (skip tests on server)"
-            ./gradlew build -x test
-
-            echo "[4/6] Docker compose up (no down)"
-            docker compose up -d --build
-
-            echo "[5/6] Show containers"
-            docker compose ps
-
-            echo "[6/6] Health check (try actuator, fallback swagger)"
-            for i in $(seq 1 30); do
-              if curl -fsS http://localhost:8080/actuator/health >/dev/null 2>&1; then
-                echo "✅ Health OK: /actuator/health"
-                exit 0
-              fi
-              if curl -fsS http://localhost:8080/swagger-ui/index.html >/dev/null 2>&1; then
-                echo "✅ Health OK: swagger"
-                exit 0
-              fi
-              echo "Waiting... ($i/30)"
-              sleep 2
-            done
-
-            echo "❌ Health check failed. Printing last logs:"
-            docker logs --tail 200 finly-backend || true
-            exit 1
+            docker ps
+            docker logs --tail=80 finly-backend || true
