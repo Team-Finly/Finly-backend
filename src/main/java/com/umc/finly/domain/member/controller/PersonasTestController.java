@@ -3,8 +3,10 @@ package com.umc.finly.domain.member.controller;
 import com.umc.finly.domain.member.dto.request.PersonaTestSubmitReq;
 import com.umc.finly.domain.member.dto.response.PersonaTestQuestionRes;
 import com.umc.finly.domain.member.dto.response.PersonaTestSubmitRes;
+import com.umc.finly.domain.member.exception.MemberErrorCode;
 import com.umc.finly.domain.member.service.PersonaTestService;
 import com.umc.finly.domain.member.service.PersonaTestSubmitService;
+import com.umc.finly.global.apiPayload.exception.CustomException;
 import com.umc.finly.global.apiPayload.response.ApiResponse;
 import com.umc.finly.global.apiPayload.response.SuccessCode;
 import lombok.RequiredArgsConstructor;
@@ -39,6 +41,9 @@ public class PersonasTestController {
             @RequestParam("mode") String mode,
             @RequestBody PersonaTestSubmitReq request
     ){
+        if (!"signup".equals(mode) && !"retest".equals(mode)) {
+            throw new CustomException(MemberErrorCode.INVALID_PERSONA_MODE);
+        }
         return ApiResponse.onSuccess(
                 submitService.submit(mode, request),
                 SuccessCode.OK
