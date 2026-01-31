@@ -30,17 +30,17 @@ jobs:
 
       # 배포에 필요한 파일만 EC2로 업로드 (전체 소스도 필요하므로 .git 제외하고 올림)
       - name: Upload project to EC2 (exclude .git)
-        uses: appleboy/scp-action@v0.1.7
+        uses: appleboy/scp-action@v1.0.0
         with:
           host: ${{ secrets.EC2_HOST }}
-          username: ${{ secrets.EC2_USER || 'ubuntu' }}
+          username: ${{ secrets.EC2_USER }}
           key: ${{ secrets.EC2_SSH_KEY }}
-          source: ".,!**/.git/**"
+          source: ".,!**/.git/**,!**/.env,!**/build/**,!**/.gradle/**,!**/.idea/**"
           target: ${{ secrets.EC2_PATH || '/home/ubuntu/Finly-backend' }}
           overwrite: true
 
       - name: SSH deploy (docker compose up --build)
-        uses: appleboy/ssh-action@v1.0.3
+        uses: appleboy/ssh-action@v1.2.5
         with:
           host: ${{ secrets.EC2_HOST }}
           username: ${{ secrets.EC2_USER || 'ubuntu' }}
