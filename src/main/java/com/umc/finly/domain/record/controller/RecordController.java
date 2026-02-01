@@ -2,6 +2,7 @@ package com.umc.finly.domain.record.controller;
 
 import com.umc.finly.domain.record.dto.RecordCreateReq;
 import com.umc.finly.domain.record.dto.RecordCreateRes;
+import com.umc.finly.domain.record.dto.RecordDetailRes;
 import com.umc.finly.domain.record.dto.RecordUpdateReq;
 import com.umc.finly.domain.record.dto.RecordUpdateRes;
 import com.umc.finly.domain.record.service.RecordService;
@@ -27,6 +28,15 @@ public class RecordController {
     ) {
         RecordCreateRes result = recordService.createRecord(principal.getMemberId(), request);
         return ApiResponse.onSuccess(result, SuccessCode.CREATED);
+    }
+
+    @GetMapping("/{recordId}")
+    public ApiResponse<RecordDetailRes> getRecord(
+            @AuthenticationPrincipal AuthPrincipal principal,
+            @PathVariable Long recordId
+    ) {
+        RecordDetailRes result = recordService.getRecord(principal.getMemberId(), recordId);
+        return ApiResponse.onSuccess(result, SuccessCode.OK);
     }
 
     @PatchMapping("/{recordId}")

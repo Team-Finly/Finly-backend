@@ -2,6 +2,7 @@ package com.umc.finly.domain.record.service;
 
 import com.umc.finly.domain.record.dto.RecordCreateReq;
 import com.umc.finly.domain.record.dto.RecordCreateRes;
+import com.umc.finly.domain.record.dto.RecordDetailRes;
 import com.umc.finly.domain.record.dto.RecordUpdateReq;
 import com.umc.finly.domain.record.dto.RecordUpdateRes;
 import com.umc.finly.domain.record.entity.RecordEntry;
@@ -66,6 +67,21 @@ public class RecordServiceImpl implements RecordService {
 
         // 5. 응답 DTO 반환
         return RecordCreateRes.from(savedEntry);
+    }
+
+    @Override
+    public RecordDetailRes getRecord(Long memberId, Long recordId) {
+        // 1. 기록 조회
+        RecordEntry entry = recordEntryRepository.findById(recordId)
+                .orElseThrow(() -> new CustomException(ErrorCode.RECORD_NOT_FOUND));
+
+        // 2. 본인 기록인지 확인
+        if (!entry.getMemberId().equals(memberId)) {
+            throw new CustomException(ErrorCode.RECORD_FORBIDDEN);
+        }
+
+        // 3. 응답 DTO 반환
+        return RecordDetailRes.from(entry);
     }
 
     @Override
