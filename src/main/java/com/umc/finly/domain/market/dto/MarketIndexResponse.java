@@ -25,11 +25,18 @@ public class MarketIndexResponse {
     @JsonFormat(pattern = "yyyy-MM-dd'T'HH:mm:ss")
     private LocalDateTime updatedAt;
 
-    public static MarketIndexResponse snapshot(BigDecimal kospi, BigDecimal kosdaq) {
+    public static MarketIndexResponse snapshot(
+            BigDecimal kospi,
+            BigDecimal kosdaq,
+            Integer fearGreed,
+            String fearGreedStatus,
+            LocalDateTime updatedAt) {
         return MarketIndexResponse.builder()
                 .kospi(kospi)
                 .kosdaq(kosdaq)
-                .updatedAt(LocalDateTime.now())
+                .fearGreed(fearGreed)
+                .fearGreedStatus(fearGreedStatus)
+                .updatedAt(updatedAt)
                 .build();
     }
 }
