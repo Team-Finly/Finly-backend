@@ -11,6 +11,7 @@ import com.umc.finly.domain.record.repository.RecordEntryRepository;
 import com.umc.finly.global.apiPayload.exception.CustomException;
 import com.umc.finly.global.apiPayload.response.ErrorCode;
 import lombok.RequiredArgsConstructor;
+import org.springframework.dao.DataIntegrityViolationException;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
@@ -56,7 +57,12 @@ public class RecordServiceImpl implements RecordService {
                 .session(session)
                 .build();
 
-        RecordEntry savedEntry = recordEntryRepository.save(entry);
+        RecordEntry savedEntry;
+        try {
+            savedEntry = recordEntryRepository.save(entry);
+        } catch (DataIntegrityViolationException e) {
+            throw new CustomException(ErrorCode.RECORD_DUPLICATE_SUBMISSION);
+        }
 
         // 5. 응답 DTO 반환
         return RecordCreateRes.from(savedEntry);
