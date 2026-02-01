@@ -30,13 +30,13 @@ public class StockLogoUpdateService {
         List<Stock> targets = stockRepository.findByLogoUrlIsNull();
         int total = targets.size();
 
-        // 1. 업데이트 대상이 없는 경우
+        // 업데이트 대상이 없는 경우
         if (targets.isEmpty()) {
             log.info("⚪ 업데이트할 로고가 없습니다.");
             return;
         }
 
-        // 2. 업데이트 시작
+        // 업데이트 시작
         log.info("🚀 로고 업데이트 시작: 총 {}건", total);
 
         AtomicInteger successCount = new AtomicInteger(0);
@@ -49,26 +49,29 @@ public class StockLogoUpdateService {
         int partitionSize = 150;
         List<List<Stock>> partitions = Lists.partition(targets, partitionSize);
 
-        // 3. 병렬 처리 시작
-        partitions.parallelStream().forEach(batch -> {
-            // 현재 어떤 스레드가 이 배치를 가져갔는지 확인
+        for (List<Stock> batch : partitions) {
             log.debug("🧵 [Thread: {}] {}건의 배치 처리 시작", Thread.currentThread().getName(), batch.size());
 
             for (Stock stock : batch) {
+                // 작업 중단(Interrupt) 신호를 받으면 루프 종료
+                if (Thread.currentThread().isInterrupted()) {
+                    log.warn("🛑 작업 중단 신호 감지로 인해 업데이트를 조기 종료합니다.");
+                    break;
+                }
                 updateSingleStock(stock, successCount, notFoundCount, failCount);
             }
 
             try {
-                // 4. DB 반영
+                // 한 배치가 끝나면 한꺼번에 DB 반영
                 stockRepository.saveAllAndFlush(batch);
             } catch (Exception e) {
-                log.error("❗ [Thread: {}] DB 저장 중 오류 발생: {}", Thread.currentThread().getName(), e.getMessage());
+                log.error("❗ DB 저장 중 오류 발생 (Thread: {}): {}", Thread.currentThread().getName(), e);
             }
-        });
+        }
 
         stopWatch.stop();
 
-        // 5. 성능 지표 계산 및 출력
+        // 성능 지표 계산 및 출력
         double totalSeconds = stopWatch.getTotalTimeSeconds();
         double tps = (totalSeconds > 0) ? (total / totalSeconds) : 0;
 
@@ -78,7 +81,7 @@ public class StockLogoUpdateService {
         log.info("📊 [StockLogoUpdate 작업]");
         log.info(">> 총 소요 시간: {}s", String.format("%.2f", totalSeconds));
         log.info(">> 초당 처리량(TPS): {}건/sec", String.format("%.2f", tps));
-        log.info(">> 병렬 처리 방식: ParallelStream (Partition Size: {})", partitionSize);
+        log.info(">> 병렬 처리 방식: @Async (Single Thread in Pool)");
     }
 
     private void updateSingleStock(Stock stock, AtomicInteger success, AtomicInteger notFound, AtomicInteger fail) {
@@ -102,20 +105,21 @@ public class StockLogoUpdateService {
             notFound.incrementAndGet();
 
             if (e.getErrorCode() == StockInfoErrorCode.TRADINGVIEW_SYMBOL_NOT_FOUND) {
-                // Case 1: TradingView에 해당 종목 페이지 자체가 없음 (미등록)
+                // TradingView에 해당 종목 페이지 자체가 없음 (미등록)
                 log.warn("❌ [{}] TradingView 미등록 종목", symbol);
             } else if (e.getErrorCode() == StockInfoErrorCode.TRADINGVIEW_LOGO_NOT_FOUND) {
-                // Case 2: 페이지는 있으나 <img> 태그나 로고 주소가 없음
+                // 페이지는 있으나 <img> 태그나 로고 주소가 없음
                 log.warn("⚠️ [{}] 종목은 존재하나 로고 이미지를 찾을 수 없음", symbol);
             } else {
-                log.warn("❓ [{}] 기타 처리 오류: {}", symbol, e.getMessage());
+                log.warn("❓ [{}] 처리 오류: {}", symbol, e.getMessage());
             }
         } catch (InterruptedException e) {
             Thread.currentThread().interrupt();
             fail.incrementAndGet();
+            log.error("❗ [{}] 작업 중단 발생 (Interrupted)", symbol, e);
         } catch (Exception e) {
             fail.incrementAndGet();
-            log.error("❗ [{}] 시스템 에러: {}", symbol, e.getMessage());
+            log.error("❗ [{}] 시스템 에러: {}", symbol, e);
         }
     }
 }
