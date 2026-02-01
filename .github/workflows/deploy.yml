@@ -3,7 +3,7 @@ name: CD - Deploy to EC2 (Docker Compose)
 on:
   # develop 브랜치에 push 될 때마다 자동 배포
   push:
-    branches: ["develop"]
+    branches: ["deploy/ci-33-github-action"]
   workflow_dispatch:
 
 # 동시에 여러 배포가 겹치지 않게 제어
