@@ -1,5 +1,6 @@
 package com.umc.finly.domain.market.stock.controller;
 
+import com.umc.finly.domain.market.stock.dto.StockAdminResponse;
 import com.umc.finly.domain.market.stock.dto.StockInfoResponse;
 import com.umc.finly.domain.market.stock.repository.StockRepository;
 import com.umc.finly.domain.market.stock.service.StockInfoScheduler;
@@ -27,31 +28,33 @@ public class StockInfoAdminController implements StockInfoApiSpecification {
 
     // KIS 종목정보 동기화
     @PostMapping("/sync")
-    public ApiResponse<String> syncStockInfo() {
-        stockInfoSyncService.syncDomesticStocks();
-        return ApiResponse.onSuccess("KIS 종목정보 동기화가 완료되었습니다.", SuccessCode.OK);
+    public ApiResponse<StockAdminResponse.StockSync> syncStockInfo() {
+        StockAdminResponse.StockSync result = stockInfoSyncService.syncDomesticStocks();
+        return ApiResponse.onSuccess(result, SuccessCode.OK);
     }
 
     // TradingView 로고 업데이트
     @PostMapping("/logo")
-    public ApiResponse<String> updateLogos() { //
-        stockLogoUpdateService.updateMissingLogos();
-        return ApiResponse.onSuccess("TradingView 로고 URL 업데이트가 완료되었습니다.", SuccessCode.OK);
+    public ApiResponse<StockAdminResponse.LogoUpdate> updateLogos() {
+        StockAdminResponse.LogoUpdate result = stockLogoUpdateService.updateMissingLogos();
+        return ApiResponse.onSuccess(result, SuccessCode.OK);
     }
 
     // 1,2 모두 실행
     @PostMapping("/all")
-    public ApiResponse<String> syncStockInfoAndUpdateLogos() {
-        stockInfoSyncService.syncDomesticStocks();
-        stockLogoUpdateService.updateMissingLogos();
-        return ApiResponse.onSuccess("종목 정보 동기화 + 로고 URL 업데이트가 완료되었습니다.", SuccessCode.OK);
+    public ApiResponse<StockAdminResponse.TotalSync> syncStockInfoAndUpdateLogos() {
+        StockAdminResponse.StockSync syncResult = stockInfoSyncService.syncDomesticStocks();
+        StockAdminResponse.LogoUpdate logoResult = stockLogoUpdateService.updateMissingLogos();
+
+        StockAdminResponse.TotalSync totalResult = new StockAdminResponse.TotalSync(syncResult, logoResult);
+        return ApiResponse.onSuccess(totalResult, SuccessCode.OK);
     }
 
     // 스케줄러 실행
     @PostMapping("/scheduler")
-    public ApiResponse<String> triggerScheduler() {
-        stockInfoScheduler.runDailyJob();
-        return ApiResponse.onSuccess("스케줄러가 성공적으로 실행되었습니다.", SuccessCode.OK);
+    public ApiResponse<StockAdminResponse.TotalSync> triggerScheduler() {
+        StockAdminResponse.TotalSync result = stockInfoScheduler.runDailyJob();
+        return ApiResponse.onSuccess(result, SuccessCode.OK);
     }
 
     // DB 모든 종목 리스트 조회

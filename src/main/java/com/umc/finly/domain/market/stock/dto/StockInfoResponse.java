@@ -5,7 +5,7 @@ import com.umc.finly.domain.market.stock.enums.MarketType;
 import lombok.Getter;
 
 /**
- * Stock 엔티티를 내부 관리/테스트용 API 응답으로 보낼 때 사용하는 DTO.
+ * Stock 엔티티를 API 응답으로 보낼 때 사용하는 DTO.
  */
 @Getter
 public class StockInfoResponse {
