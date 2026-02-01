@@ -24,10 +24,17 @@ jobs:
           key: ${{ secrets.EC2_SSH_KEY }}
           port: ${{ secrets.EC2_PORT }}
           script: |
-            set -e
+            set -euo pipefail
 
             echo "===> Move to project dir"
             cd ${{ secrets.DEPLOY_DIR }}
+            
+            # .env 누락 방지
+            echo "===> Check .env"
+            if [ ! -f .env ]; then
+              echo ".env not found in $(pwd)" >&2
+              exit 1
+            fi
 
             echo "===> Git pull"
             git fetch --all
@@ -37,9 +44,10 @@ jobs:
             chmod +x ./gradlew
             ./gradlew build -x test
 
-            echo "===> Docker compose redeploy"
-            docker compose up -d --build
-
+            # backend만 재빌드 + 오르판 정리
+            echo "===> Docker compose redeploy (backend only + remove orphans)"
+            docker compose up -d --build --remove-orphans backend
+            
             echo "===> Container Status"
             docker ps
             
