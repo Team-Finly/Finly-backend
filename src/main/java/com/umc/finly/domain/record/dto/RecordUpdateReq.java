@@ -1,7 +1,7 @@
 package com.umc.finly.domain.record.dto;
 
-import com.umc.finly.domain.record.entity.EmotionCode;
-import com.umc.finly.domain.record.entity.TradeAction;
+import com.umc.finly.domain.record.enums.EmotionCode;
+import com.umc.finly.domain.record.enums.TradeAction;
 import jakarta.validation.constraints.*;
 import lombok.Getter;
 import lombok.NoArgsConstructor;

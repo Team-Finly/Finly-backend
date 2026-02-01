@@ -6,6 +6,6 @@ import com.umc.finly.domain.record.dto.RecordUpdateReq;
 import com.umc.finly.domain.record.dto.RecordUpdateRes;
 
 public interface RecordService {
-    RecordCreateRes createRecord(Long userId, RecordCreateReq request);
-    RecordUpdateRes updateRecord(Long userId, Long recordId, RecordUpdateReq request);
+    RecordCreateRes createRecord(Long memberId, RecordCreateReq request);
+    RecordUpdateRes updateRecord(Long memberId, Long recordId, RecordUpdateReq request);
 }

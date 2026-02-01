@@ -1,4 +1,4 @@
-package com.umc.finly.domain.record.entity;
+package com.umc.finly.domain.record.enums;
 
 import java.time.LocalTime;
 

@@ -1,5 +1,8 @@
 package com.umc.finly.domain.record.entity;
 
+import com.umc.finly.domain.record.enums.EmotionCode;
+import com.umc.finly.domain.record.enums.Session;
+import com.umc.finly.domain.record.enums.TradeAction;
 import com.umc.finly.global.entity.CreatedUpdatedDeletedBaseEntity;
 import jakarta.persistence.*;
 import lombok.*;
@@ -20,8 +23,8 @@ public class RecordEntry extends CreatedUpdatedDeletedBaseEntity {
     @GeneratedValue(strategy = GenerationType.IDENTITY)
     private Long id;
 
-    @Column(name = "user_id", nullable = false)
-    private Long userId;
+    @Column(name = "member_id", nullable = false)
+    private Long memberId;
 
     @Column(name = "client_request_id", nullable = false, unique = true)
     private String clientRequestId;

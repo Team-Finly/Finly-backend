@@ -1,6 +1,9 @@
 package com.umc.finly.domain.record.dto;
 
-import com.umc.finly.domain.record.entity.*;
+import com.umc.finly.domain.record.entity.RecordEntry;
+import com.umc.finly.domain.record.enums.EmotionCode;
+import com.umc.finly.domain.record.enums.Session;
+import com.umc.finly.domain.record.enums.TradeAction;
 import lombok.Builder;
 import lombok.Getter;
 

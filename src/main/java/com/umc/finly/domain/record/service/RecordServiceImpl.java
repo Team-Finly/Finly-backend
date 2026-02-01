@@ -5,8 +5,8 @@ import com.umc.finly.domain.record.dto.RecordCreateRes;
 import com.umc.finly.domain.record.dto.RecordUpdateReq;
 import com.umc.finly.domain.record.dto.RecordUpdateRes;
 import com.umc.finly.domain.record.entity.RecordEntry;
-import com.umc.finly.domain.record.entity.Session;
-import com.umc.finly.domain.record.entity.TradeAction;
+import com.umc.finly.domain.record.enums.Session;
+import com.umc.finly.domain.record.enums.TradeAction;
 import com.umc.finly.domain.record.repository.RecordEntryRepository;
 import com.umc.finly.global.apiPayload.exception.CustomException;
 import com.umc.finly.global.apiPayload.response.ErrorCode;
@@ -25,7 +25,7 @@ public class RecordServiceImpl implements RecordService {
 
     @Override
     @Transactional
-    public RecordCreateRes createRecord(Long userId, RecordCreateReq request) {
+    public RecordCreateRes createRecord(Long memberId, RecordCreateReq request) {
         // 1. clientRequestId 중복 체크
         if (recordEntryRepository.existsByClientRequestId(request.getClientRequestId())) {
             throw new CustomException(ErrorCode.RECORD_DUPLICATE_SUBMISSION);
@@ -43,7 +43,7 @@ public class RecordServiceImpl implements RecordService {
 
         // 4. RecordEntry 엔티티 생성 및 저장
         RecordEntry entry = RecordEntry.builder()
-                .userId(userId)
+                .memberId(memberId)
                 .clientRequestId(request.getClientRequestId())
                 .recordDate(request.getRecordDate())
                 .stockId(request.getStockId())
@@ -64,13 +64,13 @@ public class RecordServiceImpl implements RecordService {
 
     @Override
     @Transactional
-    public RecordUpdateRes updateRecord(Long userId, Long recordId, RecordUpdateReq request) {
+    public RecordUpdateRes updateRecord(Long memberId, Long recordId, RecordUpdateReq request) {
         // 1. 기록 조회
         RecordEntry entry = recordEntryRepository.findById(recordId)
                 .orElseThrow(() -> new CustomException(ErrorCode.RECORD_NOT_FOUND));
 
         // 2. 본인 기록인지 확인
-        if (!entry.getUserId().equals(userId)) {
+        if (!entry.getMemberId().equals(memberId)) {
             throw new CustomException(ErrorCode.RECORD_FORBIDDEN);
         }
 
