@@ -9,6 +9,7 @@ import lombok.extern.slf4j.Slf4j;
 import org.springframework.http.HttpHeaders;
 import org.springframework.http.HttpStatusCode;
 import org.springframework.http.ResponseEntity;
+import org.springframework.http.converter.HttpMessageNotReadableException;
 import org.springframework.web.bind.MethodArgumentNotValidException;
 import org.springframework.web.bind.annotation.ExceptionHandler;
 import org.springframework.web.bind.annotation.RestController;
@@ -38,6 +39,22 @@ public class ExceptionAdvice extends ResponseEntityExceptionHandler {
                 message
         );
         return handleExceptionInternal(e, body, new HttpHeaders(),
+                ErrorCode.INVALID_REQUEST.getHttpStatus(),
+                request);
+    }
+
+    // JSON 파싱 실패 (요청 본문 읽기 실패)
+    @Override
+    protected ResponseEntity<Object> handleHttpMessageNotReadable(HttpMessageNotReadableException e,
+                                                                  HttpHeaders headers,
+                                                                  HttpStatusCode status,
+                                                                  WebRequest request) {
+        log.error("HttpMessageNotReadableException 발생", e);
+        ApiResponse<Object> body = ApiResponse.onFailure(
+                ErrorCode.INVALID_REQUEST,
+                "요청 본문을 읽을 수 없습니다. JSON 형식을 확인해주세요."
+        );
+        return handleExceptionInternal(e, body, headers,
                 ErrorCode.INVALID_REQUEST.getHttpStatus(),
                 request);
     }

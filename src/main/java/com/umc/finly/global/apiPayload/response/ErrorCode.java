@@ -23,6 +23,8 @@ public enum ErrorCode implements BaseCode {
 
     // RECORD 4xx
     RECORD_INVALID_REQUEST(HttpStatus.BAD_REQUEST, "RECORD400", "필수값 또는 형식 오류입니다."),
+    RECORD_NOT_FOUND(HttpStatus.NOT_FOUND, "RECORD404", "기록을 찾을 수 없습니다."),
+    RECORD_FORBIDDEN(HttpStatus.FORBIDDEN, "RECORD403", "해당 기록에 대한 권한이 없습니다."),
     RECORD_DUPLICATE_SUBMISSION(HttpStatus.CONFLICT, "RECORD409", "중복 제출된 요청입니다."),
 
     // MARKET 4xx

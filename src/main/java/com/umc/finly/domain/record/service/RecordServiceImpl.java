@@ -2,6 +2,8 @@ package com.umc.finly.domain.record.service;
 
 import com.umc.finly.domain.record.dto.RecordCreateReq;
 import com.umc.finly.domain.record.dto.RecordCreateRes;
+import com.umc.finly.domain.record.dto.RecordUpdateReq;
+import com.umc.finly.domain.record.dto.RecordUpdateRes;
 import com.umc.finly.domain.record.entity.RecordEntry;
 import com.umc.finly.domain.record.entity.Session;
 import com.umc.finly.domain.record.entity.TradeAction;
@@ -58,5 +60,54 @@ public class RecordServiceImpl implements RecordService {
 
         // 5. 응답 DTO 반환
         return RecordCreateRes.from(savedEntry);
+    }
+
+    @Override
+    @Transactional
+    public RecordUpdateRes updateRecord(Long userId, Long recordId, RecordUpdateReq request) {
+        // 1. 기록 조회
+        RecordEntry entry = recordEntryRepository.findById(recordId)
+                .orElseThrow(() -> new CustomException(ErrorCode.RECORD_NOT_FOUND));
+
+        // 2. 본인 기록인지 확인
+        if (!entry.getUserId().equals(userId)) {
+            throw new CustomException(ErrorCode.RECORD_FORBIDDEN);
+        }
+
+        // 3. 부분 업데이트 (null이 아닌 필드만 수정)
+        if (request.getRecordDate() != null) {
+            entry.setRecordDate(request.getRecordDate());
+        }
+        if (request.getStockId() != null) {
+            entry.setStockId(request.getStockId());
+        }
+        if (request.getTradeAction() != null) {
+            entry.setTradeAction(request.getTradeAction());
+        }
+        if (request.getUnitPrice() != null) {
+            entry.setUnitPrice(request.getUnitPrice());
+        }
+        if (request.getQuantity() != null) {
+            entry.setQuantity(request.getQuantity());
+        }
+        if (request.getEmotionCode() != null) {
+            entry.setEmotionCode(request.getEmotionCode());
+        }
+        if (request.getEmotionIntensity() != null) {
+            entry.setEmotionIntensity(request.getEmotionIntensity());
+        }
+        if (request.getMemo() != null) {
+            entry.setMemo(request.getMemo());
+        }
+
+        // 4. tradeAction이 BUY/SELL이면 unitPrice, quantity 필수 검증
+        if (entry.getTradeAction() == TradeAction.BUY || entry.getTradeAction() == TradeAction.SELL) {
+            if (entry.getUnitPrice() == null || entry.getQuantity() == null) {
+                throw new CustomException(ErrorCode.RECORD_INVALID_REQUEST);
+            }
+        }
+
+        // 5. 응답 DTO 반환
+        return RecordUpdateRes.from(entry);
     }
 }
