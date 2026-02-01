@@ -11,8 +11,8 @@ import lombok.NoArgsConstructor;
 @NoArgsConstructor
 public class MarketInsightResponse {
 
-    private String message;
-    private String dominantEmotion;
-    private String buySellRatio;
-    private String confidenceLevel;
+    private String message; // 캐러셀 문장
+    private String dominantEmotion; // 감정
+    private String buySellRatio; // BUY_DOMINANT / SELL_DOMINANT / BALANCED
+    private String confidenceLevel; // // LOW / MEDIUM / HIGH
 }
