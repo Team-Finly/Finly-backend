@@ -45,3 +45,4 @@ out/
 
 ### 초기 DB SQL ###
 /src/main/resources/db/*.sql
+.claude/

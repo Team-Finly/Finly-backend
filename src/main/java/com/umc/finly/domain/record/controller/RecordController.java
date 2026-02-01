@@ -5,9 +5,10 @@ import com.umc.finly.domain.record.dto.RecordCreateRes;
 import com.umc.finly.domain.record.service.RecordService;
 import com.umc.finly.global.apiPayload.response.ApiResponse;
 import com.umc.finly.global.apiPayload.response.SuccessCode;
+import com.umc.finly.global.config.security.AuthPrincipal;
 import jakarta.validation.Valid;
 import lombok.RequiredArgsConstructor;
-import org.springframework.http.ResponseEntity;
+import org.springframework.security.core.annotation.AuthenticationPrincipal;
 import org.springframework.web.bind.annotation.*;
 
 @RestController
@@ -18,13 +19,11 @@ public class RecordController {
     private final RecordService recordService;
 
     @PostMapping
-    public ResponseEntity<ApiResponse<RecordCreateRes>> createRecord(
-            @RequestHeader("X-User-Id") Long userId,
+    public ApiResponse<RecordCreateRes> createRecord(
+            @AuthenticationPrincipal AuthPrincipal principal,
             @Valid @RequestBody RecordCreateReq request
     ) {
-        RecordCreateRes result = recordService.createRecord(userId, request);
-
-        ApiResponse<RecordCreateRes> body = ApiResponse.onSuccess(result, SuccessCode.CREATED);
-        return ResponseEntity.status(SuccessCode.CREATED.getHttpStatus()).body(body);
+        RecordCreateRes result = recordService.createRecord(principal.getMemberId(), request);
+        return ApiResponse.onSuccess(result, SuccessCode.CREATED);
     }
 }
