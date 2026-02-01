@@ -58,6 +58,10 @@ public class StockInfoSyncService {
             throw new StockInfoException(StockInfoErrorCode.STOCK_INFO_SYNC_FAILED, e.getMessage(), e);
         }
 
+        if (kospiCount == 0 || kosdaqCount == 0) {
+            log.error("❗ 종목 정보 파싱 결과가 비어있습니다. (KOSPI: {}건, KOSDAQ: {}건)", kospiCount, kosdaqCount);
+            throw new StockInfoException(StockInfoErrorCode.STOCK_INFO_SYNC_FAILED, "KIS 종목 정보 파일 파싱 결과가 비어 있어 동기화를 중단합니다.");
+        }
         // 3. 통합 처리 (Upsert & Deactivate)
         processStocks(allInfos, kospiCount, kosdaqCount);
         log.info(">>> ✅ 국내 종목 정보 동기화 완료");
