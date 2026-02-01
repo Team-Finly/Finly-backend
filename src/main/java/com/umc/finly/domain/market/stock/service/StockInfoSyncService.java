@@ -29,7 +29,6 @@ public class StockInfoSyncService {
     private final StockInfoFileParser stockInfoFileParser;
     private final StockRepository stockRepository;
 
-    @Transactional
     public void syncDomesticStocks() {
         log.info(">>> ⚪ 국내 종목 정보 동기화 시작");
         List<StockInfoDto> allInfos = new ArrayList<>();
@@ -64,7 +63,8 @@ public class StockInfoSyncService {
         log.info(">>> ✅ 국내 종목 정보 동기화 완료");
     }
 
-    private void processStocks(List<StockInfoDto> allInfos, int kospiCount, int kosdaqCount) {
+    @Transactional
+    public void processStocks(List<StockInfoDto> allInfos, int kospiCount, int kosdaqCount) {
         // DB에 있는 기존 모든 종목을 Symbol 기준으로 Map 생성
         Map<String, Stock> existingStockMap = stockRepository.findAll().stream()
                 .collect(Collectors.toMap(Stock::getSymbol, stock -> stock));
