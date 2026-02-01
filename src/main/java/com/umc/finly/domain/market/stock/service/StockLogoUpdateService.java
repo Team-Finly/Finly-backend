@@ -53,7 +53,7 @@ public class StockLogoUpdateService {
             for (Stock stock : batch) {
                 // 작업 중단(Interrupt) 신호를 받으면 루프 종료
                 if (Thread.currentThread().isInterrupted()) {
-                    log.warn("🛑 작업 중단 신호 감지로 인해 업데이트를 조기 종료합니다.");
+                    log.warn("🛑 로고 업데이트 중 인터럽트 감지로 인해 조기 종료합니다.");
                     break;
                 }
                 updateSingleStock(stock, successCount, notFoundCount, failCount);
@@ -63,7 +63,7 @@ public class StockLogoUpdateService {
                 // 한 배치가 끝나면 한꺼번에 DB 반영
                 stockRepository.saveAllAndFlush(batch);
             } catch (Exception e) {
-                log.error("❗ DB 저장 중 오류 발생 (Thread: {}): {}", Thread.currentThread().getName(), e);
+                log.error("❗ 로고 URL DB 저장 중 오류 발생 (Thread: {}): {}", Thread.currentThread().getName(), e);
             }
         });
 
@@ -73,7 +73,7 @@ public class StockLogoUpdateService {
         double totalSeconds = stopWatch.getTotalTimeSeconds();
         double tps = (totalSeconds > 0) ? (total / totalSeconds) : 0;
 
-        log.info("✅ 업데이트 완료 - 대상: {}건, 성공: {}건, 로고 없음: {}건, 실패: {}건",
+        log.info("✅ 로고 업데이트 완료 - 대상: {}건, 성공: {}건, 로고 없음: {}건, 실패: {}건",
                 total, successCount.get(), notFoundCount.get(), failCount.get());
 
         log.info("📊 [StockLogoUpdate 작업]");
@@ -109,15 +109,15 @@ public class StockLogoUpdateService {
                 // 페이지는 있으나 <img> 태그나 로고 주소가 없음
                 log.warn("⚠️ [{}] 종목은 존재하나 로고 이미지를 찾을 수 없음", symbol);
             } else {
-                log.warn("❓ [{}] 처리 오류: {}", symbol, e.getMessage());
+                log.warn("❓ [{}] 로고 업데이트 처리 오류: {}", symbol, e.getMessage());
             }
         } catch (InterruptedException e) {
             Thread.currentThread().interrupt();
             fail.incrementAndGet();
-            log.error("❗ [{}] 작업 중단 발생 (Interrupted)", symbol, e);
+            log.error("❗ [{}] 로고 업데이트 중 인터럽트 발생", symbol, e);
         } catch (Exception e) {
             fail.incrementAndGet();
-            log.error("❗ [{}] 시스템 에러: {}", symbol, e);
+            log.error("❗ [{}] 로고 업데이트 시스템 에러: {}", symbol, e);
         }
     }
 }
