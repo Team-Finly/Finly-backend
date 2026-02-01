@@ -26,10 +26,10 @@ public class StockInfoFileParser {
 
         try (BufferedReader reader = new BufferedReader(new InputStreamReader(inputStream, KIS_CHARSET))) {
             String line;
-            while ((line = reader.readLine()) != null) {
-                if (line.length() < 40) continue; // 최소 길이 미달 제외
 
-                byte[] bytes = line.getBytes(KIS_CHARSET);
+            while ((line = reader.readLine()) != null) {
+                    byte[] bytes = line.getBytes(KIS_CHARSET);
+                    if (bytes.length < 63) continue; // 0~62 바이트 필요
 
                 // 1. 단축코드(9), 표준코드(12) 추출
                 String symbol = new String(bytes, 0, 9, KIS_CHARSET).trim();

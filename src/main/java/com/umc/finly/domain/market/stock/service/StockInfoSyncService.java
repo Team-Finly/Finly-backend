@@ -34,11 +34,15 @@ public class StockInfoSyncService {
         log.info(">>> ⚪ 국내 종목 정보 동기화 시작");
         List<StockInfoDto> allInfos = new ArrayList<>();
 
+        int kospiCount = 0;
+        int kosdaqCount = 0;
+
         // 1. 코스피 데이터 처리
         try (InputStream is = kisStockInfoFileClient.downloadKospi()) {
             List<StockInfoDto> kospiList = stockInfoFileParser.parse(is, MarketType.KOSPI);
+            kospiCount = kospiList.size();
             allInfos.addAll(kospiList);
-            log.info("✅ KOSPI 다운로드 및 파싱 완료: {} 건", kospiList.size());
+            log.info("✅ KOSPI 다운로드 및 파싱 완료: {} 건", kospiCount);
         } catch (Exception e) {
             log.error("❗ KOSPI 동기화 중 오류: {}", e.getMessage());
             throw new StockInfoException(StockInfoErrorCode.STOCK_INFO_SYNC_FAILED, e.getMessage());
@@ -47,19 +51,20 @@ public class StockInfoSyncService {
         // 2. 코스닥 데이터 처리
         try (InputStream is = kisStockInfoFileClient.downloadKosdaq()) {
             List<StockInfoDto> kosdaqList = stockInfoFileParser.parse(is, MarketType.KOSDAQ);
+            kosdaqCount = kosdaqList.size();
             allInfos.addAll(kosdaqList);
-            log.info("✅ KOSDAQ 다운로드 및 파싱 완료: {} 건", kosdaqList.size());
+            log.info("✅ KOSDAQ 다운로드 및 파싱 완료: {} 건", kosdaqCount);
         } catch (Exception e) {
             log.error("❗ KOSDAQ 동기화 중 오류: {}", e.getMessage());
             throw new StockInfoException(StockInfoErrorCode.STOCK_INFO_SYNC_FAILED, e.getMessage());
         }
 
         // 3. 통합 처리 (Upsert & Deactivate)
-        processStocks(allInfos);
-        log.info(">>> ✅ 국내 종목 정보 동기화 최종 완료");
+        processStocks(allInfos, kospiCount, kosdaqCount);
+        log.info(">>> ✅ 국내 종목 정보 동기화 완료");
     }
 
-    private void processStocks(List<StockInfoDto> allInfos) {
+    private void processStocks(List<StockInfoDto> allInfos, int kospiCount, int kosdaqCount) {
         // DB에 있는 기존 모든 종목을 Symbol 기준으로 Map 생성
         Map<String, Stock> existingStockMap = stockRepository.findAll().stream()
                 .collect(Collectors.toMap(Stock::getSymbol, stock -> stock));
@@ -113,6 +118,11 @@ public class StockInfoSyncService {
             stock.deactivate();
         });
 
-        log.info("☑\uFE0F 신규/업데이트 처리 완료, 비활성화 처리 수: {} 건", toDeactivate.size());
-    }
+        log.info("==========================================");
+        log.info("📊 [종목 파일 동기화 결과]");
+        log.info("📂 코스피 파일 종목 수: {} 건", kospiCount);
+        log.info("📂 코스닥 파일 종목 수: {} 건", kosdaqCount);
+        log.info("📦 총 종목 합계   : {} 건", allInfos.size());
+        log.info("🚫 비활성화 처리 수 : {} 건", toDeactivate.size());
+        log.info("==========================================");    }
 }
