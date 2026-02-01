@@ -12,5 +12,5 @@ spring:
 
   data:
     redis:
-      host: localhost
+      host: finly-redis
       port: 6379
