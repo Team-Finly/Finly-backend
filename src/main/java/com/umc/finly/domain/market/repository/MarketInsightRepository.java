@@ -24,7 +24,9 @@ public interface MarketInsightRepository
           AND r.deletedAt IS NULL
           AND s.isActive = true
         GROUP BY r.stockId, s.name, r.emotionCode
-    """)
+    """)// 최근 N일 동안 유저들이 매수(BUY)할 때 느낀 감정을
+        // 종목 이름 기준으로 집계하여 실시간 인사이트 생성을 위한 쿼리
+
     List<StockEmotionBuyAggregation> aggregateBuyEmotionByStock(
             @Param("fromDate") LocalDate fromDate
     );
