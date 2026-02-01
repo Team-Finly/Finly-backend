@@ -81,19 +81,17 @@ public class StockInfoSyncService {
             Stock stock = existingStockMap.get(info.getSymbol());
 
             if (stock != null) {
-                // [CASE 1 & 2] 기존 종목 존재 -> 정보 업데이트
+                // updateInfo 호출 전 상태 확인
+                boolean wasActive = stock.getIsActive();
+
                 stock.updateInfo(info.getMarketType(), info.getSymbol(), info.getName(), info.getIsin());
 
-                if (stock.getIsActive()) {
-                    // [CASE 1] 기존에 활성 상태였던 종목
+                if (wasActive) {
                     log.info(">>> \uD83D\uDD35 [업데이트] 기존 종목 정보 갱신: {} ({})", info.getName(), info.getSymbol());
                 } else {
-                    // [CASE 2] 기존에 비활성 상태였다가 다시 파일에 등장 (재상장 등)
-                    stock.activate();
                     log.info(">>> \uD83D\uDD35 [재활성화] 비활성 종목 다시 활성화: {} ({})", info.getName(), info.getSymbol());
                 }
             } else {
-                // [CASE 3] 신규 종목 -> 생성
                 Stock newStock = Stock.builder()
                         .marketType(info.getMarketType())
                         .symbol(info.getSymbol())
