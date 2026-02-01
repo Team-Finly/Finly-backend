@@ -4,6 +4,7 @@ import com.umc.finly.domain.market.stock.infra.TradingViewLogoExtractor;
 import com.umc.finly.domain.market.stock.infra.TradingViewSymbolClient;
 import org.junit.jupiter.api.DisplayName;
 import org.junit.jupiter.api.Test;
+import org.junit.jupiter.api.condition.EnabledIfEnvironmentVariable;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.test.context.SpringBootTest;
 import org.springframework.test.context.ActiveProfiles;
@@ -12,6 +13,8 @@ import static org.assertj.core.api.Assertions.assertThat;
 
 @SpringBootTest(classes = {TradingViewSymbolClient.class, TradingViewLogoExtractor.class})
 @ActiveProfiles("test")
+// RUN_EXTERNAL_TESTS 값이 true일 때만 실행
+//@EnabledIfEnvironmentVariable(named = "RUN_EXTERNAL_TESTS", matches = "true")
 class TradingViewIntegrationTest {
 
     @Autowired
