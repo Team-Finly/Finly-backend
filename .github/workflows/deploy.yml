@@ -1,79 +1,47 @@
-name: Finly CI/CD (EC2 docker compose build)
+name: CD - Deploy to EC2 (Docker Compose)
 
 on:
+  # develop 브랜치에 push 될 때마다 자동 배포
   push:
-    branches: [ "develop" ]
-  pull_request:
-    branches: [ "develop" ]
+    branches: ["develop"]
+  workflow_dispatch:
+
+# 동시에 여러 배포가 겹치지 않게 제어
+concurrency:
+  group: deploy-ec2             # 같은 그룹의 이전 실행이 있으면
+  cancel-in-progress: true      # 새 실행 시 이전 것 취소
 
 jobs:
-  build:
-    name: CI - Build
-    runs-on: ubuntu-latest
-
-    steps:
-      - name: Checkout
-        uses: actions/checkout@v4
-
-      - name: Set up JDK 21
-        uses: actions/setup-java@v4
-        with:
-          distribution: temurin
-          java-version: "21"
-          cache: gradle
-
-      - name: Build JAR (skip tests)
-        run: |
-          chmod +x ./gradlew
-          ./gradlew clean build -x test
-
   deploy:
-    name: Deploy to EC2
-    needs: build
     runs-on: ubuntu-latest
 
-    # PR에서는 절대 실행 안 됨 -> push develop에서만 배포
-    if: github.event_name == 'push' && github.ref == 'refs/heads/develop'
-
-    # 배포만 중복 방지 -> 같은 브랜치에 연속 push 시 "이전 배포를 취소"하고 최신 배포만 수행
-    concurrency:
-      group: finly-deploy
-      cancel-in-progress: true
-
     steps:
-      # 배포에 필요한 파일만 EC2로 업로드 (전체 소스도 필요하므로 .git 제외하고 올림)
-      - name: Upload project to EC2 (exclude .git)
-        uses: appleboy/scp-action@v1.0.0
+      - name: Deploy via SSH
+        uses: appleboy/ssh-action@v1.0.0
         with:
           host: ${{ secrets.EC2_HOST }}
           username: ${{ secrets.EC2_USER }}
           key: ${{ secrets.EC2_SSH_KEY }}
-          source: ".,!**/.git/**,!**/.env,!**/build/**,!**/.gradle/**,!**/.idea/**"
-          target: ${{ secrets.EC2_PATH }}
-          overwrite: true
-
-      - name: SSH deploy (docker compose up --build)
-        uses: appleboy/ssh-action@v1.2.5
-        with:
-          host: ${{ secrets.EC2_HOST }}
-          username: ${{ secrets.EC2_USER }}
-          key: ${{ secrets.EC2_SSH_KEY }}
+          port: ${{ secrets.EC2_PORT }}
           script: |
             set -e
 
-            cd ${{ secrets.EC2_PATH }}
+            echo "===> Move to project dir"
+            cd ${{ secrets.DEPLOY_DIR }}
 
-            # .env 없으면 중단 
-            if [ ! -f .env ]; then
-              echo "❌ .env 파일이 없어 배포 중단"
-              exit 1
-            fi
+            echo "===> Git pull"
+            git fetch --all
+            git reset --hard origin/${{ secrets.DEPLOY_BRANCH }}
 
-            # docker compose 플러그인 기준
-            docker compose down --remove-orphans || true
+            echo "===> Build jar"
+            chmod +x ./gradlew
+            ./gradlew build -x test
 
-            # build 포함 재기동 
-            docker compose up -d --build backend
+            echo "===> Docker compose redeploy"
+            docker compose up -d --build
 
+            echo "===> Container Status"
             docker ps
-            docker logs --tail=80 finly-backend || true
+            
+            echo "===> Backend logs (tail)"
+            docker compose logs --tail=50 backend

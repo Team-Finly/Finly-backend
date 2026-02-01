@@ -1,0 +1,28 @@
+name: CI - Build
+
+on:
+  # PR이 develop 브랜치로 들어올 때 실행
+  pull_request:
+    branches: ["develop"]
+  # develop 브랜치에 직접 push할 때도 실행
+  push:
+    branches: ["develop"]
+
+jobs:
+  build:
+    runs-on: ubuntu-latest
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v4
+
+      - name: Set up JDK 21
+        uses: actions/setup-java@v4
+        with:
+          distribution: temurin
+          java-version: "21"
+          cache: gradle
+
+      - name: Build (skip tests)
+        run: |
+          chmod +x ./gradlew
+          ./gradlew clean build -x test
