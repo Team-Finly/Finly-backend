@@ -9,7 +9,6 @@ import com.umc.finly.domain.market.stock.infra.TradingViewSymbolClient;
 import com.umc.finly.domain.market.stock.repository.StockRepository;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
-import org.springframework.scheduling.annotation.Async;
 import org.springframework.stereotype.Service;
 import org.springframework.util.StopWatch;
 
@@ -25,7 +24,6 @@ public class StockLogoUpdateService {
     private final TradingViewSymbolClient tradingViewSymbolClient;
     private final TradingViewLogoExtractor tradingViewLogoExtractor;
 
-    @Async("logoUpdateExecutor")
     public void updateMissingLogos() {
         List<Stock> targets = stockRepository.findByLogoUrlIsNull();
         int total = targets.size();
@@ -49,8 +47,8 @@ public class StockLogoUpdateService {
         int partitionSize = 150;
         List<List<Stock>> partitions = Lists.partition(targets, partitionSize);
 
-        for (List<Stock> batch : partitions) {
-            log.debug("🧵 [Thread: {}] {}건의 배치 처리 시작", Thread.currentThread().getName(), batch.size());
+        partitions.parallelStream().forEach(batch -> {
+             log.debug("🧵 [Thread: {}] {}건의 배치 처리 시작", Thread.currentThread().getName(), batch.size());
 
             for (Stock stock : batch) {
                 // 작업 중단(Interrupt) 신호를 받으면 루프 종료
@@ -67,7 +65,7 @@ public class StockLogoUpdateService {
             } catch (Exception e) {
                 log.error("❗ DB 저장 중 오류 발생 (Thread: {}): {}", Thread.currentThread().getName(), e);
             }
-        }
+        });
 
         stopWatch.stop();
 
@@ -81,7 +79,7 @@ public class StockLogoUpdateService {
         log.info("📊 [StockLogoUpdate 작업]");
         log.info(">> 총 소요 시간: {}s", String.format("%.2f", totalSeconds));
         log.info(">> 초당 처리량(TPS): {}건/sec", String.format("%.2f", tps));
-        log.info(">> 병렬 처리 방식: @Async (Single Thread in Pool)");
+        log.info(">> 병렬 처리 방식: ParallelStream (Partition Size: {})", partitionSize);
     }
 
     private void updateSingleStock(Stock stock, AtomicInteger success, AtomicInteger notFound, AtomicInteger fail) {
