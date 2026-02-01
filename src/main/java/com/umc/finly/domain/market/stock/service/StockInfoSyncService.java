@@ -43,8 +43,8 @@ public class StockInfoSyncService {
             allInfos.addAll(kospiList);
             log.info("✅ KOSPI 다운로드 및 파싱 완료: {} 건", kospiCount);
         } catch (Exception e) {
-            log.error("❗ KOSPI 동기화 중 오류: {}", e.getMessage());
-            throw new StockInfoException(StockInfoErrorCode.STOCK_INFO_SYNC_FAILED, e.getMessage());
+            log.error("❗ KOSPI 동기화 중 오류", e);
+            throw new StockInfoException(StockInfoErrorCode.STOCK_INFO_SYNC_FAILED, e.getMessage(), e);
         }
 
         // 2. 코스닥 데이터 처리
@@ -54,8 +54,8 @@ public class StockInfoSyncService {
             allInfos.addAll(kosdaqList);
             log.info("✅ KOSDAQ 다운로드 및 파싱 완료: {} 건", kosdaqCount);
         } catch (Exception e) {
-            log.error("❗ KOSDAQ 동기화 중 오류: {}", e.getMessage());
-            throw new StockInfoException(StockInfoErrorCode.STOCK_INFO_SYNC_FAILED, e.getMessage());
+            log.error("❗ KOSDAQ 동기화 중 오류", e);
+            throw new StockInfoException(StockInfoErrorCode.STOCK_INFO_SYNC_FAILED, e.getMessage(), e);
         }
 
         // 3. 통합 처리 (Upsert & Deactivate)
