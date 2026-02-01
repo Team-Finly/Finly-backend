@@ -45,6 +45,11 @@ public class StockLogoUpdateServiceTest {
 
     @BeforeEach
     void setUp() {
+        stockRepository.findBySymbol("005930").ifPresent(s -> {
+            stockRepository.delete(s);
+            stockRepository.flush(); // 즉시 DB에서 삭제
+        });
+
         Stock samsung = Stock.builder()
                 .symbol("005930")
                 .name("삼성전자")
@@ -53,7 +58,7 @@ public class StockLogoUpdateServiceTest {
                 .isActive(true)
                 .logoUrl(null)
                 .build();
-        stockRepository.findBySymbol("005930").ifPresent(stockRepository::delete);
+
         stockRepository.save(samsung);
     }
 
