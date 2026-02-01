@@ -10,6 +10,7 @@ import java.net.URI;
 import java.net.http.HttpClient;
 import java.net.http.HttpRequest;
 import java.net.http.HttpResponse;
+import java.time.Duration;
 
 /**
  * TradingView 심볼 페이지 HTML을 가져오는 클라이언트.
@@ -19,7 +20,9 @@ import java.net.http.HttpResponse;
 @RequiredArgsConstructor
 public class TradingViewSymbolClient {
 
-    private final HttpClient httpClient = HttpClient.newHttpClient();
+    private final HttpClient httpClient = HttpClient.newBuilder()
+            .connectTimeout(Duration.ofSeconds(5))
+            .build();
 
     @Value("${tradingview.symbol-base-url}")
     private String symbolBaseUrl; // ex) https://kr.tradingview.com/symbols/
@@ -35,6 +38,7 @@ public class TradingViewSymbolClient {
         try {
             HttpRequest request = HttpRequest.newBuilder()
                     .uri(URI.create(url))
+                    .timeout(Duration.ofSeconds(10))
                     .header("User-Agent", "Mozilla/5.0") // 간단 UA 지정
                     .GET()
                     .build();
