@@ -42,14 +42,28 @@ public class TradingViewSymbolClient {
             HttpResponse<String> response =
                     httpClient.send(request, HttpResponse.BodyHandlers.ofString());
 
-            if (response.statusCode() != 200) {
+            int statusCode = response.statusCode();
+
+            if (statusCode == 404) {
+                // Case 1: 미등록 종목 (404)
+                throw new StockInfoException(
+                        StockInfoErrorCode.TRADINGVIEW_SYMBOL_NOT_FOUND,
+                        String.format("TradingView 미등록 종목 (Symbol: %s, URL: %s)", symbol, url)
+                );
+            }
+
+            if (statusCode != 200) {
+                // Case 2: 기타 에러
                 throw new StockInfoException(
                         StockInfoErrorCode.TRADINGVIEW_REQUEST_FAILED,
-                        String.format("TradingView HTML 호출 실패 (Status: %d, URL: %s)", response.statusCode(), url)
+                        String.format("TradingView HTML 호출 실패 (Status: %d, URL: %s)", statusCode, url)
                 );
             }
 
             return response.body();
+
+        } catch (StockInfoException e) {
+            throw e;
         } catch (Exception e) {
             throw new StockInfoException(
                     StockInfoErrorCode.TRADINGVIEW_REQUEST_FAILED,

@@ -5,37 +5,57 @@ import com.umc.finly.domain.market.stock.exception.StockInfoException;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.stereotype.Component;
 
-import java.util.regex.Matcher;
-import java.util.regex.Pattern;
+import org.jsoup.Jsoup;
+import org.jsoup.nodes.Document;
+import org.jsoup.nodes.Element;
+import org.jsoup.select.Elements;
 
 /**
  * TradingView 심볼 페이지 HTML에서 로고 svg 파일명을 찾고,
  * S3 로고 base URL과 합쳐 최종 로고 URL을 만든다.
  */
+
+
 @Component
 public class TradingViewLogoExtractor {
-
-    // 'logo-' 클래스가 포함된 태그 내의 src 속성값을 추출
-    // [^>]+ : 태그가 닫히기 전까지의 모든 문자
-    // src="([^"]+)" : src 안의 주소만 캡처
-    private static final Pattern LOGO_TAG_PATTERN =
-            Pattern.compile("class=\"[^\"]*logo-[^\"]*\"[^>]+src=\"(https://s3-symbol-logo\\.tradingview\\.com/[^\"]+)\"",
-                    Pattern.CASE_INSENSITIVE);
 
     @Value("${tradingview.s3-logo-base-url}")
     private String logoBaseUrl;
 
     public String extractLogoUrl(String html, String symbol) {
-        Matcher matcher = LOGO_TAG_PATTERN.matcher(html);
+        // 1. HTML 파싱
+        Document doc = Jsoup.parse(html);
 
-        while (matcher.find()) {
-            String fullUrl = matcher.group(1);
+        // 2. CSS 선택자로 이미지 태그 추출
+        // [class*=logo-] : 클래스명에 "logo-"가 포함된 모든 img 태그
+        Elements imgTags = doc.select("img[class*=logo-]");
 
-            // 시스템 아이콘(국가, 거래소 등)은 파일명에 'country/', 'source/'가 들어감
-            if (!fullUrl.contains("country/") && !fullUrl.contains("source/") && !fullUrl.contains("indices/")) {
-                return fullUrl; // 조건에 맞는 첫 번째 주소 반환
+        for (Element img : imgTags) {
+            String rawUrl = img.attr("src");
+
+            if (rawUrl.isEmpty()) continue;
+
+            // 3. URL 정규화 (절대 경로 처리)
+            String fullUrl = formatUrl(rawUrl);
+
+            // 4. 필터링 (시스템 아이콘 제외 및 베이스 URL 확인)
+            if (fullUrl.startsWith(logoBaseUrl) && !isSystemIcon(fullUrl)) {
+                return fullUrl;
             }
         }
+
         throw new StockInfoException(StockInfoErrorCode.TRADINGVIEW_LOGO_NOT_FOUND, symbol);
+    }
+
+    private String formatUrl(String rawUrl) {
+        if (rawUrl.startsWith("http")) return rawUrl;
+
+        String base = logoBaseUrl.endsWith("/") ? logoBaseUrl : logoBaseUrl + "/";
+        String path = rawUrl.startsWith("/") ? rawUrl.substring(1) : rawUrl;
+        return base + path;
+    }
+
+    private boolean isSystemIcon(String url) {
+        return url.contains("country/") || url.contains("source/") || url.contains("indices/");
     }
 }

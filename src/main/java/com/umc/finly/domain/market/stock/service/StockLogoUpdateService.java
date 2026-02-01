@@ -2,6 +2,7 @@ package com.umc.finly.domain.market.stock.service;
 
 import com.google.common.collect.Lists;
 import com.umc.finly.domain.market.stock.entity.Stock;
+import com.umc.finly.domain.market.stock.exception.StockInfoErrorCode;
 import com.umc.finly.domain.market.stock.exception.StockInfoException;
 import com.umc.finly.domain.market.stock.infra.TradingViewLogoExtractor;
 import com.umc.finly.domain.market.stock.infra.TradingViewSymbolClient;
@@ -100,15 +101,18 @@ public class StockLogoUpdateService {
         } catch (StockInfoException e) {
             notFound.incrementAndGet();
 
-            Throwable rootCause = e.getCause();
-            while (rootCause != null && rootCause.getCause() != null) {
-                rootCause = rootCause.getCause();
+            if (e.getErrorCode() == StockInfoErrorCode.TRADINGVIEW_SYMBOL_NOT_FOUND) {
+                // Case 1: TradingView에 해당 종목 페이지 자체가 없음 (미등록)
+                log.warn("❌ [{}] TradingView 미등록 종목", symbol);
+            } else if (e.getErrorCode() == StockInfoErrorCode.TRADINGVIEW_LOGO_NOT_FOUND) {
+                // Case 2: 페이지는 있으나 <img> 태그나 로고 주소가 없음
+                log.warn("⚠️ [{}] 종목은 존재하나 로고 이미지를 찾을 수 없음", symbol);
+            } else {
+                log.warn("❓ [{}] 기타 처리 오류: {}", symbol, e.getMessage());
             }
-
-            String detail = (rootCause != null) ? rootCause.getMessage() : e.getMessage();
-
-            log.warn("⚠️ [{}] 로고 업데이트 실패 | 원인: {}", symbol, detail);
-
+        } catch (InterruptedException e) {
+            Thread.currentThread().interrupt();
+            fail.incrementAndGet();
         } catch (Exception e) {
             fail.incrementAndGet();
             log.error("❗ [{}] 시스템 에러: {}", symbol, e.getMessage());
