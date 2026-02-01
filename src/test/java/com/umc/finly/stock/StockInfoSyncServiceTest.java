@@ -25,7 +25,7 @@ import static org.assertj.core.api.Assertions.assertThat;
 @ActiveProfiles("test")
 @Tag("integration")
 @Transactional
-@Rollback(false) // DB에 데이터 지우지 않고 남기기
+//@Rollback(false) // DB에 데이터 지우지 않고 남기기
 class StockInfoSyncServiceTest {
 
     @MockitoBean

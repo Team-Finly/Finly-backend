@@ -45,24 +45,20 @@ public class StockLogoUpdateServiceTest {
 
     @BeforeEach
     void setUp() {
-        // 테스트 시작 전, 로고가 없는 샘플 데이터를 저장합니다.
-        // 이미 DB에 데이터가 많다면 이 과정은 생략해도 되지만,
-        // 확실한 테스트를 위해 '삼성전자' 같은 종목 하나를 로고 없이 넣어봅니다.
-        if (stockRepository.findBySymbol("005930").isEmpty()) {
-            Stock samsung = Stock.builder()
-                    .symbol("005930")
-                    .name("삼성전자")
-                    .isin("KR7005930003")
-                    .marketType(MarketType.KOSPI)
-                    .isActive(true)
-                    .logoUrl(null) // 로고가 없는 상태
-                    .build();
-            stockRepository.save(samsung);
-        }
+        Stock samsung = Stock.builder()
+                .symbol("005930")
+                .name("삼성전자")
+                .isin("KR7005930003")
+                .marketType(MarketType.KOSPI)
+                .isActive(true)
+                .logoUrl(null)
+                .build();
+        stockRepository.findBySymbol("005930").ifPresent(stockRepository::delete);
+        stockRepository.save(samsung);
     }
 
     @Test
-    @Rollback(false)
+    //@Rollback(false)
     @DisplayName("로고 URL이 없는 종목들을 찾아 TradingView에서 로고를 업데이트한다")
     void updateMissingLogos_Success() {
         // given: 로고가 없는 종목 확인
