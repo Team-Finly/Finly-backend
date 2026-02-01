@@ -18,17 +18,15 @@ public enum ErrorCode implements BaseCode {
     REQUEST_TIMEOUT(HttpStatus.REQUEST_TIMEOUT, "COMMON408", "요청 시간이 초과되었습니다."),
     CONFLICT(HttpStatus.CONFLICT, "COMMON409", "서버 상태와 충돌하는 요청입니다."),
 
-    // RECORD 4xx (기록 도메인 오류) ⭐ 여기 추가
-    RECORD_DUPLICATE_SUBMISSION(
-            HttpStatus.CONFLICT,
-            "RECORD4001",
-            "이미 제출된 기록입니다."
-    ),
-    RECORD_INVALID_REQUEST(
-            HttpStatus.BAD_REQUEST,
-            "RECORD4002",
-            "기록 요청 값이 올바르지 않습니다."
-    ),
+    // AUTH 4xx
+    EMAIL_ALREADY_EXISTS(HttpStatus.CONFLICT, "AUTH409", "이미 가입된 이메일입니다."),
+
+    // RECORD 4xx
+    RECORD_INVALID_REQUEST(HttpStatus.BAD_REQUEST, "RECORD400", "필수값 또는 형식 오류입니다."),
+    RECORD_DUPLICATE_SUBMISSION(HttpStatus.CONFLICT, "RECORD409", "중복 제출된 요청입니다."),
+
+    // MARKET 4xx
+    MARKET_STOCK_NOT_FOUND(HttpStatus.NOT_FOUND, "MARKET404", "종목을 찾을 수 없습니다."),
 
     // COMMON 5xx (서버 오류)
     INTERNAL_SERVER_ERROR(HttpStatus.INTERNAL_SERVER_ERROR, "COMMON500", "서버 내부 오류가 발생했습니다."),
