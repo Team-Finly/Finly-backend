@@ -38,6 +38,7 @@ public class SecurityConfig {
                         .requestMatchers(signupMatcher).permitAll()
 
                         // PROTECTED
+                        .requestMatchers("/api/mypage/**").authenticated()
                         .requestMatchers(retestMatcher).authenticated()
 
                         // 나머지
