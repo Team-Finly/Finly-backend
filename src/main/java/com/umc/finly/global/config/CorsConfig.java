@@ -1,10 +1,10 @@
-package com.umc.finly.global.config.security;
+package com.umc.finly.global.config;
 
-import com.umc.finly.global.config.AppCorsProperties;
 import org.springframework.boot.context.properties.EnableConfigurationProperties;
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
 import org.springframework.web.cors.CorsConfiguration;
+import org.springframework.web.cors.CorsConfigurationSource;
 import org.springframework.web.cors.UrlBasedCorsConfigurationSource;
 import org.springframework.web.servlet.config.annotation.WebMvcConfigurer;
 
@@ -15,11 +15,16 @@ import java.util.List;
 public class CorsConfig implements WebMvcConfigurer {
 
     @Bean
-    public UrlBasedCorsConfigurationSource corsConfigurationSource(AppCorsProperties props) {
+    public CorsConfigurationSource corsConfigurationSource(AppCorsProperties props) {
         CorsConfiguration config = new CorsConfiguration();
 
         // 허용 Origin (yml에서 관리)
-        config.setAllowedOrigins(props.originList());
+        List<String> origins = props.originList();
+        if (origins.contains("*")) {
+            config.setAllowedOriginPatterns(List.of("*"));
+        } else {
+            config.setAllowedOrigins(origins);
+        }
 
         // 허용 HTTP Method
         config.setAllowedMethods(List.of("GET", "POST", "PUT", "PATCH", "DELETE", "OPTIONS"));
