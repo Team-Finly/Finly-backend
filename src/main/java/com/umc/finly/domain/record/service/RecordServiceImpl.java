@@ -83,7 +83,7 @@ public class RecordServiceImpl implements RecordService {
         RecordFeedback feedback = feedbackService.requestFeedbackAsync(memberId, savedEntry);
 
         // 7. 응답 DTO 반환
-        return RecordCreateRes.from(savedEntry, feedback);
+        return RecordCreateRes.from(savedEntry, stock, feedback);
     }
 
     @Override
@@ -97,8 +97,12 @@ public class RecordServiceImpl implements RecordService {
             throw new CustomException(ErrorCode.RECORD_FORBIDDEN);
         }
 
-        // 3. 응답 DTO 반환
-        return RecordDetailRes.from(entry);
+        // 3. Stock 조회
+        Stock stock = stockRepository.findById(entry.getStockId())
+                .orElseThrow(() -> new CustomException(ErrorCode.MARKET_STOCK_NOT_FOUND));
+
+        // 4. 응답 DTO 반환
+        return RecordDetailRes.from(entry, stock);
     }
 
     @Override
@@ -114,11 +118,12 @@ public class RecordServiceImpl implements RecordService {
         }
 
         // 3. 부분 업데이트 (null이 아닌 필드만 수정)
+        Stock stock = null;
         if (request.getRecordDate() != null) {
             entry.setRecordDate(request.getRecordDate());
         }
         if (request.getSymbol() != null) {
-            Stock stock = stockRepository.findBySymbol(request.getSymbol())
+            stock = stockRepository.findBySymbol(request.getSymbol())
                     .orElseThrow(() -> new CustomException(ErrorCode.MARKET_STOCK_NOT_FOUND));
             entry.setStockId(stock.getId());
         }
@@ -148,7 +153,13 @@ public class RecordServiceImpl implements RecordService {
             }
         }
 
-        // 5. 응답 DTO 반환
-        return RecordUpdateRes.from(entry);
+        // 5. symbol이 변경되지 않은 경우 기존 Stock 조회
+        if (stock == null) {
+            stock = stockRepository.findById(entry.getStockId())
+                    .orElseThrow(() -> new CustomException(ErrorCode.MARKET_STOCK_NOT_FOUND));
+        }
+
+        // 6. 응답 DTO 반환
+        return RecordUpdateRes.from(entry, stock);
     }
 }

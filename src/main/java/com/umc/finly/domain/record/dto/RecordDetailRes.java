@@ -1,5 +1,6 @@
 package com.umc.finly.domain.record.dto;
 
+import com.umc.finly.domain.market.stock.entity.Stock;
 import com.umc.finly.domain.record.entity.RecordEntry;
 import com.umc.finly.domain.record.enums.EmotionCode;
 import com.umc.finly.domain.record.enums.Session;
@@ -20,21 +21,21 @@ public class RecordDetailRes {
     private LocalDateTime recordedAt;
     private Session session;
     private TradeAction tradeAction;
-    private Long stockId;
+    private String symbol;
     private BigDecimal unitPrice;
     private BigDecimal quantity;
     private EmotionCode emotionCode;
     private Integer emotionIntensity;
     private String memo;
 
-    public static RecordDetailRes from(RecordEntry entry) {
+    public static RecordDetailRes from(RecordEntry entry, Stock stock) {
         return RecordDetailRes.builder()
                 .recordId(entry.getId())
                 .recordDate(entry.getRecordDate())
                 .recordedAt(entry.getCreatedAt())
                 .session(entry.getSession())
                 .tradeAction(entry.getTradeAction())
-                .stockId(entry.getStockId())
+                .symbol(stock.getSymbol())
                 .unitPrice(entry.getUnitPrice())
                 .quantity(entry.getQuantity())
                 .emotionCode(entry.getEmotionCode())
