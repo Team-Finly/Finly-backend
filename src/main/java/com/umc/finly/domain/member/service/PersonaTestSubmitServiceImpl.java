@@ -8,7 +8,6 @@ import com.umc.finly.domain.member.entity.mapping.MembersPersonasResult;
 import com.umc.finly.domain.member.exception.MemberErrorCode;
 import com.umc.finly.domain.member.repository.MemberPersonaResultRepository;
 import com.umc.finly.global.apiPayload.exception.CustomException;
-import com.umc.finly.global.util.SecurityUtil;
 import lombok.RequiredArgsConstructor;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
@@ -45,13 +44,14 @@ public class PersonaTestSubmitServiceImpl implements PersonaTestSubmitService{
                             .map(existing -> existing.updatePersona(persona))
                             .orElseGet(() -> MembersPersonasResult.create(memberId, persona));
 
-            memberPersonaResultRepository.save(result);
+            MembersPersonasResult saved =
+                    memberPersonaResultRepository.saveAndFlush(result);
 
             return buildResponse(
                     persona,
                     true,
-                    result.getCreatedAt(),
-                    result.getUpdatedAt()
+                    saved.getCreatedAt(),
+                    saved.getUpdatedAt()
             );
         }
 
@@ -64,15 +64,9 @@ public class PersonaTestSubmitServiceImpl implements PersonaTestSubmitService{
             LocalDateTime createdAt,
             LocalDateTime updatedAt
     ) {
+
         return PersonaTestSubmitRes.builder()
-                .persona(
-                        PersonaTestSubmitRes.PersonaRes.builder()
-                                .id(persona.getId())
-                                .title(persona.getTitle())
-                                .description(persona.getDescription())
-                                .iconUrl(persona.getIconUrl())
-                                .build()
-                )
+                .personaType(persona.getPersonaType().toUiType())
                 .saved(saved)
                 .createdAt(createdAt)
                 .updatedAt(updatedAt)
