@@ -12,6 +12,8 @@ import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
+import org.springframework.transaction.support.TransactionSynchronization;
+import org.springframework.transaction.support.TransactionSynchronizationManager;
 
 @Slf4j
 @Service
@@ -33,8 +35,15 @@ public class RecordFeedbackServiceImpl implements RecordFeedbackService {
 
         RecordFeedback savedFeedback = feedbackRepository.save(feedback);
 
-        // 별도 Bean에서 호출하여 @Async가 정상 작동하도록 함
-        asyncExecutor.generateFeedbackAsync(savedFeedback.getId(), memberId, recordEntry.getId());
+        // 트랜잭션 커밋 후 비동기 작업 시작 (커밋 전에는 다른 트랜잭션에서 데이터 조회 불가)
+        Long feedbackId = savedFeedback.getId();
+        Long recordEntryId = recordEntry.getId();
+        TransactionSynchronizationManager.registerSynchronization(new TransactionSynchronization() {
+            @Override
+            public void afterCommit() {
+                asyncExecutor.generateFeedbackAsync(feedbackId, memberId, recordEntryId);
+            }
+        });
 
         return savedFeedback;
     }
@@ -80,7 +89,14 @@ public class RecordFeedbackServiceImpl implements RecordFeedbackService {
             feedback = feedbackRepository.save(feedback);
         }
 
-        asyncExecutor.generateFeedbackAsync(feedback.getId(), memberId, recordEntryId);
+        // 트랜잭션 커밋 후 비동기 작업 시작
+        Long feedbackId = feedback.getId();
+        TransactionSynchronizationManager.registerSynchronization(new TransactionSynchronization() {
+            @Override
+            public void afterCommit() {
+                asyncExecutor.generateFeedbackAsync(feedbackId, memberId, recordEntryId);
+            }
+        });
 
         return RecordFeedbackRes.from(feedback);
     }
