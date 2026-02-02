@@ -2,6 +2,7 @@ package com.umc.finly.domain.analysis.infra.config;
 
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
+import org.springframework.context.annotation.Primary;
 import org.springframework.http.client.JdkClientHttpRequestFactory;
 import org.springframework.web.client.RestClient;
 
@@ -15,6 +16,7 @@ import java.time.Duration;
 @Configuration
 public class NaverStockRestClientConfig {
     @Bean
+    @Primary
     public RestClient naverStockRestClient() {
         HttpClient httpClient = HttpClient.newBuilder()
                 .connectTimeout(Duration.ofSeconds(5)) // 연결 타임아웃

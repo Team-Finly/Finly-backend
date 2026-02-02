@@ -30,6 +30,14 @@ public enum ErrorCode implements BaseCode {
     // MARKET 4xx
     MARKET_STOCK_NOT_FOUND(HttpStatus.NOT_FOUND, "MARKET404", "종목을 찾을 수 없습니다."),
 
+    // FEEDBACK 4xx
+    FEEDBACK_NOT_FOUND(HttpStatus.NOT_FOUND, "FEEDBACK404", "피드백을 찾을 수 없습니다."),
+    FEEDBACK_GENERATION_IN_PROGRESS(HttpStatus.CONFLICT, "FEEDBACK409", "피드백이 생성 중입니다."),
+
+    // FEEDBACK 5xx
+    FEEDBACK_GENERATION_FAILED(HttpStatus.INTERNAL_SERVER_ERROR, "FEEDBACK500", "피드백 생성에 실패했습니다."),
+    OPENAI_API_FAILED(HttpStatus.BAD_GATEWAY, "FEEDBACK502", "OpenAI API 호출에 실패했습니다."),
+
     // COMMON 5xx (서버 오류)
     INTERNAL_SERVER_ERROR(HttpStatus.INTERNAL_SERVER_ERROR, "COMMON500", "서버 내부 오류가 발생했습니다."),
     BAD_GATEWAY(HttpStatus.BAD_GATEWAY, "COMMON502", "잘못된 게이트웨이 오류가 발생했습니다."),

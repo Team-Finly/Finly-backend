@@ -6,6 +6,7 @@ import com.umc.finly.domain.record.dto.RecordDetailRes;
 import com.umc.finly.domain.record.dto.RecordUpdateReq;
 import com.umc.finly.domain.record.dto.RecordUpdateRes;
 import com.umc.finly.domain.record.entity.RecordEntry;
+import com.umc.finly.domain.record.entity.RecordFeedback;
 import com.umc.finly.domain.record.enums.Session;
 import com.umc.finly.domain.record.enums.TradeAction;
 import com.umc.finly.domain.record.repository.RecordEntryRepository;
@@ -24,6 +25,7 @@ import java.time.LocalTime;
 public class RecordServiceImpl implements RecordService {
 
     private final RecordEntryRepository recordEntryRepository;
+    private final RecordFeedbackService feedbackService;
 
     @Override
     @Transactional
@@ -65,8 +67,11 @@ public class RecordServiceImpl implements RecordService {
             throw new CustomException(ErrorCode.RECORD_DUPLICATE_SUBMISSION);
         }
 
-        // 5. 응답 DTO 반환
-        return RecordCreateRes.from(savedEntry);
+        // 5. AI 피드백 비동기 생성 요청
+        RecordFeedback feedback = feedbackService.requestFeedbackAsync(memberId, savedEntry);
+
+        // 6. 응답 DTO 반환
+        return RecordCreateRes.from(savedEntry, feedback);
     }
 
     @Override

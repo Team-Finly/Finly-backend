@@ -3,8 +3,10 @@ package com.umc.finly.domain.record.controller;
 import com.umc.finly.domain.record.dto.RecordCreateReq;
 import com.umc.finly.domain.record.dto.RecordCreateRes;
 import com.umc.finly.domain.record.dto.RecordDetailRes;
+import com.umc.finly.domain.record.dto.RecordFeedbackRes;
 import com.umc.finly.domain.record.dto.RecordUpdateReq;
 import com.umc.finly.domain.record.dto.RecordUpdateRes;
+import com.umc.finly.domain.record.service.RecordFeedbackService;
 import com.umc.finly.domain.record.service.RecordService;
 import com.umc.finly.global.apiPayload.response.ApiResponse;
 import com.umc.finly.global.apiPayload.response.SuccessCode;
@@ -20,6 +22,7 @@ import org.springframework.web.bind.annotation.*;
 public class RecordController {
 
     private final RecordService recordService;
+    private final RecordFeedbackService feedbackService;
 
     @PostMapping
     public ApiResponse<RecordCreateRes> createRecord(
@@ -46,6 +49,24 @@ public class RecordController {
             @Valid @RequestBody RecordUpdateReq request
     ) {
         RecordUpdateRes result = recordService.updateRecord(principal.getMemberId(), recordId, request);
+        return ApiResponse.onSuccess(result, SuccessCode.OK);
+    }
+
+    @GetMapping("/{recordId}/feedback")
+    public ApiResponse<RecordFeedbackRes> getFeedback(
+            @AuthenticationPrincipal AuthPrincipal principal,
+            @PathVariable Long recordId
+    ) {
+        RecordFeedbackRes result = feedbackService.getFeedback(principal.getMemberId(), recordId);
+        return ApiResponse.onSuccess(result, SuccessCode.OK);
+    }
+
+    @PostMapping("/{recordId}/feedback/regenerate")
+    public ApiResponse<RecordFeedbackRes> regenerateFeedback(
+            @AuthenticationPrincipal AuthPrincipal principal,
+            @PathVariable Long recordId
+    ) {
+        RecordFeedbackRes result = feedbackService.regenerateFeedback(principal.getMemberId(), recordId);
         return ApiResponse.onSuccess(result, SuccessCode.OK);
     }
 }
