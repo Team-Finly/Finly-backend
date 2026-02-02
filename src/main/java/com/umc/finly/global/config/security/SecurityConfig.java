@@ -4,6 +4,7 @@ import com.umc.finly.global.infra.jwt.JwtProvider;
 import lombok.RequiredArgsConstructor;
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
+import org.springframework.http.HttpMethod;
 import org.springframework.security.config.annotation.web.builders.HttpSecurity;
 import org.springframework.security.crypto.bcrypt.BCryptPasswordEncoder;
 import org.springframework.security.crypto.password.PasswordEncoder;
@@ -29,10 +30,13 @@ public class SecurityConfig {
                         "retest".equals(request.getParameter("mode"));
 
         http
+                .cors(cors -> {})
                 .csrf(csrf -> csrf.disable())
                 .formLogin(form -> form.disable())
                 .httpBasic(basic -> basic.disable())
                 .authorizeHttpRequests(auth -> auth
+                        .requestMatchers(HttpMethod.OPTIONS, "/**").permitAll()
+
                         // PUBLIC
                         .requestMatchers("/auth/**", "/api/persona-test/questions").permitAll()
                         .requestMatchers(signupMatcher).permitAll()
