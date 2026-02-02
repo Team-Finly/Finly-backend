@@ -28,3 +28,7 @@ kis:
 tradingview:
   symbol-base-url: ${TRADINGVIEW_SYMBOL_URL}
   s3-logo-base-url: ${TRADINGVIEW_S3_LOGO_URL}
+
+app:
+  cors:
+    allowed-origins: ${APP_CORS_ALLOWED_ORIGINS}
