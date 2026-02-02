@@ -1,0 +1,30 @@
+spring:
+  config:
+    import: "optional:file:.env.test[.properties]"
+
+  datasource:
+    url: ${TEST_DB_URL}
+    username: root
+    password:
+    driver-class-name: com.mysql.cj.jdbc.Driver
+  jpa:
+    hibernate:
+      ddl-auto: update
+    show-sql: true
+    properties:
+      hibernate:
+        format_sql: true
+    database: mysql
+
+kis:
+  info:
+    kospi-url: ${KIS_KOSPI_URL}
+    kosdaq-url: ${KIS_KOSDAQ_URL}
+
+tradingview:
+  symbol-base-url: ${TRADINGVIEW_SYMBOL_URL}
+  s3-logo-base-url: ${TRADINGVIEW_S3_LOGO_URL}
+
+logging:
+  level:
+    com.umc.finly.domain.market.stock: DEBUG

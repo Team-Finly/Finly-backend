@@ -34,7 +34,7 @@ public class SecurityConfig {
                 .httpBasic(basic -> basic.disable())
                 .authorizeHttpRequests(auth -> auth
                         // PUBLIC
-                        .requestMatchers("/api/persona-test/questions", "/api/auth/check-email","/api/auth/signup", "/api/auth/login").permitAll()
+                        .requestMatchers("/auth/**", "/api/persona-test/questions").permitAll()
                         .requestMatchers(signupMatcher).permitAll()
 
                         // PROTECTED
