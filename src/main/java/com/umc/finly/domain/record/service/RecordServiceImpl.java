@@ -1,5 +1,7 @@
 package com.umc.finly.domain.record.service;
 
+import com.umc.finly.domain.market.stock.entity.Stock;
+import com.umc.finly.domain.market.stock.repository.StockRepository;
 import com.umc.finly.domain.record.dto.RecordCreateReq;
 import com.umc.finly.domain.record.dto.RecordCreateRes;
 import com.umc.finly.domain.record.dto.RecordDetailRes;
@@ -17,6 +19,7 @@ import org.springframework.dao.DataIntegrityViolationException;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
+import java.math.BigDecimal;
 import java.time.LocalTime;
 
 @Service
@@ -26,6 +29,7 @@ public class RecordServiceImpl implements RecordService {
 
     private final RecordEntryRepository recordEntryRepository;
     private final RecordFeedbackService feedbackService;
+    private final StockRepository stockRepository;
 
     @Override
     @Transactional
@@ -35,22 +39,30 @@ public class RecordServiceImpl implements RecordService {
             throw new CustomException(ErrorCode.RECORD_DUPLICATE_SUBMISSION);
         }
 
-        // 2. tradeAction이 BUY/SELL이면 unitPrice, quantity 필수 검증
+        // 2. tradeAction이 BUY/SELL이면 unitPrice, quantity 필수 및 0보다 커야 함
         if (request.getTradeAction() == TradeAction.BUY || request.getTradeAction() == TradeAction.SELL) {
             if (request.getUnitPrice() == null || request.getQuantity() == null) {
                 throw new CustomException(ErrorCode.RECORD_INVALID_REQUEST);
             }
+            if (request.getUnitPrice().compareTo(BigDecimal.ZERO) <= 0
+                    || request.getQuantity().compareTo(BigDecimal.ZERO) <= 0) {
+                throw new CustomException(ErrorCode.RECORD_INVALID_REQUEST);
+            }
         }
 
-        // 3. Session 자동 계산 (현재 시간 기반)
+        // 3. symbol로 Stock 조회
+        Stock stock = stockRepository.findBySymbol(request.getSymbol())
+                .orElseThrow(() -> new CustomException(ErrorCode.MARKET_STOCK_NOT_FOUND));
+
+        // 4. Session 자동 계산 (현재 시간 기반)
         Session session = Session.fromTime(LocalTime.now());
 
-        // 4. RecordEntry 엔티티 생성 및 저장
+        // 5. RecordEntry 엔티티 생성 및 저장
         RecordEntry entry = RecordEntry.builder()
                 .memberId(memberId)
                 .clientRequestId(request.getClientRequestId())
                 .recordDate(request.getRecordDate())
-                .stockId(request.getStockId())
+                .stockId(stock.getId())
                 .tradeAction(request.getTradeAction())
                 .unitPrice(request.getUnitPrice())
                 .quantity(request.getQuantity())
@@ -67,10 +79,10 @@ public class RecordServiceImpl implements RecordService {
             throw new CustomException(ErrorCode.RECORD_DUPLICATE_SUBMISSION);
         }
 
-        // 5. AI 피드백 비동기 생성 요청
+        // 6. AI 피드백 비동기 생성 요청
         RecordFeedback feedback = feedbackService.requestFeedbackAsync(memberId, savedEntry);
 
-        // 6. 응답 DTO 반환
+        // 7. 응답 DTO 반환
         return RecordCreateRes.from(savedEntry, feedback);
     }
 
@@ -105,8 +117,10 @@ public class RecordServiceImpl implements RecordService {
         if (request.getRecordDate() != null) {
             entry.setRecordDate(request.getRecordDate());
         }
-        if (request.getStockId() != null) {
-            entry.setStockId(request.getStockId());
+        if (request.getSymbol() != null) {
+            Stock stock = stockRepository.findBySymbol(request.getSymbol())
+                    .orElseThrow(() -> new CustomException(ErrorCode.MARKET_STOCK_NOT_FOUND));
+            entry.setStockId(stock.getId());
         }
         if (request.getTradeAction() != null) {
             entry.setTradeAction(request.getTradeAction());

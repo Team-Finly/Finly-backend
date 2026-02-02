@@ -19,16 +19,16 @@ public class RecordCreateReq {
     @NotNull(message = "recordDate는 필수입니다.")
     private LocalDate recordDate;
 
-    @NotNull(message = "stockId는 필수입니다.")
-    private Long stockId;
+    @NotBlank(message = "symbol은 필수입니다.")
+    private String symbol;
 
     @NotNull(message = "tradeAction은 필수입니다.")
     private TradeAction tradeAction;
 
-    @DecimalMin(value = "0.0", inclusive = false, message = "unitPrice는 0보다 커야 합니다.")
+    @DecimalMin(value = "0.0", inclusive = true, message = "unitPrice는 0 이상이어야 합니다.")
     private BigDecimal unitPrice;
 
-    @DecimalMin(value = "0.0", inclusive = false, message = "quantity는 0보다 커야 합니다.")
+    @DecimalMin(value = "0.0", inclusive = true, message = "quantity는 0 이상이어야 합니다.")
     private BigDecimal quantity;
 
     @NotNull(message = "emotionCode는 필수입니다.")

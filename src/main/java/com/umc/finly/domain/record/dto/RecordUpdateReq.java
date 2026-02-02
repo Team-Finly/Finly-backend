@@ -15,7 +15,7 @@ public class RecordUpdateReq {
 
     private LocalDate recordDate;
 
-    private Long stockId;
+    private String symbol;
 
     private TradeAction tradeAction;
 
