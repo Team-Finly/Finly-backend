@@ -16,7 +16,7 @@ import lombok.*;
         uniqueConstraints = {
                 @UniqueConstraint(
                         name = "uk_member_persona",
-                        columnNames = {"mem_id"}
+                        columnNames = {"member_id"}
                 )
         }
 )
@@ -26,7 +26,7 @@ public class MembersPersonasResult extends BaseEntity {
     @GeneratedValue(strategy = GenerationType.IDENTITY)
     private Long id;
 
-    @Column(name = "mem_id", nullable = false)
+    @Column(name = "member_id", nullable = false)
     private Long memberId;
 
     @ManyToOne(fetch = FetchType.LAZY)

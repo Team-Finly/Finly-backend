@@ -19,6 +19,13 @@ public enum AuthErrorCode implements BaseCode {
     // 401
     INVALID_LOGIN_PASSWORD(HttpStatus.UNAUTHORIZED, "AUTH401", "이메일 또는 비밀번호가 올바르지 않습니다."),
 
+    UNATHORIZED(HttpStatus.UNAUTHORIZED, "AUTH401_1", "인증이 필요합니다. "),
+    TOKEN_EXPIRED(HttpStatus.UNAUTHORIZED, "AUTH401_2", "토큰이 만료되었습니다."),
+    INVALID_TOKEN(HttpStatus.UNAUTHORIZED, "AUTH401_3", "유효하지 않은 토큰입니다."),
+
+    //403
+    FORBIDDEN(HttpStatus.FORBIDDEN, "AUTH403", "접근 권한이 없습니다."),
+
     // 422
     REQUIRED_TERM_NOT_AGREED(HttpStatus.UNPROCESSABLE_ENTITY, "AUTH422", "필수 약관에 동의해야 합니다.");
 
