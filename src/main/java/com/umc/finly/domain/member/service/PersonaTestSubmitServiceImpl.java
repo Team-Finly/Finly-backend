@@ -36,7 +36,7 @@ public class PersonaTestSubmitServiceImpl implements PersonaTestSubmitService{
         if ("retest".equals(mode)) {
             // 로그인 후 재테스트
             if (memberId == null){
-                throw new CustomException(AuthErrorCode.UNATHORIZED);
+                throw new CustomException(AuthErrorCode.UNAUTHORIZED);
             }
 
             MembersPersonasResult result =

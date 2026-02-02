@@ -52,7 +52,7 @@ public class PersonasTestController {
         Long memberId = null;
         if("retest".equals(mode)){
             if (authPrincipal==null){
-                throw new CustomException(AuthErrorCode.UNATHORIZED);
+                throw new CustomException(AuthErrorCode.UNAUTHORIZED);
             }
             memberId = authPrincipal.getMemberId();
         }
