@@ -16,4 +16,14 @@ public enum PersonaType {
     public String getDisplayName() {
         return displayName;
     }
+
+    // 프론트 UI 용 타입 변환
+    public PersonaUiType toUiType(){
+        return switch (this){
+            case WORRIED_DEER -> PersonaUiType.DEER;
+            case CAUTIOUS_TURTLE -> PersonaUiType.TURTLE;
+            case SHARP_EAGLE -> PersonaUiType.EAGLE;
+            case FIERY_LION -> PersonaUiType.LION;
+        };
+    }
 }
