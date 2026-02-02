@@ -1,5 +1,6 @@
 package com.umc.finly.domain.member.service;
 
+import com.umc.finly.domain.auth.exception.AuthErrorCode;
 import com.umc.finly.domain.member.dto.request.PersonaTestSubmitReq;
 import com.umc.finly.domain.member.dto.response.PersonaTestSubmitRes;
 import com.umc.finly.domain.member.entity.Persona;
@@ -22,7 +23,7 @@ public class PersonaTestSubmitServiceImpl implements PersonaTestSubmitService{
     private final MemberPersonaResultRepository memberPersonaResultRepository;
 
     @Override
-    public PersonaTestSubmitRes submit(String mode, PersonaTestSubmitReq request){
+    public PersonaTestSubmitRes submit(String mode, Long memberId, PersonaTestSubmitReq request){
 
         // 공용 채점/검증 로직 재사용
         Persona persona = personaScoringService.resolvePersona(request.getAnswers());
@@ -34,8 +35,10 @@ public class PersonaTestSubmitServiceImpl implements PersonaTestSubmitService{
         }
 
         if ("retest".equals(mode)) {
-            // 로그인 후 재테스트: JWT필요
-            Long memberId = SecurityUtil.getCurrentMemberId();
+            // 로그인 후 재테스트
+            if (memberId == null){
+                throw new CustomException(AuthErrorCode.UNATHORIZED);
+            }
 
             MembersPersonasResult result =
                     memberPersonaResultRepository.findByMemberId(memberId)
