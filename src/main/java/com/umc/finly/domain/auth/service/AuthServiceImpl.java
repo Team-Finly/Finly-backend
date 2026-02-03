@@ -13,7 +13,6 @@ import com.umc.finly.domain.member.dto.request.PersonaAnswerReq;
 import com.umc.finly.domain.member.entity.Member;
 import com.umc.finly.domain.member.entity.Persona;
 import com.umc.finly.domain.member.entity.mapping.MembersPersonasResult;
-import com.umc.finly.domain.member.exception.MemberErrorCode;
 import com.umc.finly.domain.member.repository.MemberPersonaResultRepository;
 import com.umc.finly.domain.member.repository.MemberRepository;
 import com.umc.finly.domain.member.repository.MemberTermRepository;
@@ -150,6 +149,61 @@ public class AuthServiceImpl implements AuthService {
         );
 
         return new LoginTokens(result, refreshToken, refreshMaxAgeSeconds);
+    }
+
+    /** 토큰 재발급 **/
+    @Override
+    public ReissueTokens reissue(String refreshToken){
+
+        if (refreshToken == null || refreshToken.isBlank()){
+            throw new CustomException(AuthErrorCode.REFRESH_TOKEN_MISSING);
+        }
+
+        // 1) refresh 토큰 1차 검증 : 서명/만료
+        if (!jwtProvider.validateRefreshToken(refreshToken)){
+            throw new CustomException(AuthErrorCode.INVALID_REFRESH_TOKEN);
+        }
+
+        // 2) type = refresh 확인
+        String type = jwtProvider.getType(refreshToken);
+        if (!"refresh".equals(type)) {
+            throw new CustomException(AuthErrorCode.INVALID_REFRESH_TOKEN);
+        }
+
+        // 3) memberId/email 추출
+        Long memberId = jwtProvider.getMemberId(refreshToken);
+        String email = jwtProvider.getEmail(refreshToken);
+
+        Member member = memberRepository.findById(memberId)
+                .orElseThrow(() -> new CustomException(AuthErrorCode.INVALID_REFRESH_TOKEN));
+
+        // 4) DB 검증
+        if (member.getRefreshToken() == null || !member.getRefreshToken().equals(refreshToken)) {
+            throw new CustomException(AuthErrorCode.REFRESH_TOKEN_MISMATCH);
+        }
+
+        LocalDateTime expiredAt = member.getRefreshTokenExpiredAt();
+        if (expiredAt == null || expiredAt.isBefore(LocalDateTime.now()) || expiredAt.isEqual(LocalDateTime.now())) {
+            throw new CustomException(AuthErrorCode.REFRESH_TOKEN_EXPIRED);
+        }
+
+        // 5) 새 accessToken 발급
+        String newAccessToken = jwtProvider.createAccessToken(memberId, email);
+
+        String newRefreshToken = jwtProvider.createRefreshToken(memberId, email);
+        LocalDateTime newRefreshExpiredAt = LocalDateTime.ofInstant(
+                jwtProvider.getExpiration(newRefreshToken).toInstant(),
+                ZoneId.systemDefault()
+        );
+        member.updateRefreshToken(newRefreshToken, newRefreshExpiredAt);
+        memberRepository.save(member);
+
+        long refreshMaxAgeSeconds = Math.max(
+                0,
+                (jwtProvider.getExpiration(newRefreshToken).getTime() - System.currentTimeMillis()) / 1000
+        );
+
+        return new ReissueTokens(newAccessToken, newRefreshToken, refreshMaxAgeSeconds);
     }
 
     // -----------------------------------------------------------

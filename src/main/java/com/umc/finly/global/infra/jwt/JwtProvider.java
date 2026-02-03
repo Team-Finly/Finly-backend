@@ -46,6 +46,8 @@ public class JwtProvider {
     public String getEmail(String token) {
         return parseClaims(token).get("email", String.class);
     }
+    public String getType(String token) { return parseClaims(token).get("type", String.class);
+    }
     public String getTokenType(String token) {
         return parseClaims(token).get("type", String.class);
     }
