@@ -1,4 +1,4 @@
-package com.umc.finly.domain.market.stock.dto;
+package com.umc.finly.domain.market.stock.info.dto;
 
 import com.umc.finly.domain.market.stock.entity.Stock;
 import com.umc.finly.domain.market.stock.enums.MarketType;

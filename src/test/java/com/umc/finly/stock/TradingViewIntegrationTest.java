@@ -1,10 +1,9 @@
 package com.umc.finly.stock;
 
-import com.umc.finly.domain.market.stock.infra.TradingViewLogoExtractor;
-import com.umc.finly.domain.market.stock.infra.TradingViewSymbolClient;
+import com.umc.finly.domain.market.stock.info.infra.TradingViewLogoExtractor;
+import com.umc.finly.domain.market.stock.info.infra.TradingViewSymbolClient;
 import org.junit.jupiter.api.DisplayName;
 import org.junit.jupiter.api.Test;
-import org.junit.jupiter.api.condition.EnabledIfEnvironmentVariable;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.test.context.SpringBootTest;
 import org.springframework.test.context.ActiveProfiles;

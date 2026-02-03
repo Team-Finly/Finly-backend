@@ -1,12 +1,12 @@
-package com.umc.finly.domain.market.stock.service;
+package com.umc.finly.domain.market.stock.info.service;
 
 import com.google.common.collect.Lists;
-import com.umc.finly.domain.market.stock.dto.StockAdminResponse;
+import com.umc.finly.domain.market.stock.info.dto.StockAdminResponse;
 import com.umc.finly.domain.market.stock.entity.Stock;
-import com.umc.finly.domain.market.stock.exception.StockInfoErrorCode;
-import com.umc.finly.domain.market.stock.exception.StockInfoException;
-import com.umc.finly.domain.market.stock.infra.TradingViewLogoExtractor;
-import com.umc.finly.domain.market.stock.infra.TradingViewSymbolClient;
+import com.umc.finly.domain.market.stock.info.exception.StockInfoErrorCode;
+import com.umc.finly.domain.market.stock.info.exception.StockInfoException;
+import com.umc.finly.domain.market.stock.info.infra.TradingViewLogoExtractor;
+import com.umc.finly.domain.market.stock.info.infra.TradingViewSymbolClient;
 import com.umc.finly.domain.market.stock.repository.StockRepository;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;

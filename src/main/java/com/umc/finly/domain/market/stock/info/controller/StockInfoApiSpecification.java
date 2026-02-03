@@ -1,7 +1,7 @@
-package com.umc.finly.domain.market.stock.controller;
+package com.umc.finly.domain.market.stock.info.controller;
 
-import com.umc.finly.domain.market.stock.dto.StockAdminResponse;
-import com.umc.finly.domain.market.stock.dto.StockInfoResponse;
+import com.umc.finly.domain.market.stock.info.dto.StockAdminResponse;
+import com.umc.finly.domain.market.stock.info.dto.StockInfoResponse;
 import com.umc.finly.global.apiPayload.response.ApiResponse;
 import io.swagger.v3.oas.annotations.Operation;
 import io.swagger.v3.oas.annotations.responses.ApiResponses;
