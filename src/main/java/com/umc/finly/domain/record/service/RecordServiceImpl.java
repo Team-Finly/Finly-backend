@@ -2,11 +2,13 @@ package com.umc.finly.domain.record.service;
 
 import com.umc.finly.domain.market.stock.entity.Stock;
 import com.umc.finly.domain.market.stock.repository.StockRepository;
+import com.umc.finly.domain.record.dto.DailyReportRes;
 import com.umc.finly.domain.record.dto.RecordCreateReq;
 import com.umc.finly.domain.record.dto.RecordCreateRes;
 import com.umc.finly.domain.record.dto.RecordDetailRes;
 import com.umc.finly.domain.record.dto.RecordUpdateReq;
 import com.umc.finly.domain.record.dto.RecordUpdateRes;
+import com.umc.finly.domain.record.infra.OpenAiFeedbackClient;
 import com.umc.finly.domain.record.entity.RecordEntry;
 import com.umc.finly.domain.record.entity.RecordFeedback;
 import com.umc.finly.domain.record.enums.Session;
@@ -17,6 +19,7 @@ import com.umc.finly.global.apiPayload.response.ErrorCode;
 import lombok.RequiredArgsConstructor;
 import org.springframework.dao.DataIntegrityViolationException;
 import org.springframework.stereotype.Service;
+import org.springframework.transaction.annotation.Propagation;
 import org.springframework.transaction.annotation.Transactional;
 
 import java.math.BigDecimal;
@@ -30,6 +33,7 @@ public class RecordServiceImpl implements RecordService {
     private final RecordEntryRepository recordEntryRepository;
     private final RecordFeedbackService feedbackService;
     private final StockRepository stockRepository;
+    private final OpenAiFeedbackClient openAiFeedbackClient;
 
     @Override
     @Transactional
@@ -165,5 +169,37 @@ public class RecordServiceImpl implements RecordService {
 
         // 6. 응답 DTO 반환
         return RecordUpdateRes.from(entry, stock);
+    }
+
+    @Override
+    @Transactional(propagation = Propagation.NOT_SUPPORTED)
+    public DailyReportRes getDailyReport(Long memberId, Long recordId) {
+        // 1. 기록 조회
+        RecordEntry entry = recordEntryRepository.findById(recordId)
+                .orElseThrow(() -> new CustomException(ErrorCode.RECORD_NOT_FOUND));
+
+        // 2. 본인 기록인지 확인
+        if (!entry.getMemberId().equals(memberId)) {
+            throw new CustomException(ErrorCode.RECORD_FORBIDDEN);
+        }
+
+        // 3. Stock 조회
+        Stock stock = stockRepository.findById(entry.getStockId())
+                .orElseThrow(() -> new CustomException(ErrorCode.MARKET_STOCK_NOT_FOUND));
+
+        // 4. memo 요약 (빈 값이면 OpenAI 호출 스킵)
+        String content = "";
+        if (entry.getMemo() != null && !entry.getMemo().isBlank()) {
+            String systemPrompt = "당신은 투자 기록 메모를 간결하게 요약하는 도우미입니다. 주어진 메모를 한 줄로 요약해 주세요.";
+            try {
+                OpenAiFeedbackClient.FeedbackResponse response =
+                        openAiFeedbackClient.generateFeedback(systemPrompt, entry.getMemo());
+                content = response.content();
+            } catch (Exception e) {
+                content = entry.getMemo();
+            }
+        }
+
+        return DailyReportRes.from(entry, stock, content);
     }
 }
