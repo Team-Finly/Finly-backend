@@ -3,6 +3,7 @@ package com.umc.finly.domain.auth.controller;
 import com.umc.finly.domain.auth.dto.req.AuthLoginReq;
 import com.umc.finly.domain.auth.dto.req.AuthSignUpReq;
 import com.umc.finly.domain.auth.dto.res.AuthLoginRes;
+import com.umc.finly.domain.auth.dto.res.AuthReissueRes;
 import com.umc.finly.domain.auth.dto.res.AuthSignUpRes;
 import com.umc.finly.domain.auth.dto.res.CheckEmailRes;
 import com.umc.finly.domain.auth.exception.AuthErrorCode;
@@ -72,5 +73,20 @@ public class AuthController {
         );
 
         return ApiResponse.onSuccess(tokens.body(), SuccessCode.OK);
+    }
+
+    // 토큰 재발급
+    @PostMapping("/reissue")
+    public ApiResponse<AuthReissueRes> reissue(
+            @CookieValue(value = "refreshToken", required = false) String refreshToken,
+            HttpServletResponse response
+    ){
+        AuthService.ReissueTokens tokens = authService.reissue(refreshToken);
+        cookieUtil.addRefreshTokenCookie(response, tokens.refreshToken(), tokens.refreshMaxAgeSeconds());
+
+        return ApiResponse.onSuccess(
+                AuthReissueRes.of(tokens.accessToken()),
+                SuccessCode.OK
+        );
     }
 }
