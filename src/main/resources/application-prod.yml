@@ -12,8 +12,8 @@ spring:
 
   data:
     redis:
-      host: finly-redis
-      port: 6379
+      host: ${REDIS_HOST}
+      port: ${REDIS_PORT}
 
 app:
   cors:
