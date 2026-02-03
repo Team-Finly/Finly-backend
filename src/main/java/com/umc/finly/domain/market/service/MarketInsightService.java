@@ -5,6 +5,7 @@ import com.umc.finly.domain.market.repository.MarketInsightRepository;
 import com.umc.finly.domain.market.repository.projection.StockEmotionBuyAggregation;
 import lombok.RequiredArgsConstructor;
 import org.springframework.stereotype.Service;
+import com.umc.finly.domain.record.enums.EmotionCode;
 
 import java.time.LocalDate;
 import java.util.*;
@@ -24,12 +25,12 @@ public class MarketInsightService {
         List<StockEmotionBuyAggregation> rows =
                 marketInsightRepository.aggregateBuyEmotionByStock(fromDate);
 
-        if (rows.isEmpty()) {//사용자 데이터가 비어있을 때
+        if (rows.isEmpty()) {//사용자 데이터가 비어있을 때 (초기 상태)
             return MarketInsightResponse.builder()
                     .message("아직 충분한 사용자 데이터가 없어요")
-                    .dominantEmotion("NEUTRAL")
-                    .buySellRatio("BALANCED")
-                    .confidenceLevel("LOW")
+                    .dominantEmotion("EMPTY")
+                    .buySellRatio("EMPTY")
+                    .confidenceLevel("EMPTY")
                     .build();
         }
 
@@ -48,7 +49,7 @@ public class MarketInsightService {
                                 )
                         ));
 
-        // 캐러셀용 랜덤 1개 선택
+        // 캐러셀용 랜덤 1개 선택하는 로직
         List<StockEmotionBuyAggregation> candidates =
                 new ArrayList<>(dominantByStock.values());
 
@@ -56,29 +57,36 @@ public class MarketInsightService {
                 candidates.get(new Random().nextInt(candidates.size()));
 
         String stockName = picked.getStockName();
-        String emotion   = picked.getEmotionCode(); // enum name
+        EmotionCode emotion = EmotionCode.valueOf(picked.getEmotionCode());// 감정 enum 받아오기
 
         String message = generateMessage(stockName, emotion);
 
         return MarketInsightResponse.builder()
+                .stockName(stockName)
                 .message(message)
-                .dominantEmotion(emotion)
+                .dominantEmotion(emotion.name())
                 .buySellRatio("BUY_DOMINANT")
                 .confidenceLevel(calcConfidence(candidates.size()))
                 .build();
     }
 
     //문장 생성하기 (사용자가 구매한 종목명 표시하기  )
-    private String generateMessage(String stockName, String emotion) {
+    private String generateMessage(String stockName, EmotionCode emotion) {
         return switch (emotion) {
-            case "FEAR" ->
-                    "지금 서비스 유저들은 불안할 때 " + stockName + "을(를) 매수했어요";
-            case "EXPECTATION" ->
-                    "기대감이 높을 때 " + stockName + "을(를) 산 유저가 많아요";
-            case "GREED" ->
-                    "강한 확신 속에서 " + stockName + " 매수가 이뤄졌어요";
-            default ->
-                    "차분한 심리에서 " + stockName + " 매수가 이뤄졌어요";
+            case ANXIETY ->
+                    "지금 " + stockName + " 주주들은 불안해하고 있어요";
+
+            case REGRET ->
+                    "지금 " + stockName + " 주주들은 후회하는 감정을 느끼고 있어요";
+
+            case GREED ->
+                    "지금 " + stockName + " 주주들은 욕심이 커진 상태예요";
+
+            case CONFIDENCE ->
+                    "지금 " + stockName + " 주주들은 확신을 가지고 있어요";
+
+            case CALM ->
+                    "지금 " + stockName + " 주주들은 차분한 상태를 유지하고 있어요";
         };
     }
 
