@@ -16,7 +16,6 @@ import jakarta.validation.Valid;
 import jakarta.validation.constraints.Email;
 import jakarta.validation.constraints.NotBlank;
 import lombok.RequiredArgsConstructor;
-import org.springframework.beans.factory.annotation.Value;
 import org.springframework.validation.annotation.Validated;
 import org.springframework.web.bind.annotation.*;
 
@@ -30,10 +29,6 @@ public class AuthController {
     private final AuthService authService;
 
     private final CookieUtil cookieUtil;
-
-    // 로컬이라 false로 값 부여. 운영 단계에서 true로 키면 됨
-    @Value("${app.cookie.secure:false}")
-    private boolean cookieSecure;
 
     // 이메일 중복 확인
     @GetMapping("/check-email")
@@ -73,8 +68,7 @@ public class AuthController {
         cookieUtil.addRefreshTokenCookie(
                 response,
                 tokens.refreshToken(),
-                tokens.refreshMaxAgeSeconds(),
-                cookieSecure
+                tokens.refreshMaxAgeSeconds()
         );
 
         return ApiResponse.onSuccess(tokens.body(), SuccessCode.OK);

@@ -19,8 +19,6 @@ import org.springframework.security.web.authentication.UsernamePasswordAuthentic
 import org.springframework.security.web.util.matcher.RequestMatcher;
 import org.springframework.http.MediaType;
 
-import java.awt.*;
-
 @Configuration
 @RequiredArgsConstructor
 public class SecurityConfig {
@@ -53,13 +51,13 @@ public class SecurityConfig {
         ObjectMapper objectMapper = new ObjectMapper();
 
         AuthenticationEntryPoint entryPoint = (request, response, authException) -> {
-            response.setStatus(AuthErrorCode.UNATHORIZED.getHttpStatus().value());
+            response.setStatus(AuthErrorCode.UNAUTHORIZED.getHttpStatus().value());
             response.setContentType(MediaType.APPLICATION_JSON_VALUE);
             response.setCharacterEncoding("UTF-8");
 
             ApiResponse<Object> body = ApiResponse.onFailure(
-                    AuthErrorCode.UNATHORIZED,
-                    AuthErrorCode.UNATHORIZED.getMessage()
+                    AuthErrorCode.UNAUTHORIZED,
+                    AuthErrorCode.UNAUTHORIZED.getMessage()
             );
 
             objectMapper.writeValue(response.getWriter(), body);

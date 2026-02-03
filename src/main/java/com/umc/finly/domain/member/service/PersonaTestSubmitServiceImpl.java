@@ -1,5 +1,6 @@
 package com.umc.finly.domain.member.service;
 
+import com.umc.finly.domain.auth.exception.AuthErrorCode;
 import com.umc.finly.domain.member.dto.request.PersonaTestSubmitReq;
 import com.umc.finly.domain.member.dto.response.PersonaTestSubmitRes;
 import com.umc.finly.domain.member.entity.Persona;
@@ -7,7 +8,6 @@ import com.umc.finly.domain.member.entity.mapping.MembersPersonasResult;
 import com.umc.finly.domain.member.exception.MemberErrorCode;
 import com.umc.finly.domain.member.repository.MemberPersonaResultRepository;
 import com.umc.finly.global.apiPayload.exception.CustomException;
-import com.umc.finly.global.util.SecurityUtil;
 import lombok.RequiredArgsConstructor;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
@@ -22,7 +22,7 @@ public class PersonaTestSubmitServiceImpl implements PersonaTestSubmitService{
     private final MemberPersonaResultRepository memberPersonaResultRepository;
 
     @Override
-    public PersonaTestSubmitRes submit(String mode, PersonaTestSubmitReq request){
+    public PersonaTestSubmitRes submit(String mode, Long memberId, PersonaTestSubmitReq request){
 
         // 공용 채점/검증 로직 재사용
         Persona persona = personaScoringService.resolvePersona(request.getAnswers());
@@ -34,21 +34,24 @@ public class PersonaTestSubmitServiceImpl implements PersonaTestSubmitService{
         }
 
         if ("retest".equals(mode)) {
-            // 로그인 후 재테스트: JWT필요
-            Long memberId = SecurityUtil.getCurrentMemberId();
+            // 로그인 후 재테스트
+            if (memberId == null){
+                throw new CustomException(AuthErrorCode.UNAUTHORIZED);
+            }
 
             MembersPersonasResult result =
                     memberPersonaResultRepository.findByMemberId(memberId)
                             .map(existing -> existing.updatePersona(persona))
                             .orElseGet(() -> MembersPersonasResult.create(memberId, persona));
 
-            memberPersonaResultRepository.save(result);
+            MembersPersonasResult saved =
+                    memberPersonaResultRepository.saveAndFlush(result);
 
             return buildResponse(
                     persona,
                     true,
-                    result.getCreatedAt(),
-                    result.getUpdatedAt()
+                    saved.getCreatedAt(),
+                    saved.getUpdatedAt()
             );
         }
 
@@ -61,15 +64,9 @@ public class PersonaTestSubmitServiceImpl implements PersonaTestSubmitService{
             LocalDateTime createdAt,
             LocalDateTime updatedAt
     ) {
+
         return PersonaTestSubmitRes.builder()
-                .persona(
-                        PersonaTestSubmitRes.PersonaRes.builder()
-                                .id(persona.getId())
-                                .title(persona.getTitle())
-                                .description(persona.getDescription())
-                                .iconUrl(persona.getIconUrl())
-                                .build()
-                )
+                .personaType(persona.getPersonaType().toUiType())
                 .saved(saved)
                 .createdAt(createdAt)
                 .updatedAt(updatedAt)

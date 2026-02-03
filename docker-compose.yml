@@ -19,6 +19,16 @@ services:
       interval: 10s
       retries: 10
 
+  redis: # 레디스 설정
+    image: redis:7
+    container_name: finly-redis
+    restart: always
+    ports:
+      - "6379:6379"
+    volumes:
+      - redis-data:/data
+    command: redis-server --appendonly yes
+
   backend:
     build: .
     image: finly-backend
@@ -38,9 +48,13 @@ services:
       KIS_KOSDAQ_URL: ${KIS_KOSDAQ_URL}
       TRADINGVIEW_SYMBOL_URL: ${TRADINGVIEW_SYMBOL_URL}
       TRADINGVIEW_S3_LOGO_URL: ${TRADINGVIEW_S3_LOGO_URL}
+      APP_CORS_ALLOWED_ORIGINS: ${APP_CORS_ALLOWED_ORIGINS}
+      REDIS_HOST: finly-redis
+      REDIS_PORT: 6379
     ports:
       - "8080:8080"
     restart: always
 
 volumes:
   mysql-data:
+  redis-data:
