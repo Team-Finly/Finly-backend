@@ -17,7 +17,7 @@ public interface StockRepository extends JpaRepository<Stock, Long> {
     List<Stock> findByLogoUrlIsNull();
     // 종목명에 검색어 포함한 종목 조회
     Page<Stock> findByNameContaining(String keyword, Pageable pageable);
-    // 종목명에 검색어 포함한 종목 조회(앞에 포함 -> 중간에 포함 -> 끝에 포함 순으로 정렬)
+    // 종목명에 검색어 포함한 종목 조회(앞에 포함 -> 끝에 포함 -> 중간에 포함 순으로 정렬)
     @Query("""
         select s
         from Stock s
