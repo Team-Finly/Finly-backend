@@ -14,11 +14,8 @@ import org.springframework.web.bind.annotation.RestController;
 @RequestMapping("/api/analysis")
 public class AssociationAnalysisController {
 
-
     @GetMapping("/record/stocks") //사용자 종목 기록 조회 API
     public ApiResponse<StockRecordRes> getRecordStocks() {
-
-
 
         return ApiResponse.onSuccess(result, SuccessCode.OK);
 
