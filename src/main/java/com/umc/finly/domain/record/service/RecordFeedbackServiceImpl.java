@@ -10,6 +10,7 @@ import com.umc.finly.global.apiPayload.exception.CustomException;
 import com.umc.finly.global.apiPayload.response.ErrorCode;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
+import org.springframework.dao.DataIntegrityViolationException;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 import org.springframework.transaction.support.TransactionSynchronization;
@@ -68,18 +69,22 @@ public class RecordFeedbackServiceImpl implements RecordFeedbackService {
             throw new CustomException(ErrorCode.RECORD_FORBIDDEN);
         }
 
-        // 2. 피드백 조회 또는 새로 생성
-        RecordFeedback feedback = feedbackRepository.findByRecordEntryId(recordEntryId)
+        // 2. 피드백 조회 (행 잠금으로 동시 재생성 요청 경쟁 조건 방지)
+        RecordFeedback feedback = feedbackRepository.findByRecordEntryIdForUpdate(recordEntryId)
                 .orElse(null);
 
         if (feedback == null) {
-            // 피드백이 없으면 새로 생성
-            feedback = RecordFeedback.builder()
-                    .recordEntryId(recordEntryId)
-                    .memberId(memberId)
-                    .status(FeedbackStatus.PENDING)
-                    .build();
-            feedback = feedbackRepository.save(feedback);
+            // 피드백이 없으면 새로 생성 (유니크 제약으로 동시 중복 생성 방지)
+            try {
+                feedback = RecordFeedback.builder()
+                        .recordEntryId(recordEntryId)
+                        .memberId(memberId)
+                        .status(FeedbackStatus.PENDING)
+                        .build();
+                feedback = feedbackRepository.save(feedback);
+            } catch (DataIntegrityViolationException e) {
+                throw new CustomException(ErrorCode.FEEDBACK_GENERATION_IN_PROGRESS);
+            }
         } else {
             // 피드백이 대기 중이거나 생성 중이면 에러
             if (feedback.getStatus() == FeedbackStatus.PENDING
