@@ -57,6 +57,11 @@ public class MyPageController {
             @AuthenticationPrincipal AuthPrincipal principal,
             @RequestBody @Valid UpdateNicknameReq request
             ){
+
+        if (principal == null){
+            throw new CustomException(AuthErrorCode.UNAUTHORIZED);
+        }
+
         return ApiResponse.onSuccess(
                 myPageService.updateMyNickname(
                         principal.getMemberId(),
