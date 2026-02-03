@@ -38,4 +38,7 @@ app:
   cors:
     allowed-origins: ${APP_CORS_ALLOWED_ORIGINS}
   cookie:
-    secure: false
+    cookie:
+      secure: false
+      same-site: Lax
+      path: /auth

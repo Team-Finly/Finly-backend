@@ -20,3 +20,5 @@ app:
     allowed-origins: ${APP_CORS_ALLOWED_ORIGINS}
   cookie:
     secure: true
+    same-site: Lax   # 프론트/백 분리면 None
+    path: /auth
