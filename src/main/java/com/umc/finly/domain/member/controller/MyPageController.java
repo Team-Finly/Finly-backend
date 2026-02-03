@@ -1,6 +1,7 @@
 package com.umc.finly.domain.member.controller;
 
 import com.umc.finly.domain.auth.exception.AuthErrorCode;
+import com.umc.finly.domain.member.dto.response.MyPageMeRes;
 import com.umc.finly.domain.member.dto.response.MyPagePersonaRes;
 import com.umc.finly.domain.member.service.MyPageService;
 import com.umc.finly.global.apiPayload.exception.CustomException;
@@ -20,6 +21,7 @@ public class MyPageController {
 
     private final MyPageService myPageService;
 
+    // 내 페르소나 조회
     @GetMapping("/persona")
     public ApiResponse<MyPagePersonaRes> getMyPersona(
             @AuthenticationPrincipal AuthPrincipal principal
@@ -29,6 +31,17 @@ public class MyPageController {
         }
         return ApiResponse.onSuccess(
                 myPageService.getMyPersona(principal.getMemberId()),
+                SuccessCode.OK
+        );
+    }
+
+    // 내 프로필 조회
+    @GetMapping("/me")
+    public ApiResponse<MyPageMeRes> getMyInfo(
+            @AuthenticationPrincipal AuthPrincipal principal
+    ){
+        return ApiResponse.onSuccess(
+                myPageService.getMyInfo(principal.getMemberId()),
                 SuccessCode.OK
         );
     }
