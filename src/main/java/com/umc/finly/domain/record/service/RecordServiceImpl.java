@@ -189,9 +189,13 @@ public class RecordServiceImpl implements RecordService {
         String content = "";
         if (entry.getMemo() != null && !entry.getMemo().isBlank()) {
             String systemPrompt = "당신은 투자 기록 메모를 간결하게 요약하는 도우미입니다. 주어진 메모를 한 줄로 요약해 주세요.";
-            OpenAiFeedbackClient.FeedbackResponse response =
-                    openAiFeedbackClient.generateFeedback(systemPrompt, entry.getMemo());
-            content = response.content();
+            try {
+                OpenAiFeedbackClient.FeedbackResponse response =
+                        openAiFeedbackClient.generateFeedback(systemPrompt, entry.getMemo());
+                content = response.content();
+            } catch (Exception e) {
+                content = entry.getMemo();
+            }
         }
 
         return DailyReportRes.from(entry, stock, content);
