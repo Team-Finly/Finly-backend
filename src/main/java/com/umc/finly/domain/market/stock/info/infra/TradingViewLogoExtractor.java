@@ -1,7 +1,7 @@
-package com.umc.finly.domain.market.stock.infra;
+package com.umc.finly.domain.market.stock.info.infra;
 
-import com.umc.finly.domain.market.stock.exception.StockInfoErrorCode;
-import com.umc.finly.domain.market.stock.exception.StockInfoException;
+import com.umc.finly.domain.market.stock.info.exception.StockInfoErrorCode;
+import com.umc.finly.domain.market.stock.info.exception.StockInfoException;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.stereotype.Component;
 

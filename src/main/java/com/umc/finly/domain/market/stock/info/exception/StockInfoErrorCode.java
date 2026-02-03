@@ -1,4 +1,4 @@
-package com.umc.finly.domain.market.stock.exception;
+package com.umc.finly.domain.market.stock.info.exception;
 
 import com.umc.finly.global.apiPayload.response.BaseCode;
 import lombok.AllArgsConstructor;

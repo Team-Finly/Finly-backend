@@ -1,6 +1,6 @@
 package com.umc.finly.stock;
 
-import com.umc.finly.domain.market.stock.infra.TradingViewLogoExtractor;
+import com.umc.finly.domain.market.stock.info.infra.TradingViewLogoExtractor;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.DisplayName;
 import org.junit.jupiter.api.Test;

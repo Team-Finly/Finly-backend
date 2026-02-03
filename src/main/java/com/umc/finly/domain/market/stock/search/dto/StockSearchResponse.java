@@ -1,6 +1,5 @@
-package com.umc.finly.domain.market.stock.dto;
+package com.umc.finly.domain.market.stock.search.dto;
 
-import com.umc.finly.domain.market.stock.entity.Stock;
 import lombok.AllArgsConstructor;
 import lombok.Builder;
 import lombok.Getter;
