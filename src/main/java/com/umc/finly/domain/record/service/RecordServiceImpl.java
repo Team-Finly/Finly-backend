@@ -8,6 +8,7 @@ import com.umc.finly.domain.record.dto.RecordCreateRes;
 import com.umc.finly.domain.record.dto.RecordDetailRes;
 import com.umc.finly.domain.record.dto.RecordUpdateReq;
 import com.umc.finly.domain.record.dto.RecordUpdateRes;
+import com.umc.finly.domain.record.dto.TodayRecordRes;
 import com.umc.finly.domain.record.infra.OpenAiFeedbackClient;
 import com.umc.finly.domain.record.entity.RecordEntry;
 import com.umc.finly.domain.record.entity.RecordFeedback;
@@ -23,7 +24,13 @@ import org.springframework.transaction.annotation.Propagation;
 import org.springframework.transaction.annotation.Transactional;
 
 import java.math.BigDecimal;
+import java.time.LocalDate;
+import java.time.LocalDateTime;
 import java.time.LocalTime;
+import java.util.List;
+import java.util.Map;
+import java.util.function.Function;
+import java.util.stream.Collectors;
 
 @Service
 @RequiredArgsConstructor
@@ -201,5 +208,44 @@ public class RecordServiceImpl implements RecordService {
         }
 
         return DailyReportRes.from(entry, stock, content);
+    }
+
+    @Override
+    public TodayRecordRes getTodayRecords(Long memberId, LocalDate date) {
+        // 1. 해당 날짜의 기록 조회 (createdAt 오름차순)
+        List<RecordEntry> entries = recordEntryRepository
+                .findByMemberIdAndRecordDateOrderByCreatedAtAsc(memberId, date);
+
+        // 2. PrismFeedback 타이틀 생성
+        String title = TodayRecordRes.generatePrismTitle(entries);
+        TodayRecordRes.PrismFeedback prismFeedback = TodayRecordRes.PrismFeedback.builder()
+                .title(title)
+                .generatedAt(LocalDateTime.now())
+                .build();
+
+        // 3. 기록에 포함된 stockId 일괄 조회
+        List<Long> stockIds = entries.stream()
+                .map(RecordEntry::getStockId)
+                .distinct()
+                .toList();
+        Map<Long, Stock> stockMap = stockRepository.findAllById(stockIds).stream()
+                .collect(Collectors.toMap(Stock::getId, Function.identity()));
+
+        // 4. TimelineEntry 변환
+        List<TodayRecordRes.TimelineEntry> timelineSummary = entries.stream()
+                .map(entry -> {
+                    Stock stock = stockMap.get(entry.getStockId());
+                    String symbol = stock != null ? stock.getSymbol() : "";
+                    return TodayRecordRes.TimelineEntry.from(entry, symbol);
+                })
+                .toList();
+
+        return TodayRecordRes.builder()
+                .date(date)
+                .prismFeedback(prismFeedback)
+                .timelineSummary(timelineSummary)
+                .hasRecords(!entries.isEmpty())
+                .recordCount(entries.size())
+                .build();
     }
 }
