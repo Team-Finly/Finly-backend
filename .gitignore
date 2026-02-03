@@ -22,6 +22,7 @@ bin/
 *.iws
 *.iml
 *.ipr
+nul
 out/
 !**/src/main/**/out/
 !**/src/test/**/out/
@@ -45,6 +46,8 @@ out/
 
 ### 초기 DB SQL ###
 /src/main/resources/db/*.sql
+.claude/
 
 ### /test/resources KIS .mst 파일 ###
 *.mst
+

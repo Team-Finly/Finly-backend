@@ -9,6 +9,7 @@ import lombok.extern.slf4j.Slf4j;
 import org.springframework.http.HttpHeaders;
 import org.springframework.http.HttpStatusCode;
 import org.springframework.http.ResponseEntity;
+import org.springframework.http.converter.HttpMessageNotReadableException;
 import org.springframework.web.bind.MethodArgumentNotValidException;
 import org.springframework.web.bind.annotation.ExceptionHandler;
 import org.springframework.web.bind.annotation.RestController;
@@ -42,6 +43,22 @@ public class ExceptionAdvice extends ResponseEntityExceptionHandler {
                 request);
     }
 
+    // JSON 파싱 실패 (요청 본문 읽기 실패)
+    @Override
+    protected ResponseEntity<Object> handleHttpMessageNotReadable(HttpMessageNotReadableException e,
+                                                                  HttpHeaders headers,
+                                                                  HttpStatusCode status,
+                                                                  WebRequest request) {
+        log.error("HttpMessageNotReadableException 발생", e);
+        ApiResponse<Object> body = ApiResponse.onFailure(
+                ErrorCode.INVALID_REQUEST,
+                "요청 본문을 읽을 수 없습니다. JSON 형식을 확인해주세요."
+        );
+        return handleExceptionInternal(e, body, headers,
+                ErrorCode.INVALID_REQUEST.getHttpStatus(),
+                request);
+    }
+
     // @Valid @RequestBody DTO 검증 실패
     @Override
     protected ResponseEntity<Object> handleMethodArgumentNotValid(MethodArgumentNotValidException e,
@@ -68,7 +85,8 @@ public class ExceptionAdvice extends ResponseEntityExceptionHandler {
     @ExceptionHandler(Exception.class)
     public ResponseEntity<Object> handleUnknownException(Exception e, WebRequest request) {
         log.error("Unhandled exception", e); // printStackTrace() 지양
-        ApiResponse<Object> body = ApiResponse.onFailure(ErrorCode.INTERNAL_SERVER_ERROR, null); // 내부 메시지 노출 X
+        // TODO: 배포 전 null로 변경 필요 (현재는 디버깅용)
+        ApiResponse<Object> body = ApiResponse.onFailure(ErrorCode.INTERNAL_SERVER_ERROR, e.getMessage());
         return handleExceptionInternal(e, body, new HttpHeaders(),
                 ErrorCode.INTERNAL_SERVER_ERROR.getHttpStatus(), request);
     }
