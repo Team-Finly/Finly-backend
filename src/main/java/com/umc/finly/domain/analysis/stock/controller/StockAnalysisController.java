@@ -1,7 +1,7 @@
-package com.umc.finly.domain.analysis.controller;
+package com.umc.finly.domain.analysis.stock.controller;
 
-import com.umc.finly.domain.analysis.dto.response.StockSummaryRes;
-import com.umc.finly.domain.analysis.service.StockAnalysisService;
+import com.umc.finly.domain.analysis.stock.dto.response.StockSummaryRes;
+import com.umc.finly.domain.analysis.stock.service.StockAnalysisService;
 import com.umc.finly.global.apiPayload.response.ApiResponse;
 import com.umc.finly.global.apiPayload.response.SuccessCode;
 import lombok.RequiredArgsConstructor;

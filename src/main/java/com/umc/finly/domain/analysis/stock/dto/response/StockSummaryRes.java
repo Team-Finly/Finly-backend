@@ -1,4 +1,4 @@
-package com.umc.finly.domain.analysis.dto.response;
+package com.umc.finly.domain.analysis.stock.dto.response;
 
 import lombok.Builder;
 import lombok.Getter;

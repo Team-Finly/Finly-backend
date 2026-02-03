@@ -1,6 +1,6 @@
-package com.umc.finly.domain.analysis.service;
+package com.umc.finly.domain.analysis.stock.service;
 
-import com.umc.finly.domain.analysis.dto.response.StockSummaryRes;
+import com.umc.finly.domain.analysis.stock.dto.response.StockSummaryRes;
 import lombok.RequiredArgsConstructor;
 import org.springframework.stereotype.Service;
 

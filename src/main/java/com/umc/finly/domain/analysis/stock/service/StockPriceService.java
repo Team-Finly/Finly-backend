@@ -1,6 +1,6 @@
-package com.umc.finly.domain.analysis.service;
+package com.umc.finly.domain.analysis.stock.service;
 
-import com.umc.finly.domain.analysis.infra.StockPriceProvider;
+import com.umc.finly.domain.analysis.stock.infra.StockPriceProvider;
 import lombok.RequiredArgsConstructor;
 import org.springframework.cache.annotation.Cacheable;
 import org.springframework.stereotype.Service;
