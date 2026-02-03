@@ -1,22 +1,26 @@
 package com.umc.finly.global.util;
 
+import com.umc.finly.global.config.CookieProperties;
 import jakarta.servlet.http.HttpServletResponse;
+import lombok.RequiredArgsConstructor;
 import org.springframework.http.ResponseCookie;
 import org.springframework.stereotype.Component;
 
 @Component
+@RequiredArgsConstructor
 public class CookieUtil {
 
-    // 운영 환경에서 Secure=true 권장 (HTTPS)
+    private final CookieProperties cookieProperties;
+
     public void addRefreshTokenCookie(HttpServletResponse response,
                                       String refreshToken,
-                                      long maxAgeSeconds,
-                                      boolean secure){
+                                      long maxAgeSeconds) {
+
         ResponseCookie cookie = ResponseCookie.from("refreshToken", refreshToken)
                 .httpOnly(true)
-                .secure(secure)
-                .path("/auth")
-                .sameSite("Lax")
+                .secure(cookieProperties.isSecure())
+                .path(cookieProperties.getPath())
+                .sameSite(cookieProperties.getSameSite())
                 .maxAge(maxAgeSeconds)
                 .build();
 
