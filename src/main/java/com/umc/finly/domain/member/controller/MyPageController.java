@@ -40,6 +40,10 @@ public class MyPageController {
     public ApiResponse<MyPageMeRes> getMyInfo(
             @AuthenticationPrincipal AuthPrincipal principal
     ){
+        if (principal == null){
+            throw new CustomException(AuthErrorCode.UNAUTHORIZED);
+        }
+
         return ApiResponse.onSuccess(
                 myPageService.getMyInfo(principal.getMemberId()),
                 SuccessCode.OK
