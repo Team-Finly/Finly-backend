@@ -7,6 +7,7 @@ import com.umc.finly.domain.record.dto.RecordDetailRes;
 import com.umc.finly.domain.record.dto.RecordFeedbackRes;
 import com.umc.finly.domain.record.dto.RecordUpdateReq;
 import com.umc.finly.domain.record.dto.RecordUpdateRes;
+import com.umc.finly.domain.record.dto.TodayRecordRes;
 import com.umc.finly.domain.record.service.RecordFeedbackService;
 import com.umc.finly.domain.record.service.RecordService;
 import com.umc.finly.global.apiPayload.response.ApiResponse;
@@ -14,8 +15,11 @@ import com.umc.finly.global.apiPayload.response.SuccessCode;
 import com.umc.finly.global.config.security.AuthPrincipal;
 import jakarta.validation.Valid;
 import lombok.RequiredArgsConstructor;
+import org.springframework.format.annotation.DateTimeFormat;
 import org.springframework.security.core.annotation.AuthenticationPrincipal;
 import org.springframework.web.bind.annotation.*;
+
+import java.time.LocalDate;
 
 @RestController
 @RequiredArgsConstructor
@@ -32,6 +36,15 @@ public class RecordController {
     ) {
         RecordCreateRes result = recordService.createRecord(principal.getMemberId(), request);
         return ApiResponse.onSuccess(result, SuccessCode.CREATED);
+    }
+
+    @GetMapping("/today")
+    public ApiResponse<TodayRecordRes> getTodayRecords(
+            @AuthenticationPrincipal AuthPrincipal principal,
+            @RequestParam @DateTimeFormat(iso = DateTimeFormat.ISO.DATE) LocalDate date
+    ) {
+        TodayRecordRes result = recordService.getTodayRecords(principal.getMemberId(), date);
+        return ApiResponse.onSuccess(result, SuccessCode.OK);
     }
 
     @GetMapping("/{recordId}")
