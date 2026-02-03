@@ -25,7 +25,7 @@ public class MyPageController {
             @AuthenticationPrincipal AuthPrincipal principal
     ){
         if(principal == null){
-            throw new CustomException(AuthErrorCode.UNATHORIZED);
+            throw new CustomException(AuthErrorCode.UNAUTHORIZED);
         }
         return ApiResponse.onSuccess(
                 myPageService.getMyPersona(principal.getMemberId()),

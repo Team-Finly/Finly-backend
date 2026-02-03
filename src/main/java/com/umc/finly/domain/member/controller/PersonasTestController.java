@@ -1,5 +1,6 @@
 package com.umc.finly.domain.member.controller;
 
+import com.umc.finly.domain.auth.exception.AuthErrorCode;
 import com.umc.finly.domain.member.dto.request.PersonaTestSubmitReq;
 import com.umc.finly.domain.member.dto.response.PersonaTestQuestionRes;
 import com.umc.finly.domain.member.dto.response.PersonaTestSubmitRes;
@@ -9,7 +10,9 @@ import com.umc.finly.domain.member.service.PersonaTestSubmitService;
 import com.umc.finly.global.apiPayload.exception.CustomException;
 import com.umc.finly.global.apiPayload.response.ApiResponse;
 import com.umc.finly.global.apiPayload.response.SuccessCode;
+import com.umc.finly.global.config.security.AuthPrincipal;
 import lombok.RequiredArgsConstructor;
+import org.springframework.security.core.annotation.AuthenticationPrincipal;
 import org.springframework.web.bind.annotation.*;
 
 import java.util.List;
@@ -39,13 +42,23 @@ public class PersonasTestController {
     @PostMapping("/submit")
     public ApiResponse<PersonaTestSubmitRes> submit(
             @RequestParam("mode") String mode,
-            @RequestBody PersonaTestSubmitReq request
-    ){
+            @RequestBody PersonaTestSubmitReq request,
+            @AuthenticationPrincipal AuthPrincipal authPrincipal
+            ){
         if (!"signup".equals(mode) && !"retest".equals(mode)) {
             throw new CustomException(MemberErrorCode.INVALID_PERSONA_MODE);
         }
+
+        Long memberId = null;
+        if("retest".equals(mode)){
+            if (authPrincipal==null){
+                throw new CustomException(AuthErrorCode.UNAUTHORIZED);
+            }
+            memberId = authPrincipal.getMemberId();
+        }
+
         return ApiResponse.onSuccess(
-                submitService.submit(mode, request),
+                submitService.submit(mode, memberId, request),
                 SuccessCode.OK
         );
     }

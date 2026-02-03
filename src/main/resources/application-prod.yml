@@ -14,3 +14,7 @@ spring:
     redis:
       host: finly-redis
       port: 6379
+
+app:
+  cors:
+    allowed-origins: ${APP_CORS_ALLOWED_ORIGINS}

@@ -7,6 +7,8 @@ import com.umc.finly.global.infra.jwt.JwtProvider;
 import lombok.RequiredArgsConstructor;
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
+import org.springframework.http.HttpMethod;
+import org.springframework.security.config.Customizer;
 import org.springframework.security.config.annotation.web.builders.HttpSecurity;
 import org.springframework.security.crypto.bcrypt.BCryptPasswordEncoder;
 import org.springframework.security.crypto.password.PasswordEncoder;
@@ -16,8 +18,6 @@ import org.springframework.security.web.access.AccessDeniedHandler;
 import org.springframework.security.web.authentication.UsernamePasswordAuthenticationFilter;
 import org.springframework.security.web.util.matcher.RequestMatcher;
 import org.springframework.http.MediaType;
-
-import java.awt.*;
 
 @Configuration
 @RequiredArgsConstructor
@@ -51,13 +51,13 @@ public class SecurityConfig {
         ObjectMapper objectMapper = new ObjectMapper();
 
         AuthenticationEntryPoint entryPoint = (request, response, authException) -> {
-            response.setStatus(AuthErrorCode.UNATHORIZED.getHttpStatus().value());
+            response.setStatus(AuthErrorCode.UNAUTHORIZED.getHttpStatus().value());
             response.setContentType(MediaType.APPLICATION_JSON_VALUE);
             response.setCharacterEncoding("UTF-8");
 
             ApiResponse<Object> body = ApiResponse.onFailure(
-                    AuthErrorCode.UNATHORIZED,
-                    AuthErrorCode.UNATHORIZED.getMessage()
+                    AuthErrorCode.UNAUTHORIZED,
+                    AuthErrorCode.UNAUTHORIZED.getMessage()
             );
 
             objectMapper.writeValue(response.getWriter(), body);
@@ -77,12 +77,15 @@ public class SecurityConfig {
         };
 
         http
+                .cors(Customizer.withDefaults())
                 /** [기존 보안 기능 비활성화] **/
                 .csrf(csrf -> csrf.disable())
                 .formLogin(form -> form.disable())
                 .httpBasic(basic -> basic.disable())
                 /** [URL 접근 권한 설정] **/
                 .authorizeHttpRequests(auth -> auth
+                        .requestMatchers(HttpMethod.OPTIONS, "/**").permitAll()
+
                         // PUBLIC
                         .requestMatchers("/auth/**", "/api/persona-test/questions").permitAll()
                         .requestMatchers(signupMatcher).permitAll()
