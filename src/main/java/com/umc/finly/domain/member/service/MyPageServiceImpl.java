@@ -40,6 +40,7 @@ public class MyPageServiceImpl implements MyPageService{
 
     // 내 닉네임 변경
     @Override
+    @Transactional
     public UpdateNicknameRes updateMyNickname(Long memberId, String nickname){
         Member member = memberRepository.findById(memberId)
                 .orElseThrow(()-> new CustomException(MemberErrorCode.MEMBER_NOT_FOUND));
