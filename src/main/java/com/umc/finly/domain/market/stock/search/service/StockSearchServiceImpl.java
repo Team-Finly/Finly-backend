@@ -20,7 +20,6 @@ import org.springframework.transaction.annotation.Transactional;
 public class StockSearchServiceImpl implements StockSearchService {
 
     private static final int MIN_KEYWORD_LENGTH = 2;
-    private static final long TOO_MANY_RESULTS = 50L;
 
     private final StockRepository stockRepository;
     private final StockSearchConverter stockSearchConverter;
@@ -30,15 +29,7 @@ public class StockSearchServiceImpl implements StockSearchService {
         try {
             String trimmedKeyword = validateKeyword(keyword);
 
-            Page<Stock> stockPage = stockRepository.findByNameContaining(trimmedKeyword, pageable);
-
-            if (stockPage.getTotalElements() == 0) {
-                throw new StockSearchException(StockSearchErrorCode.STOCK_NOT_FOUND);
-            }
-
-            if (stockPage.getTotalElements() > TOO_MANY_RESULTS) {
-                throw new StockSearchException(StockSearchErrorCode.TOO_MANY_RESULTS);
-            }
+            Page<Stock> stockPage = stockRepository.searchByName(trimmedKeyword, pageable);
 
             return stockSearchConverter.toStockSearchResponse(trimmedKeyword, stockPage);
         } catch (StockSearchException e) {
