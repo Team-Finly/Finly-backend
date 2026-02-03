@@ -3,7 +3,7 @@ package com.umc.finly.stock;
 import com.umc.finly.domain.market.stock.entity.Stock;
 import com.umc.finly.domain.market.stock.enums.MarketType;
 import com.umc.finly.domain.market.stock.repository.StockRepository;
-import com.umc.finly.domain.market.stock.service.StockLogoUpdateService;
+import com.umc.finly.domain.market.stock.info.service.StockLogoUpdateService;
 import com.umc.finly.global.config.security.SecurityConfig;
 import com.umc.finly.global.infra.jwt.JwtProvider;
 import org.junit.jupiter.api.BeforeEach;
@@ -16,7 +16,6 @@ import org.springframework.security.crypto.password.PasswordEncoder;
 import org.springframework.test.context.ActiveProfiles;
 import org.springframework.test.context.bean.override.mockito.MockitoBean;
 import org.springframework.transaction.annotation.Transactional;
-import org.springframework.test.annotation.Rollback;
 
 import java.util.List;
 
