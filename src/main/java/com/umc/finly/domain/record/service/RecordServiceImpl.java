@@ -19,6 +19,7 @@ import com.umc.finly.global.apiPayload.response.ErrorCode;
 import lombok.RequiredArgsConstructor;
 import org.springframework.dao.DataIntegrityViolationException;
 import org.springframework.stereotype.Service;
+import org.springframework.transaction.annotation.Propagation;
 import org.springframework.transaction.annotation.Transactional;
 
 import java.math.BigDecimal;
@@ -171,6 +172,7 @@ public class RecordServiceImpl implements RecordService {
     }
 
     @Override
+    @Transactional(propagation = Propagation.NOT_SUPPORTED)
     public DailyReportRes getDailyReport(Long memberId, Long recordId) {
         // 1. 기록 조회
         RecordEntry entry = recordEntryRepository.findById(recordId)
