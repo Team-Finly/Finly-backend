@@ -71,7 +71,7 @@ public class FeedbackPromptBuilder {
         }
 
         sb.append("- 감정: ").append(formatEmotion(entry.getEmotionCode().name())).append("\n");
-        sb.append("- 감정 강도: ").append(entry.getEmotionIntensity()).append("/5\n");
+        sb.append("- 감정 강도: ").append(entry.getEmotionIntensity()).append("/7\n");
         sb.append("- 시간대: ").append(formatSession(entry.getSession().name())).append("\n");
 
         if (entry.getMemo() != null && !entry.getMemo().isBlank()) {
@@ -113,7 +113,7 @@ public class FeedbackPromptBuilder {
                 .mapToInt(RecordEntry::getEmotionIntensity)
                 .average()
                 .orElse(0.0);
-        sb.append("\n### 평균 감정 강도: ").append(String.format("%.1f", avgIntensity)).append("/5\n");
+        sb.append("\n### 평균 감정 강도: ").append(String.format("%.1f", avgIntensity)).append("/7\n");
 
         return sb.toString();
     }

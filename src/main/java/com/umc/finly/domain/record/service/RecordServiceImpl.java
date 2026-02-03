@@ -146,9 +146,13 @@ public class RecordServiceImpl implements RecordService {
             entry.setMemo(request.getMemo());
         }
 
-        // 4. tradeAction이 BUY/SELL이면 unitPrice, quantity 필수 검증
+        // 4. tradeAction이 BUY/SELL이면 unitPrice, quantity 필수 및 0보다 커야 함
         if (entry.getTradeAction() == TradeAction.BUY || entry.getTradeAction() == TradeAction.SELL) {
             if (entry.getUnitPrice() == null || entry.getQuantity() == null) {
+                throw new CustomException(ErrorCode.RECORD_INVALID_REQUEST);
+            }
+            if (entry.getUnitPrice().compareTo(BigDecimal.ZERO) <= 0
+                    || entry.getQuantity().compareTo(BigDecimal.ZERO) <= 0) {
                 throw new CustomException(ErrorCode.RECORD_INVALID_REQUEST);
             }
         }

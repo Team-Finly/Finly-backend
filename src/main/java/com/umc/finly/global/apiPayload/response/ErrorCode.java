@@ -18,9 +18,6 @@ public enum ErrorCode implements BaseCode {
     REQUEST_TIMEOUT(HttpStatus.REQUEST_TIMEOUT, "COMMON408", "요청 시간이 초과되었습니다."),
     CONFLICT(HttpStatus.CONFLICT, "COMMON409", "서버 상태와 충돌하는 요청입니다."),
 
-    // AUTH 4xx
-    EMAIL_ALREADY_EXISTS(HttpStatus.CONFLICT, "AUTH409", "이미 가입된 이메일입니다."),
-
     // RECORD 4xx
     RECORD_INVALID_REQUEST(HttpStatus.BAD_REQUEST, "RECORD400", "필수값 또는 형식 오류입니다."),
     RECORD_NOT_FOUND(HttpStatus.NOT_FOUND, "RECORD404", "기록을 찾을 수 없습니다."),

@@ -81,8 +81,9 @@ public class RecordFeedbackServiceImpl implements RecordFeedbackService {
                     .build();
             feedback = feedbackRepository.save(feedback);
         } else {
-            // 피드백이 이미 생성 중이면 에러
-            if (feedback.getStatus() == FeedbackStatus.GENERATING) {
+            // 피드백이 대기 중이거나 생성 중이면 에러
+            if (feedback.getStatus() == FeedbackStatus.PENDING
+                    || feedback.getStatus() == FeedbackStatus.GENERATING) {
                 throw new CustomException(ErrorCode.FEEDBACK_GENERATION_IN_PROGRESS);
             }
             feedback.resetForRegeneration();
