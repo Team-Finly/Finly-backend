@@ -7,6 +7,8 @@ import com.umc.finly.global.infra.jwt.JwtProvider;
 import lombok.RequiredArgsConstructor;
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
+import org.springframework.http.HttpMethod;
+import org.springframework.security.config.Customizer;
 import org.springframework.security.config.annotation.web.builders.HttpSecurity;
 import org.springframework.security.crypto.bcrypt.BCryptPasswordEncoder;
 import org.springframework.security.crypto.password.PasswordEncoder;
@@ -77,12 +79,15 @@ public class SecurityConfig {
         };
 
         http
+                .cors(Customizer.withDefaults())
                 /** [기존 보안 기능 비활성화] **/
                 .csrf(csrf -> csrf.disable())
                 .formLogin(form -> form.disable())
                 .httpBasic(basic -> basic.disable())
                 /** [URL 접근 권한 설정] **/
                 .authorizeHttpRequests(auth -> auth
+                        .requestMatchers(HttpMethod.OPTIONS, "/**").permitAll()
+
                         // PUBLIC
                         .requestMatchers("/auth/**", "/api/persona-test/questions").permitAll()
                         .requestMatchers(signupMatcher).permitAll()
