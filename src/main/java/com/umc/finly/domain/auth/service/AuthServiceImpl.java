@@ -136,7 +136,7 @@ public class AuthServiceImpl implements AuthService {
         memberRepository.save(member);
 
         AuthLoginRes result = AuthLoginRes.builder()
-                .accessToken("Bearer " + accessToken)
+                .accessToken(accessToken)
                 .member(AuthLoginRes.MemberInfo.builder()
                         .memberId(member.getId())
                         .email(member.getEmail())

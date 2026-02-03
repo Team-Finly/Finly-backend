@@ -1,18 +1,19 @@
 package com.umc.finly.domain.member.controller;
 
 import com.umc.finly.domain.auth.exception.AuthErrorCode;
+import com.umc.finly.domain.member.dto.request.UpdateNicknameReq;
 import com.umc.finly.domain.member.dto.response.MyPageMeRes;
 import com.umc.finly.domain.member.dto.response.MyPagePersonaRes;
+import com.umc.finly.domain.member.dto.response.UpdateNicknameRes;
 import com.umc.finly.domain.member.service.MyPageService;
 import com.umc.finly.global.apiPayload.exception.CustomException;
 import com.umc.finly.global.apiPayload.response.ApiResponse;
 import com.umc.finly.global.apiPayload.response.SuccessCode;
 import com.umc.finly.global.config.security.AuthPrincipal;
+import jakarta.validation.Valid;
 import lombok.RequiredArgsConstructor;
 import org.springframework.security.core.annotation.AuthenticationPrincipal;
-import org.springframework.web.bind.annotation.GetMapping;
-import org.springframework.web.bind.annotation.RequestMapping;
-import org.springframework.web.bind.annotation.RestController;
+import org.springframework.web.bind.annotation.*;
 
 @RestController
 @RequiredArgsConstructor
@@ -46,6 +47,26 @@ public class MyPageController {
 
         return ApiResponse.onSuccess(
                 myPageService.getMyInfo(principal.getMemberId()),
+                SuccessCode.OK
+        );
+    }
+
+    // 내 닉네임 변경
+    @PostMapping("/me/nickname")
+    public ApiResponse<UpdateNicknameRes> updateNickname(
+            @AuthenticationPrincipal AuthPrincipal principal,
+            @RequestBody @Valid UpdateNicknameReq request
+            ){
+
+        if (principal == null){
+            throw new CustomException(AuthErrorCode.UNAUTHORIZED);
+        }
+
+        return ApiResponse.onSuccess(
+                myPageService.updateMyNickname(
+                        principal.getMemberId(),
+                        request.getNickname()
+                ),
                 SuccessCode.OK
         );
     }

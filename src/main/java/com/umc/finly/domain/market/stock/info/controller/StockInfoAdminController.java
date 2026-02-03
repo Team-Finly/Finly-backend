@@ -1,11 +1,11 @@
-package com.umc.finly.domain.market.stock.controller;
+package com.umc.finly.domain.market.stock.info.controller;
 
-import com.umc.finly.domain.market.stock.dto.StockAdminResponse;
-import com.umc.finly.domain.market.stock.dto.StockInfoResponse;
+import com.umc.finly.domain.market.stock.info.dto.StockAdminResponse;
+import com.umc.finly.domain.market.stock.info.dto.StockInfoResponse;
 import com.umc.finly.domain.market.stock.repository.StockRepository;
-import com.umc.finly.domain.market.stock.service.StockInfoScheduler;
-import com.umc.finly.domain.market.stock.service.StockInfoSyncService;
-import com.umc.finly.domain.market.stock.service.StockLogoUpdateService;
+import com.umc.finly.domain.market.stock.info.service.StockInfoScheduler;
+import com.umc.finly.domain.market.stock.info.service.StockInfoSyncService;
+import com.umc.finly.domain.market.stock.info.service.StockLogoUpdateService;
 import com.umc.finly.global.apiPayload.response.ApiResponse;
 import com.umc.finly.global.apiPayload.response.SuccessCode;
 import lombok.RequiredArgsConstructor;

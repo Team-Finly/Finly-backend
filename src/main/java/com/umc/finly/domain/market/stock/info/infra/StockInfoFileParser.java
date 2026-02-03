@@ -1,9 +1,9 @@
-package com.umc.finly.domain.market.stock.infra;
+package com.umc.finly.domain.market.stock.info.infra;
 
-import com.umc.finly.domain.market.stock.dto.StockInfoDto;
+import com.umc.finly.domain.market.stock.info.dto.StockInfoDto;
 import com.umc.finly.domain.market.stock.enums.MarketType;
-import com.umc.finly.domain.market.stock.exception.StockInfoErrorCode;
-import com.umc.finly.domain.market.stock.exception.StockInfoException;
+import com.umc.finly.domain.market.stock.info.exception.StockInfoErrorCode;
+import com.umc.finly.domain.market.stock.info.exception.StockInfoException;
 import org.springframework.stereotype.Component;
 
 import java.io.BufferedReader;

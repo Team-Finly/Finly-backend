@@ -1,8 +1,8 @@
 package com.umc.finly.stock;
 
-import com.umc.finly.domain.market.stock.dto.StockInfoDto;
+import com.umc.finly.domain.market.stock.info.dto.StockInfoDto;
 import com.umc.finly.domain.market.stock.enums.MarketType;
-import com.umc.finly.domain.market.stock.infra.StockInfoFileParser;
+import com.umc.finly.domain.market.stock.info.infra.StockInfoFileParser;
 import org.junit.jupiter.api.DisplayName;
 import org.junit.jupiter.api.Test;
 import org.springframework.beans.factory.annotation.Autowired;

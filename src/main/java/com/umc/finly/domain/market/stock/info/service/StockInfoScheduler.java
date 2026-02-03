@@ -1,6 +1,6 @@
-package com.umc.finly.domain.market.stock.service;
+package com.umc.finly.domain.market.stock.info.service;
 
-import com.umc.finly.domain.market.stock.dto.StockAdminResponse;
+import com.umc.finly.domain.market.stock.info.dto.StockAdminResponse;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.scheduling.annotation.Scheduled;
