@@ -5,9 +5,9 @@ import com.umc.finly.global.apiPayload.exception.CustomException;
 
 public class StockSearchException extends CustomException {
 
-    public StockSearchException(StockInfoErrorCode errorCode) {super (errorCode);}
+    public StockSearchException(StockSearchErrorCode errorCode) {super (errorCode);}
 
-    public StockSearchException(StockInfoErrorCode errorCode, String message) {super (errorCode, message);}
+    public StockSearchException(StockSearchErrorCode errorCode, String message) {super (errorCode, message);}
 
-    public StockSearchException(StockInfoErrorCode errorCode, String message, Throwable cause) {super (errorCode, message, cause);}
+    public StockSearchException(StockSearchErrorCode errorCode, String message, Throwable cause) {super (errorCode, message, cause);}
 }

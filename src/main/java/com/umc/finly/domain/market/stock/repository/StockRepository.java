@@ -1,6 +1,8 @@
 package com.umc.finly.domain.market.stock.repository;
 
 import com.umc.finly.domain.market.stock.entity.Stock;
+import org.springframework.data.domain.Page;
+import org.springframework.data.domain.Pageable;
 import org.springframework.data.jpa.repository.JpaRepository;
 
 import java.util.List;
@@ -12,5 +14,5 @@ public interface StockRepository extends JpaRepository<Stock, Long> {
     // logoUrl이 null인 종목 조회
     List<Stock> findByLogoUrlIsNull();
     // 종목명에 검색어 포함한 종목 조회
-    List<Stock> findByNameContaining(String keyword);
+    Page<Stock> findByNameContaining(String keyword, Pageable pageable);
 }

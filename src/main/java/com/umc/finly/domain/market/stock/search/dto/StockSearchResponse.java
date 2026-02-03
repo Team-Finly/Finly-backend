@@ -34,7 +34,7 @@ public class StockSearchResponse {
         private int currentPage;
         private int pageSize;
         private int totalPages;
-        private int totalElements;
+        private long totalElements;
         private boolean isLast;
     }
 }
