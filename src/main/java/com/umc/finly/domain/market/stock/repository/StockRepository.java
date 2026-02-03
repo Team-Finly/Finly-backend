@@ -11,4 +11,6 @@ public interface StockRepository extends JpaRepository<Stock, Long> {
     Optional<Stock> findBySymbol(String symbol);
     // logoUrl이 null인 종목 조회
     List<Stock> findByLogoUrlIsNull();
+    // 종목명 검색 (부분 일치)
+    List<Stock> findByNameContaining(String keyword);
 }

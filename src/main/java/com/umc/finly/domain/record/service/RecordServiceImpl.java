@@ -6,12 +6,14 @@ import com.umc.finly.domain.record.dto.DailyReportRes;
 import com.umc.finly.domain.record.dto.RecordCreateReq;
 import com.umc.finly.domain.record.dto.RecordCreateRes;
 import com.umc.finly.domain.record.dto.RecordDetailRes;
+import com.umc.finly.domain.record.dto.RecordSearchRes;
 import com.umc.finly.domain.record.dto.RecordUpdateReq;
 import com.umc.finly.domain.record.dto.RecordUpdateRes;
 import com.umc.finly.domain.record.dto.TodayRecordRes;
 import com.umc.finly.domain.record.infra.OpenAiFeedbackClient;
 import com.umc.finly.domain.record.entity.RecordEntry;
 import com.umc.finly.domain.record.entity.RecordFeedback;
+import com.umc.finly.domain.record.enums.EmotionCode;
 import com.umc.finly.domain.record.enums.Session;
 import com.umc.finly.domain.record.enums.TradeAction;
 import com.umc.finly.domain.record.repository.RecordEntryRepository;
@@ -246,6 +248,43 @@ public class RecordServiceImpl implements RecordService {
                 .timelineSummary(timelineSummary)
                 .hasRecords(!entries.isEmpty())
                 .recordCount(entries.size())
+                .build();
+    }
+
+    @Override
+    public RecordSearchRes searchRecords(Long memberId, String keyword, EmotionCode emotionCode) {
+        // 1. keyword가 있으면 종목명 매칭 stockId 목록 조회
+        List<Long> stockIds = null;
+        if (keyword != null && !keyword.isBlank()) {
+            stockIds = stockRepository.findByNameContaining(keyword).stream()
+                    .map(Stock::getId)
+                    .toList();
+        }
+
+        // 2. RecordEntry 검색
+        List<RecordEntry> entries = recordEntryRepository.searchRecords(
+                memberId, emotionCode, keyword, stockIds);
+
+        // 3. 결과의 stockId 일괄 조회 → Stock Map 생성
+        List<Long> resultStockIds = entries.stream()
+                .map(RecordEntry::getStockId)
+                .distinct()
+                .toList();
+        Map<Long, Stock> stockMap = stockRepository.findAllById(resultStockIds).stream()
+                .collect(Collectors.toMap(Stock::getId, Function.identity()));
+
+        // 4. 응답 DTO 생성
+        List<RecordSearchRes.SearchEntry> searchEntries = entries.stream()
+                .map(entry -> {
+                    Stock stock = stockMap.get(entry.getStockId());
+                    String symbol = stock != null ? stock.getSymbol() : "";
+                    return RecordSearchRes.SearchEntry.from(entry, symbol);
+                })
+                .toList();
+
+        return RecordSearchRes.builder()
+                .records(searchEntries)
+                .totalCount(searchEntries.size())
                 .build();
     }
 }
