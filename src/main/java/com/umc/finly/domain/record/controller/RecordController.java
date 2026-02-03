@@ -1,5 +1,6 @@
 package com.umc.finly.domain.record.controller;
 
+import com.umc.finly.domain.record.dto.DailyReportRes;
 import com.umc.finly.domain.record.dto.RecordCreateReq;
 import com.umc.finly.domain.record.dto.RecordCreateRes;
 import com.umc.finly.domain.record.dto.RecordDetailRes;
@@ -58,6 +59,15 @@ public class RecordController {
             @PathVariable Long recordId
     ) {
         RecordFeedbackRes result = feedbackService.getFeedback(principal.getMemberId(), recordId);
+        return ApiResponse.onSuccess(result, SuccessCode.OK);
+    }
+
+    @GetMapping("/{recordId}/daily-report")
+    public ApiResponse<DailyReportRes> getDailyReport(
+            @AuthenticationPrincipal AuthPrincipal principal,
+            @PathVariable Long recordId
+    ) {
+        DailyReportRes result = recordService.getDailyReport(principal.getMemberId(), recordId);
         return ApiResponse.onSuccess(result, SuccessCode.OK);
     }
 
