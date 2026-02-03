@@ -2,6 +2,7 @@ package com.umc.finly.domain.member.service;
 
 import com.umc.finly.domain.member.dto.response.MyPageMeRes;
 import com.umc.finly.domain.member.dto.response.MyPagePersonaRes;
+import com.umc.finly.domain.member.dto.response.UpdateNicknameRes;
 import com.umc.finly.domain.member.entity.Member;
 import com.umc.finly.domain.member.exception.MemberErrorCode;
 import com.umc.finly.domain.member.repository.MemberPersonaResultRepository;
@@ -35,5 +36,21 @@ public class MyPageServiceImpl implements MyPageService{
                 .orElseThrow(()-> new CustomException(MemberErrorCode.MEMBER_NOT_FOUND));
 
         return MyPageMeRes.from(member);
+    }
+
+    // 내 닉네임 변경
+    @Override
+    public UpdateNicknameRes updateMyNickname(Long memberId, String nickname){
+        Member member = memberRepository.findById(memberId)
+                .orElseThrow(()-> new CustomException(MemberErrorCode.MEMBER_NOT_FOUND));
+
+        // 닉네임 변경 없을 시
+        if (member.getNickname().equals(nickname)){
+            return UpdateNicknameRes.of(member.getNickname());
+        }
+
+        member.changeNickname(nickname);
+
+        return UpdateNicknameRes.of(member.getNickname());
     }
 }

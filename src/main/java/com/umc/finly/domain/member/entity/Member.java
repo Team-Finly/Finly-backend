@@ -59,5 +59,9 @@ public class Member extends CreatedDeletedBaseEntity {
         this.refreshToken = null;
         this.refreshTokenExpiredAt = null;
     }
+
+    public void changeNickname(String nickname) {
+        this.nickname = nickname;
+    }
 }
 
