@@ -41,9 +41,14 @@ public class StockSearchServiceImpl implements StockSearchService {
 
     // 검색어 검증 메서드
     private String validateKeyword(String keyword) {
+
+        if (keyword == null) {
+            throw new StockSearchException(StockSearchErrorCode.EMPTY_KEYWORD);
+        }
+
         String trimmed = keyword.strip();
 
-        if (keyword == null || trimmed.isEmpty()) {
+        if (trimmed.isEmpty()) {
             throw new StockSearchException(StockSearchErrorCode.EMPTY_KEYWORD);
         }
 
