@@ -4,17 +4,22 @@ import com.fasterxml.jackson.databind.JsonNode;
 import com.fasterxml.jackson.databind.ObjectMapper;
 import com.umc.finly.domain.analysis.exception.code.AnalysisErrorCode;
 import com.umc.finly.global.apiPayload.exception.CustomException;
-import lombok.RequiredArgsConstructor;
+import org.springframework.beans.factory.annotation.Qualifier;
 import org.springframework.stereotype.Component;
 import org.springframework.web.client.RestClient;
 
 // 네이버 금융 API를 이용해 국내 주식의 현재가를 조회
 @Component
-@RequiredArgsConstructor
 public class NaverStockPriceProvider implements StockPriceProvider {
     private static final String NAVER_API_URL = "https://polling.finance.naver.com/api/realtime/domestic/stock/%s";
     private final ObjectMapper objectMapper; // JSON 문자열을 자바 객체로 변환해주는 객체
     private final RestClient restClient; // 외부 HTTP API를 호출하는 클라이언트
+
+    public NaverStockPriceProvider(ObjectMapper objectMapper,
+                                   @Qualifier("naverStockRestClient") RestClient restClient) {
+        this.objectMapper = objectMapper;
+        this.restClient = restClient;
+    }
 
     @Override
     public Integer getCurrentPrice(String stockCode) {

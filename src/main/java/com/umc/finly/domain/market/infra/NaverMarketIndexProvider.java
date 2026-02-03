@@ -5,18 +5,23 @@ import com.fasterxml.jackson.databind.ObjectMapper;
 import com.umc.finly.domain.market.dto.MarketIndices;
 import com.umc.finly.domain.market.exception.code.MarketErrorCode;
 import com.umc.finly.global.apiPayload.exception.CustomException;
-import lombok.RequiredArgsConstructor;
+import org.springframework.beans.factory.annotation.Qualifier;
 import org.springframework.stereotype.Component;
 import org.springframework.web.client.RestClient;
 
 import java.math.BigDecimal;
 
 @Component
-@RequiredArgsConstructor
 public class NaverMarketIndexProvider implements MarketIndexProvider {
     private static final String NAVER_API_URL = "https://m.stock.naver.com/front-api/realTime/domestic/index";
     private final ObjectMapper objectMapper;
     private final RestClient restClient;
+
+    public NaverMarketIndexProvider(ObjectMapper objectMapper,
+                                    @Qualifier("marketRestClient") RestClient restClient) {
+        this.objectMapper = objectMapper;
+        this.restClient = restClient;
+    }
 
     @Override
     public MarketIndices getMarketIndices() {

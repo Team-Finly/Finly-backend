@@ -18,6 +18,7 @@ public class MarketController {
 
     @GetMapping("/index")
     public ApiResponse<MarketIndexResponse> getMarketIndex() {
+
         return ApiResponse.onSuccess(
                 marketIndexService.getMarketIndex(),
                 SuccessCode.OK

@@ -5,5 +5,5 @@ import com.umc.finly.domain.member.dto.response.PersonaTestSubmitRes;
 
 public interface PersonaTestSubmitService {
 
-    PersonaTestSubmitRes submit(String mode, PersonaTestSubmitReq request);
+    PersonaTestSubmitRes submit(String mode, Long memberId, PersonaTestSubmitReq request);
 }

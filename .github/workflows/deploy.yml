@@ -1,0 +1,55 @@
+name: CD - Deploy to EC2 (Docker Compose)
+
+on:
+  # develop 브랜치에 push 될 때마다 자동 배포
+  push:
+    branches: ["develop"]
+  workflow_dispatch:
+
+# 동시에 여러 배포가 겹치지 않게 제어
+concurrency:
+  group: deploy-ec2             # 같은 그룹의 이전 실행이 있으면
+  cancel-in-progress: true      # 새 실행 시 이전 것 취소
+
+jobs:
+  deploy:
+    runs-on: ubuntu-latest
+
+    steps:
+      - name: Deploy via SSH
+        uses: appleboy/ssh-action@v1.2.5
+        with:
+          host: ${{ secrets.EC2_HOST }}
+          username: ${{ secrets.EC2_USER }}
+          key: ${{ secrets.EC2_SSH_KEY }}
+          port: ${{ secrets.EC2_PORT }}
+          script: |
+            set -euo pipefail
+
+            echo "===> Move to project dir"
+            cd ${{ secrets.DEPLOY_DIR }}
+            
+            # .env 누락 방지
+            echo "===> Check .env"
+            if [ ! -f .env ]; then
+              echo ".env not found in $(pwd)" >&2
+              exit 1
+            fi
+
+            echo "===> Git pull"
+            git fetch --all
+            git reset --hard origin/${{ secrets.DEPLOY_BRANCH }}
+
+            echo "===> Build jar"
+            chmod +x ./gradlew
+            ./gradlew build -x test
+
+            # backend만 재빌드 + 오르판 정리
+            echo "===> Docker compose redeploy (backend only + remove orphans)"
+            docker compose up -d --build --remove-orphans backend
+            
+            echo "===> Container Status"
+            docker ps
+            
+            echo "===> Backend logs (tail)"
+            docker compose logs --tail=50 backend
