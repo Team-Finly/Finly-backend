@@ -6,7 +6,7 @@ import lombok.Getter;
 
 @Getter
 @AllArgsConstructor
-public class FearGreedResult {
+public class FearGreedRes {
     private final Integer score;
     private final FearGreedStatus status;
 }

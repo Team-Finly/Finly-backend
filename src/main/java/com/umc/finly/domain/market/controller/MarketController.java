@@ -1,6 +1,6 @@
 package com.umc.finly.domain.market.controller;
 
-import com.umc.finly.domain.market.dto.MarketIndexResponse;
+import com.umc.finly.domain.market.dto.MarketIndexRes;
 import com.umc.finly.domain.market.dto.MarketInsightResponse;
 import com.umc.finly.domain.market.service.MarketIndexService;
 import com.umc.finly.domain.market.service.MarketInsightService;
@@ -17,7 +17,7 @@ public class MarketController {
     private final MarketInsightService marketInsightService;
 
     @GetMapping("/index")
-    public ApiResponse<MarketIndexResponse> getMarketIndex() {
+    public ApiResponse<MarketIndexRes> getMarketIndex() {
 
         return ApiResponse.onSuccess(
                 marketIndexService.getMarketIndex(),

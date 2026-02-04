@@ -11,4 +11,5 @@ public interface RecordEntryRepository extends JpaRepository<RecordEntry, Long> 
     boolean existsByClientRequestId(String clientRequestId);
     List<RecordEntry> findByMemberIdOrderByRecordDateDesc(Long memberId, Pageable pageable);
     List<RecordEntry> findByMemberIdAndRecordDateOrderByCreatedAtAsc(Long memberId, LocalDate recordDate);
+    List<RecordEntry> findAllByMemberIdAndStockId(Long memberId, Long stockId);
 }

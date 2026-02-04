@@ -91,6 +91,7 @@ public class SecurityConfig {
                         .requestMatchers(signupMatcher).permitAll()
 
                         // PROTECTED
+                        .requestMatchers("/api/analysis/**").authenticated()
                         .requestMatchers("/api/mypage/**").authenticated()
                         .requestMatchers(retestMatcher).authenticated()
 

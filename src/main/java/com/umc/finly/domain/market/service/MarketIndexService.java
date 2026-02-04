@@ -1,7 +1,7 @@
 package com.umc.finly.domain.market.service;
 
-import com.umc.finly.domain.market.dto.FearGreedResult;
-import com.umc.finly.domain.market.dto.MarketIndexResponse;
+import com.umc.finly.domain.market.dto.FearGreedRes;
+import com.umc.finly.domain.market.dto.MarketIndexRes;
 import com.umc.finly.domain.market.dto.MarketIndices;
 import com.umc.finly.domain.market.infra.FearGreedIndexProvider;
 import com.umc.finly.domain.market.infra.MarketIndexProvider;
@@ -22,12 +22,12 @@ public class MarketIndexService {
             value = "marketIndex",
             unless = "#result == null"
     )
-    public MarketIndexResponse getMarketIndex() {
+    public MarketIndexRes getMarketIndex() {
         MarketIndices indices = marketIndexProvider.getMarketIndices();
-        FearGreedResult fearGreed = fearGreedIndexProvider.getFearGreedIndex();
+        FearGreedRes fearGreed = fearGreedIndexProvider.getFearGreedIndex();
         LocalDateTime snapshotAt = LocalDateTime.now(ZoneId.of("Asia/Seoul"));
 
-        return MarketIndexResponse.snapshot(
+        return MarketIndexRes.snapshot(
                 indices.getKospi(),
                 indices.getKosdaq(),
                 fearGreed.getScore(),
