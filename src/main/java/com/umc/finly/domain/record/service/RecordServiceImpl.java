@@ -259,6 +259,9 @@ public class RecordServiceImpl implements RecordService {
             stockIds = stockRepository.findByNameContaining(keyword).stream()
                     .map(Stock::getId)
                     .toList();
+            if (stockIds.isEmpty()) {
+                stockIds = null;
+            }
         }
 
         // 2. RecordEntry 검색

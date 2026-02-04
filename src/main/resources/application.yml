@@ -1,6 +1,8 @@
 spring:
   application:
     name: finly
+  profiles:
+    active: local
 
 jwt:
   secret: ${JWT_SECRET}

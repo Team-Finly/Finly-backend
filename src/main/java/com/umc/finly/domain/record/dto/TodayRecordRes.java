@@ -67,10 +67,16 @@ public class TodayRecordRes {
         }
         if (entries.size() == 1) {
             EmotionCode emotion = entries.get(0).getEmotionCode();
+            if (emotion == null) { // null 체크
+                return "오늘 하루도 기록을 남겼네요!";
+            }
             return "{{" + emotion.getLabel() + "}}한 하루네요!";
         }
         EmotionCode first = entries.get(0).getEmotionCode();
         EmotionCode last = entries.get(entries.size() - 1).getEmotionCode();
+        if (first == null || last == null) { // null 체크
+            return "오늘도 열심히 기록했네요!";
+        }
         return "{{" + first.getLabel() + "}}하게 시작해 {{" + last.getLabel() + "}}" + last.getParticle() + " 마무리한 날이네요.";
     }
 }
