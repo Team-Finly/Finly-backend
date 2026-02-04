@@ -9,7 +9,7 @@ import lombok.NoArgsConstructor;
 @Builder
 @AllArgsConstructor
 @NoArgsConstructor
-public class MarketInsightResponse {
+public class MarketInsightResDTO {
 
 
     private String stockName; // 종목 이름

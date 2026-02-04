@@ -1,8 +1,8 @@
-package com.umc.finly.domain.analysis.infra;
+package com.umc.finly.domain.analysis.stock.infra;
 
 import com.fasterxml.jackson.databind.JsonNode;
 import com.fasterxml.jackson.databind.ObjectMapper;
-import com.umc.finly.domain.analysis.exception.code.AnalysisErrorCode;
+import com.umc.finly.domain.analysis.stock.exception.code.AnalysisErrorCode;
 import com.umc.finly.global.apiPayload.exception.CustomException;
 import org.springframework.beans.factory.annotation.Qualifier;
 import org.springframework.stereotype.Component;

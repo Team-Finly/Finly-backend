@@ -1,4 +1,4 @@
-package com.umc.finly.domain.analysis.infra.config;
+package com.umc.finly.domain.analysis.stock.infra.config;
 
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;

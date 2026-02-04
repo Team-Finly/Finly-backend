@@ -2,7 +2,7 @@ package com.umc.finly.domain.market.infra;
 
 import com.fasterxml.jackson.databind.JsonNode;
 import com.fasterxml.jackson.databind.ObjectMapper;
-import com.umc.finly.domain.market.dto.MarketIndices;
+import com.umc.finly.domain.market.dto.MarketIndicesDTO;
 import com.umc.finly.domain.market.exception.code.MarketErrorCode;
 import com.umc.finly.global.apiPayload.exception.CustomException;
 import org.springframework.beans.factory.annotation.Qualifier;
@@ -24,7 +24,7 @@ public class NaverMarketIndexProvider implements MarketIndexProvider {
     }
 
     @Override
-    public MarketIndices getMarketIndices() {
+    public MarketIndicesDTO getMarketIndices() {
         try {
             String response = restClient.post()
                     .uri(NAVER_API_URL)
@@ -52,7 +52,7 @@ public class NaverMarketIndexProvider implements MarketIndexProvider {
             BigDecimal kospi = extractIndex(marketSnapshots, "KOSPI");
             BigDecimal kosdaq = extractIndex(marketSnapshots, "KOSDAQ");
 
-            return new MarketIndices(kospi, kosdaq);
+            return new MarketIndicesDTO(kospi, kosdaq);
         } catch (CustomException e) {
             throw e;
         } catch (Exception e) {

@@ -7,7 +7,7 @@ import java.math.BigDecimal;
 
 @Getter
 @AllArgsConstructor
-public class MarketIndices {
+public class MarketIndicesDTO {
     private final BigDecimal kospi;
     private final BigDecimal kosdaq;
 }
