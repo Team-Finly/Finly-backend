@@ -9,7 +9,7 @@ import com.umc.finly.domain.auth.entity.mapping.MemberTerm;
 import com.umc.finly.domain.auth.enums.TermType;
 import com.umc.finly.domain.auth.exception.AuthErrorCode;
 import com.umc.finly.domain.auth.repository.TermRepository;
-import com.umc.finly.domain.member.dto.request.PersonaAnswerReq;
+import com.umc.finly.domain.member.dto.request.PersonaAnswerReqDTO;
 import com.umc.finly.domain.member.entity.Member;
 import com.umc.finly.domain.member.entity.Persona;
 import com.umc.finly.domain.member.entity.mapping.MembersPersonasResult;
@@ -270,13 +270,13 @@ public class AuthServiceImpl implements AuthService {
         }
     }
 
-    private Persona resolvePersonaFromSignup(List<PersonaAnswerReq> answers) {
+    private Persona resolvePersonaFromSignup(List<PersonaAnswerReqDTO> answers) {
         if (answers == null || answers.isEmpty()) {
             throw new CustomException(AuthErrorCode.INVALID_PERSONA_ANSWERS);
         }
 
-        List<PersonaAnswerReq> convertedAnswers = answers.stream()
-                .map(a -> new PersonaAnswerReq(
+        List<PersonaAnswerReqDTO> convertedAnswers = answers.stream()
+                .map(a -> new PersonaAnswerReqDTO(
                         a.getQuestionId(),
                         a.getOptionId()
                 ))

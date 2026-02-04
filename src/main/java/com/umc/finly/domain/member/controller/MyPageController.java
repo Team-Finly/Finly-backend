@@ -1,10 +1,10 @@
 package com.umc.finly.domain.member.controller;
 
 import com.umc.finly.domain.auth.exception.AuthErrorCode;
-import com.umc.finly.domain.member.dto.request.UpdateNicknameReq;
-import com.umc.finly.domain.member.dto.response.MyPageMeRes;
-import com.umc.finly.domain.member.dto.response.MyPagePersonaRes;
-import com.umc.finly.domain.member.dto.response.UpdateNicknameRes;
+import com.umc.finly.domain.member.dto.request.UpdateNicknameReqDTO;
+import com.umc.finly.domain.member.dto.response.MyPageMeResDTO;
+import com.umc.finly.domain.member.dto.response.MyPagePersonaResDTO;
+import com.umc.finly.domain.member.dto.response.UpdateNicknameResDTO;
 import com.umc.finly.domain.member.service.MyPageService;
 import com.umc.finly.global.apiPayload.exception.CustomException;
 import com.umc.finly.global.apiPayload.response.ApiResponse;
@@ -24,7 +24,7 @@ public class MyPageController {
 
     // 내 페르소나 조회
     @GetMapping("/persona")
-    public ApiResponse<MyPagePersonaRes> getMyPersona(
+    public ApiResponse<MyPagePersonaResDTO> getMyPersona(
             @AuthenticationPrincipal AuthPrincipal principal
     ){
         if(principal == null){
@@ -38,7 +38,7 @@ public class MyPageController {
 
     // 내 프로필 조회
     @GetMapping("/me")
-    public ApiResponse<MyPageMeRes> getMyInfo(
+    public ApiResponse<MyPageMeResDTO> getMyInfo(
             @AuthenticationPrincipal AuthPrincipal principal
     ){
         if (principal == null){
@@ -53,9 +53,9 @@ public class MyPageController {
 
     // 내 닉네임 변경
     @PostMapping("/me/nickname")
-    public ApiResponse<UpdateNicknameRes> updateNickname(
+    public ApiResponse<UpdateNicknameResDTO> updateNickname(
             @AuthenticationPrincipal AuthPrincipal principal,
-            @RequestBody @Valid UpdateNicknameReq request
+            @RequestBody @Valid UpdateNicknameReqDTO request
             ){
 
         if (principal == null){

@@ -8,7 +8,7 @@ import java.time.LocalDateTime;
 
 @Getter
 @Builder
-public class PersonaTestSubmitRes {
+public class PersonaTestSubmitResDTO {
     private PersonaUiType personaType;
     private boolean saved;
     private LocalDateTime createdAt;    // 최초 페르소나 결과 생성 시각

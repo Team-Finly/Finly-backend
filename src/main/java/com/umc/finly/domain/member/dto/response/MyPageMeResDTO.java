@@ -8,14 +8,14 @@ import lombok.Getter;
 @Getter
 @Builder
 @AllArgsConstructor
-public class MyPageMeRes {
+public class MyPageMeResDTO {
 
     private Long memberId;
     private String email;
     private String nickname;
 
-    public static MyPageMeRes from(Member member){
-        return MyPageMeRes.builder()
+    public static MyPageMeResDTO from(Member member){
+        return MyPageMeResDTO.builder()
                 .memberId(member.getId())
                 .email(member.getEmail())
                 .nickname(member.getNickname())

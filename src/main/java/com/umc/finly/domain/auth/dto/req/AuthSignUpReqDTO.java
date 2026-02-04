@@ -1,6 +1,6 @@
 package com.umc.finly.domain.auth.dto.req;
 
-import com.umc.finly.domain.member.dto.request.PersonaAnswerReq;
+import com.umc.finly.domain.member.dto.request.PersonaAnswerReqDTO;
 import jakarta.validation.Valid;
 import jakarta.validation.constraints.Email;
 import jakarta.validation.constraints.NotBlank;
@@ -34,7 +34,7 @@ public class AuthSignUpReqDTO {
 
     @NotEmpty(message = "personaAnswers는 필수입니다.")
     @Valid
-    private List<PersonaAnswerReq> personaAnswers;
+    private List<PersonaAnswerReqDTO> personaAnswers;
 
     @Getter
     @NoArgsConstructor

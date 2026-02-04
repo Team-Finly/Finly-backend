@@ -1,8 +1,8 @@
 package com.umc.finly.domain.member.service;
 
 import com.umc.finly.domain.auth.exception.AuthErrorCode;
-import com.umc.finly.domain.member.dto.request.PersonaTestSubmitReq;
-import com.umc.finly.domain.member.dto.response.PersonaTestSubmitRes;
+import com.umc.finly.domain.member.dto.request.PersonaTestSubmitReqDTO;
+import com.umc.finly.domain.member.dto.response.PersonaTestSubmitResDTO;
 import com.umc.finly.domain.member.entity.Persona;
 import com.umc.finly.domain.member.entity.mapping.MembersPersonasResult;
 import com.umc.finly.domain.member.exception.MemberErrorCode;
@@ -22,7 +22,7 @@ public class PersonaTestSubmitServiceImpl implements PersonaTestSubmitService{
     private final MemberPersonaResultRepository memberPersonaResultRepository;
 
     @Override
-    public PersonaTestSubmitRes submit(String mode, Long memberId, PersonaTestSubmitReq request){
+    public PersonaTestSubmitResDTO submit(String mode, Long memberId, PersonaTestSubmitReqDTO request){
 
         // 공용 채점/검증 로직 재사용
         Persona persona = personaScoringService.resolvePersona(request.getAnswers());
@@ -58,14 +58,14 @@ public class PersonaTestSubmitServiceImpl implements PersonaTestSubmitService{
         throw new CustomException(MemberErrorCode.INVALID_PERSONA_MODE);
     }
 
-    private PersonaTestSubmitRes buildResponse(
+    private PersonaTestSubmitResDTO buildResponse(
             Persona persona,
             boolean saved,
             LocalDateTime createdAt,
             LocalDateTime updatedAt
     ) {
 
-        return PersonaTestSubmitRes.builder()
+        return PersonaTestSubmitResDTO.builder()
                 .personaType(persona.getPersonaType().toUiType())
                 .saved(saved)
                 .createdAt(createdAt)

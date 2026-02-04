@@ -7,12 +7,12 @@ import lombok.Getter;
 @Getter
 @Builder
 @AllArgsConstructor
-public class UpdateNicknameRes {
+public class UpdateNicknameResDTO {
 
     private String nickname;
 
-    public static UpdateNicknameRes of(String nickname){
-        return UpdateNicknameRes.builder()
+    public static UpdateNicknameResDTO of(String nickname){
+        return UpdateNicknameResDTO.builder()
                 .nickname(nickname)
                 .build();
     }
