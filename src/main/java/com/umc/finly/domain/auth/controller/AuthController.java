@@ -1,11 +1,11 @@
 package com.umc.finly.domain.auth.controller;
 
-import com.umc.finly.domain.auth.dto.req.AuthLoginReq;
-import com.umc.finly.domain.auth.dto.req.AuthSignUpReq;
-import com.umc.finly.domain.auth.dto.res.AuthLoginRes;
-import com.umc.finly.domain.auth.dto.res.AuthReissueRes;
-import com.umc.finly.domain.auth.dto.res.AuthSignUpRes;
-import com.umc.finly.domain.auth.dto.res.CheckEmailRes;
+import com.umc.finly.domain.auth.dto.req.AuthLoginReqDTO;
+import com.umc.finly.domain.auth.dto.req.AuthSignUpReqDTO;
+import com.umc.finly.domain.auth.dto.res.AuthLoginResDTO;
+import com.umc.finly.domain.auth.dto.res.AuthReissueResDTO;
+import com.umc.finly.domain.auth.dto.res.AuthSignUpResDTO;
+import com.umc.finly.domain.auth.dto.res.CheckEmailResDTO;
 import com.umc.finly.domain.auth.exception.AuthErrorCode;
 import com.umc.finly.domain.auth.service.AuthService;
 import com.umc.finly.global.apiPayload.exception.CustomException;
@@ -33,7 +33,7 @@ public class AuthController {
 
     // 이메일 중복 확인
     @GetMapping("/check-email")
-    public ApiResponse<CheckEmailRes> checkEmail(
+    public ApiResponse<CheckEmailResDTO> checkEmail(
             @RequestParam("email")
             @NotBlank(message = "유효한 이메일을 입력해 주세요.")
             @Email(message = "유효한 이메일을 입력해 주세요.")
@@ -46,22 +46,22 @@ public class AuthController {
             throw new CustomException(AuthErrorCode.EMAIL_ALREADY_EXISTS);
         }
 
-        return ApiResponse.onSuccess(CheckEmailRes.of(true),
+        return ApiResponse.onSuccess(CheckEmailResDTO.of(true),
                 SuccessCode.OK
         );
     }
 
     // 회원가입
     @PostMapping("/signup")
-    public ApiResponse<AuthSignUpRes> signup(@RequestBody @Valid AuthSignUpReq request){
-        AuthSignUpRes result = authService.signup(request);
+    public ApiResponse<AuthSignUpResDTO> signup(@RequestBody @Valid AuthSignUpReqDTO request){
+        AuthSignUpResDTO result = authService.signup(request);
         return ApiResponse.onSuccess(result, SuccessCode.CREATED);
     }
 
     // 로그인
     @PostMapping("/login")
-    public ApiResponse<AuthLoginRes> login(
-            @RequestBody @Valid AuthLoginReq request,
+    public ApiResponse<AuthLoginResDTO> login(
+            @RequestBody @Valid AuthLoginReqDTO request,
             HttpServletResponse response
             ){
         AuthService.LoginTokens tokens = authService.login(request);
@@ -77,7 +77,7 @@ public class AuthController {
 
     // 토큰 재발급
     @PostMapping("/reissue")
-    public ApiResponse<AuthReissueRes> reissue(
+    public ApiResponse<AuthReissueResDTO> reissue(
             @CookieValue(value = "refreshToken", required = false) String refreshToken,
             HttpServletResponse response
     ){
@@ -85,7 +85,7 @@ public class AuthController {
         cookieUtil.addRefreshTokenCookie(response, tokens.refreshToken(), tokens.refreshMaxAgeSeconds());
 
         return ApiResponse.onSuccess(
-                AuthReissueRes.of(tokens.accessToken()),
+                AuthReissueResDTO.of(tokens.accessToken()),
                 SuccessCode.OK
         );
     }

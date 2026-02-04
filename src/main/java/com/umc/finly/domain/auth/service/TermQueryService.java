@@ -1,7 +1,7 @@
 package com.umc.finly.domain.auth.service;
 
-import com.umc.finly.domain.auth.dto.res.TermRes;
+import com.umc.finly.domain.auth.dto.res.TermResDTO;
 
 public interface TermQueryService {
-    TermRes.TermList getTerms();
+    TermResDTO.TermList getTerms();
 }

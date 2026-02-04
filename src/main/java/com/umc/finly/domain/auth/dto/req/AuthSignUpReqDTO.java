@@ -16,7 +16,7 @@ import java.util.List;
 @NoArgsConstructor
 @AllArgsConstructor
 @Builder
-public class AuthSignUpReq {
+public class AuthSignUpReqDTO {
 
     @NotBlank(message = "email은 필수입니다.")
     @Email(message = "email 형식이 올바르지 않습니다.")

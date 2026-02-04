@@ -9,7 +9,7 @@ import lombok.NoArgsConstructor;
 @NoArgsConstructor
 @AllArgsConstructor
 @Builder
-public class AuthSignUpRes {
+public class AuthSignUpResDTO {
     private Long memberId;
     private String email;
     private String nickname;
