@@ -18,14 +18,13 @@ public enum AuthErrorCode implements BaseCode {
 
     // 401
     INVALID_LOGIN_PASSWORD(HttpStatus.UNAUTHORIZED, "AUTH401_1", "이메일 또는 비밀번호가 올바르지 않습니다."),
-    UNAUTHORIZED(HttpStatus.UNAUTHORIZED, "AUTH401_2", "인증이 필요합니다. "),
+    UNAUTHORIZED(HttpStatus.UNAUTHORIZED, "AUTH401_2", "인증이 필요합니다."),
     ACCESS_TOKEN_EXPIRED(HttpStatus.UNAUTHORIZED, "AUTH401_3", "액세스 토큰이 만료되었습니다."),
     INVALID_ACCESS_TOKEN(HttpStatus.UNAUTHORIZED, "AUTH401_4", "유효하지 않은 액세스 토큰입니다."),
-
     REFRESH_TOKEN_MISSING(HttpStatus.UNAUTHORIZED, "AUTH401_5", "refreshToken 쿠키가 없습니다."),
-    REFRESH_TOKEN_EXPIRED(HttpStatus.UNAUTHORIZED, "AUTH401_6", "refreshToken 이 만료되었습니다."),
-    INVALID_REFRESH_TOKEN(HttpStatus.UNAUTHORIZED, "AUTH401_7", "유효하지 않은 refreshToken 입니다."),
-    REFRESH_TOKEN_MISMATCH(HttpStatus.UNAUTHORIZED, "AUTH401_8", "서버에 저장된 refreshToken 과 일치하지 않습니다."),
+    REFRESH_TOKEN_EXPIRED(HttpStatus.UNAUTHORIZED, "AUTH401_6", "refreshToken이 만료되었습니다."),
+    INVALID_REFRESH_TOKEN(HttpStatus.UNAUTHORIZED, "AUTH401_7", "유효하지 않은 refreshToken입니다."),
+    REFRESH_TOKEN_MISMATCH(HttpStatus.UNAUTHORIZED, "AUTH401_8", "서버에 저장된 refreshToken과 일치하지 않습니다."),
 
     //403
     FORBIDDEN(HttpStatus.FORBIDDEN, "AUTH403", "접근 권한이 없습니다."),
