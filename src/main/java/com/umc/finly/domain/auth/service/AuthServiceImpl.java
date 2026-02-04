@@ -19,6 +19,8 @@ import com.umc.finly.domain.member.repository.MemberTermRepository;
 import com.umc.finly.domain.member.service.PersonaScoringService;
 import com.umc.finly.global.apiPayload.exception.CustomException;
 import com.umc.finly.global.infra.jwt.JwtProvider;
+import io.jsonwebtoken.ExpiredJwtException;
+import io.jsonwebtoken.JwtException;
 import lombok.RequiredArgsConstructor;
 import org.springframework.security.crypto.password.PasswordEncoder;
 import org.springframework.stereotype.Service;
@@ -153,41 +155,43 @@ public class AuthServiceImpl implements AuthService {
 
     /** 토큰 재발급 **/
     @Override
-    public ReissueTokens reissue(String refreshToken){
+    public ReissueTokens reissue(String refreshToken) {
 
-        if (refreshToken == null || refreshToken.isBlank()){
+        if (refreshToken == null || refreshToken.isBlank()) {
             throw new CustomException(AuthErrorCode.REFRESH_TOKEN_MISSING);
         }
 
-        // 1) refresh 토큰 1차 검증 : 서명/만료
-        if (!jwtProvider.validateRefreshToken(refreshToken)){
+        // 1) refresh 토큰 1차 검증 (서명/만료/type)
+        try {
+            jwtProvider.assertRefreshToken(refreshToken);
+        } catch (ExpiredJwtException e) {
+            throw new CustomException(AuthErrorCode.REFRESH_TOKEN_EXPIRED); // 또는 TOKEN_EXPIRED 정책에 맞게
+        } catch (JwtException | IllegalArgumentException e) {
             throw new CustomException(AuthErrorCode.INVALID_REFRESH_TOKEN);
         }
 
-        // 2) type = refresh 확인
-        String type = jwtProvider.getType(refreshToken);
-        if (!"refresh".equals(type)) {
+        // 2) memberId/email 추출
+        Long memberId;
+        String email;
+        try {
+            memberId = jwtProvider.getMemberId(refreshToken);
+            email = jwtProvider.getEmail(refreshToken);
+        } catch (ExpiredJwtException e) {
+            throw new CustomException(AuthErrorCode.REFRESH_TOKEN_EXPIRED);
+        } catch (JwtException | IllegalArgumentException e) {
             throw new CustomException(AuthErrorCode.INVALID_REFRESH_TOKEN);
         }
-
-        // 3) memberId/email 추출
-        Long memberId = jwtProvider.getMemberId(refreshToken);
-        String email = jwtProvider.getEmail(refreshToken);
 
         Member member = memberRepository.findById(memberId)
                 .orElseThrow(() -> new CustomException(AuthErrorCode.INVALID_REFRESH_TOKEN));
 
-        // 4) DB 검증
-        if (member.getRefreshToken() == null || !member.getRefreshToken().equals(refreshToken)) {
-            throw new CustomException(AuthErrorCode.REFRESH_TOKEN_MISMATCH);
-        }
-
+        // 3) DB 만료 검증 (서버 저장 만료 시각)
         LocalDateTime expiredAt = member.getRefreshTokenExpiredAt();
-        if (expiredAt == null || expiredAt.isBefore(LocalDateTime.now()) || expiredAt.isEqual(LocalDateTime.now())) {
+        if (expiredAt == null || !expiredAt.isAfter(LocalDateTime.now())) {
             throw new CustomException(AuthErrorCode.REFRESH_TOKEN_EXPIRED);
         }
 
-        // 5) 새 accessToken 발급
+        // 4) 새 토큰 발급
         String newAccessToken = jwtProvider.createAccessToken(memberId, email);
 
         String newRefreshToken = jwtProvider.createRefreshToken(memberId, email);
@@ -195,8 +199,19 @@ public class AuthServiceImpl implements AuthService {
                 jwtProvider.getExpiration(newRefreshToken).toInstant(),
                 ZoneId.systemDefault()
         );
-        member.updateRefreshToken(newRefreshToken, newRefreshExpiredAt);
-        memberRepository.save(member);
+
+        // 5) CAS로 refreshToken 회전 (경쟁 조건 차단)
+        int updated = memberRepository.rotateRefreshToken(
+                memberId,
+                refreshToken,          // old token
+                newRefreshToken,       // new token
+                newRefreshExpiredAt
+        );
+
+        if (updated == 0) {
+            // 동시에 다른 요청이 먼저 회전시켰거나, 서버 저장 토큰과 불일치
+            throw new CustomException(AuthErrorCode.REFRESH_TOKEN_MISMATCH);
+        }
 
         long refreshMaxAgeSeconds = Math.max(
                 0,
@@ -205,6 +220,7 @@ public class AuthServiceImpl implements AuthService {
 
         return new ReissueTokens(newAccessToken, newRefreshToken, refreshMaxAgeSeconds);
     }
+
 
     // -----------------------------------------------------------
     private boolean isValidPassword(String raw) {

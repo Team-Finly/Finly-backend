@@ -1,6 +1,7 @@
 package com.umc.finly.global.infra.jwt;
 
 import io.jsonwebtoken.Claims;
+import io.jsonwebtoken.ExpiredJwtException;
 import io.jsonwebtoken.JwtException;
 import io.jsonwebtoken.Jwts;
 import io.jsonwebtoken.SignatureAlgorithm;
@@ -69,6 +70,14 @@ public class JwtProvider {
 
     public Date getExpiration(String token) {
         return parseClaims(token).getExpiration();
+    }
+
+    public void assertRefreshToken(String token) throws ExpiredJwtException, JwtException {
+        Claims claims = parseClaims(token); // 여기서 만료/무효 예외 그대로 올라감
+        String type = claims.get("type", String.class);
+        if (!"refresh".equals(type)) {
+            throw new JwtException("Not a refresh token");
+        }
     }
 
     private String buildToken(Long memberId, String email, String type, long expireMs) {
