@@ -13,13 +13,14 @@ import com.umc.finly.domain.member.dto.request.PersonaAnswerReq;
 import com.umc.finly.domain.member.entity.Member;
 import com.umc.finly.domain.member.entity.Persona;
 import com.umc.finly.domain.member.entity.mapping.MembersPersonasResult;
-import com.umc.finly.domain.member.exception.MemberErrorCode;
 import com.umc.finly.domain.member.repository.MemberPersonaResultRepository;
 import com.umc.finly.domain.member.repository.MemberRepository;
 import com.umc.finly.domain.member.repository.MemberTermRepository;
 import com.umc.finly.domain.member.service.PersonaScoringService;
 import com.umc.finly.global.apiPayload.exception.CustomException;
 import com.umc.finly.global.infra.jwt.JwtProvider;
+import io.jsonwebtoken.ExpiredJwtException;
+import io.jsonwebtoken.JwtException;
 import lombok.RequiredArgsConstructor;
 import org.springframework.security.crypto.password.PasswordEncoder;
 import org.springframework.stereotype.Service;
@@ -151,6 +152,85 @@ public class AuthServiceImpl implements AuthService {
 
         return new LoginTokens(result, refreshToken, refreshMaxAgeSeconds);
     }
+
+    /** 토큰 재발급 **/
+    @Override
+    public ReissueTokens reissue(String refreshToken) {
+
+        // 0) refreshToken 존재 체크 + 정규화
+        if (refreshToken == null) {
+            throw new CustomException(AuthErrorCode.REFRESH_TOKEN_MISSING);
+        }
+
+        String rawRefreshToken = refreshToken.trim();
+        while (rawRefreshToken.startsWith("Bearer ")) {
+            rawRefreshToken = rawRefreshToken.substring(7).trim();
+        }
+        if (rawRefreshToken.isBlank()) {
+            throw new CustomException(AuthErrorCode.REFRESH_TOKEN_MISSING);
+        }
+
+        // 1) refresh 토큰 1차 검증 (서명/만료/type=refresh) + 만료/무효 매핑
+        try {
+            jwtProvider.assertRefreshToken(rawRefreshToken);
+        } catch (ExpiredJwtException e) {
+            throw new CustomException(AuthErrorCode.REFRESH_TOKEN_EXPIRED);
+        } catch (JwtException | IllegalArgumentException e) {
+            throw new CustomException(AuthErrorCode.INVALID_REFRESH_TOKEN);
+        }
+
+        // 2) memberId 추출
+        final Long memberId;
+        try {
+            memberId = jwtProvider.getMemberId(rawRefreshToken);
+        } catch (ExpiredJwtException e) {
+            throw new CustomException(AuthErrorCode.REFRESH_TOKEN_EXPIRED);
+        } catch (JwtException | IllegalArgumentException e) {
+            throw new CustomException(AuthErrorCode.INVALID_REFRESH_TOKEN);
+        }
+
+        // 3) Member 조회 + 최신 email 사용
+        Member member = memberRepository.findById(memberId)
+                .orElseThrow(() -> new CustomException(AuthErrorCode.INVALID_REFRESH_TOKEN));
+
+        String email = member.getEmail();
+
+        // 4) DB 만료 검증 (서버 저장 만료 시각)
+        LocalDateTime expiredAt = member.getRefreshTokenExpiredAt();
+        if (expiredAt == null || !expiredAt.isAfter(LocalDateTime.now())) {
+            throw new CustomException(AuthErrorCode.REFRESH_TOKEN_EXPIRED);
+        }
+
+        // 5) 새 토큰 발급
+        String newAccessToken = jwtProvider.createAccessToken(memberId, email);
+
+        String newRefreshToken = jwtProvider.createRefreshToken(memberId, email);
+        LocalDateTime newRefreshExpiredAt = LocalDateTime.ofInstant(
+                jwtProvider.getExpiration(newRefreshToken).toInstant(),
+                ZoneId.systemDefault()
+        );
+
+        // 6) CAS로 refreshToken 회전 (경쟁 조건 차단)
+        int updated = memberRepository.rotateRefreshToken(
+                memberId,
+                rawRefreshToken,     // old token
+                newRefreshToken,     // new token
+                newRefreshExpiredAt
+        );
+
+        if (updated == 0) {
+            // 동시에 다른 요청이 먼저 회전시켰거나, 서버 저장 토큰과 불일치
+            throw new CustomException(AuthErrorCode.REFRESH_TOKEN_MISMATCH);
+        }
+
+        long refreshMaxAgeSeconds = Math.max(
+                0,
+                (jwtProvider.getExpiration(newRefreshToken).getTime() - System.currentTimeMillis()) / 1000
+        );
+
+        return new ReissueTokens(newAccessToken, newRefreshToken, refreshMaxAgeSeconds);
+    }
+
 
     // -----------------------------------------------------------
     private boolean isValidPassword(String raw) {

@@ -12,9 +12,17 @@ public interface AuthService {
 
     LoginTokens login(AuthLoginReq request);
 
+    ReissueTokens reissue(String refreshToken);
+
     record LoginTokens(
             AuthLoginRes body,
             String refreshToken,
             long refreshMaxAgeSeconds
     ){}
+
+    record ReissueTokens(
+            String accessToken,
+            String refreshToken,
+            long refreshMaxAgeSeconds
+    ) {}
 }
