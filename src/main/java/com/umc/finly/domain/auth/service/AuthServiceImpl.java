@@ -172,10 +172,9 @@ public class AuthServiceImpl implements AuthService {
 
         // 2) memberId/email 추출
         Long memberId;
-        String email;
         try {
+            jwtProvider.assertRefreshToken(refreshToken);
             memberId = jwtProvider.getMemberId(refreshToken);
-            email = jwtProvider.getEmail(refreshToken);
         } catch (ExpiredJwtException e) {
             throw new CustomException(AuthErrorCode.REFRESH_TOKEN_EXPIRED);
         } catch (JwtException | IllegalArgumentException e) {
@@ -184,6 +183,7 @@ public class AuthServiceImpl implements AuthService {
 
         Member member = memberRepository.findById(memberId)
                 .orElseThrow(() -> new CustomException(AuthErrorCode.INVALID_REFRESH_TOKEN));
+        String email = member.getEmail();
 
         // 3) DB 만료 검증 (서버 저장 만료 시각)
         LocalDateTime expiredAt = member.getRefreshTokenExpiredAt();
