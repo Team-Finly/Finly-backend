@@ -5,7 +5,7 @@ import jakarta.validation.constraints.NotBlank;
 import lombok.Getter;
 
 @Getter
-public class AuthLoginReq {
+public class AuthLoginReqDTO {
     // 로그인 DTO
 
     @Email(message = "유효한 이메일이어야 합니다.")

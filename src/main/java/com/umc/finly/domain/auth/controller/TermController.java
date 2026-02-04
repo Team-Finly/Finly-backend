@@ -1,6 +1,6 @@
 package com.umc.finly.domain.auth.controller;
 
-import com.umc.finly.domain.auth.dto.res.TermRes;
+import com.umc.finly.domain.auth.dto.res.TermResDTO;
 import com.umc.finly.domain.auth.service.TermQueryService;
 import com.umc.finly.global.apiPayload.response.ApiResponse;
 import com.umc.finly.global.apiPayload.response.SuccessCode;
@@ -33,7 +33,7 @@ public class TermController {
                     """
     )
     @GetMapping
-    public ApiResponse<TermRes.TermList> getTerms(){
+    public ApiResponse<TermResDTO.TermList> getTerms(){
         return ApiResponse.onSuccess(termQueryService.getTerms(), SuccessCode.OK);
     }
 }

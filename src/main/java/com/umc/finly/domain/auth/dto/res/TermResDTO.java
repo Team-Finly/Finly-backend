@@ -8,7 +8,7 @@ import lombok.NoArgsConstructor;
 import java.util.List;
 
 // 약관 관련 API 응답 DTO
-public class TermRes {
+public class TermResDTO {
 
     // 약관 목록 응답 Wrapper
     @Getter

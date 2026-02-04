@@ -10,14 +10,14 @@ import java.time.LocalDateTime;
 @Builder
 @AllArgsConstructor
 @NoArgsConstructor(access = AccessLevel.PROTECTED)
-public class MyPagePersonaRes {
+public class MyPagePersonaResDTO {
 
     private PersonaUiType personaType;
     private LocalDateTime createdAt;
     private LocalDateTime updatedAt;
 
-    public static MyPagePersonaRes from(MembersPersonasResult result){
-        return MyPagePersonaRes.builder()
+    public static MyPagePersonaResDTO from(MembersPersonasResult result){
+        return MyPagePersonaResDTO.builder()
                 .personaType(result.getPersona().getPersonaType().toUiType())
                 .createdAt(result.getCreatedAt())
                 .updatedAt(result.getUpdatedAt())

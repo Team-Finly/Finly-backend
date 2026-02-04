@@ -1,7 +1,7 @@
 package com.umc.finly.domain.member.service;
 
-import com.umc.finly.domain.member.dto.response.PersonaTestOptionRes;
-import com.umc.finly.domain.member.dto.response.PersonaTestQuestionRes;
+import com.umc.finly.domain.member.dto.response.PersonaTestOptionResDTO;
+import com.umc.finly.domain.member.dto.response.PersonaTestQuestionResDTO;
 import com.umc.finly.domain.member.entity.PersonaTestQuestion;
 import com.umc.finly.domain.member.repository.PersonaTestOptionsRepository;
 import com.umc.finly.domain.member.repository.PersonaTestQuestionsRepository;
@@ -21,7 +21,7 @@ public class PersonasTestServiceImpl implements PersonaTestService {
 
     // 페르소나 테스트 질문 전체 조회
     @Override
-    public List<PersonaTestQuestionRes> getPersonasTestQuestions(){
+    public List<PersonaTestQuestionResDTO> getPersonasTestQuestions(){
 
         List<PersonaTestQuestion> questions =
                  questionRepository.findAllByOrderByQuestionCodeAsc();
@@ -29,13 +29,13 @@ public class PersonasTestServiceImpl implements PersonaTestService {
         // 각 질문에 대한 선택지 조회 후 DTO 변환
         return questions.stream()
                 .map(question->{
-                    List<PersonaTestOptionRes> options =
+                    List<PersonaTestOptionResDTO> options =
                             optionRepository
                                     .findByQuestionIdOrderByChoiceCodeAsc(question.getId())
                                     .stream()
-                                    .map(PersonaTestOptionRes::from)
+                                    .map(PersonaTestOptionResDTO::from)
                                     .toList();
-                    return PersonaTestQuestionRes.of(question, options);
+                    return PersonaTestQuestionResDTO.of(question, options);
                 })
                 .toList();
     }

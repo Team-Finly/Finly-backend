@@ -8,18 +8,18 @@ import java.util.List;
 
 @Getter
 @Builder
-public class PersonaTestQuestionRes {
+public class PersonaTestQuestionResDTO {
 
     private Long id;
     private String questionCode;
     private String content;
-    private List<PersonaTestOptionRes> options;
+    private List<PersonaTestOptionResDTO> options;
 
-    public static PersonaTestQuestionRes of(
+    public static PersonaTestQuestionResDTO of(
             PersonaTestQuestion question,
-            List<PersonaTestOptionRes> options
+            List<PersonaTestOptionResDTO> options
     ){
-        return PersonaTestQuestionRes.builder()
+        return PersonaTestQuestionResDTO.builder()
                 .id(question.getId())
                 .questionCode(question.getQuestionCode().name())
                 .content(question.getContent())

@@ -6,14 +6,14 @@ import lombok.Getter;
 
 @Getter
 @Builder
-public class PersonaTestOptionRes {
+public class PersonaTestOptionResDTO {
 
     private Long id;
     private String choiceCode;
     private String content;
 
-    public static PersonaTestOptionRes from(PersonaTestOption option){
-        return PersonaTestOptionRes.builder()
+    public static PersonaTestOptionResDTO from(PersonaTestOption option){
+        return PersonaTestOptionResDTO.builder()
                 .id(option.getId())
                 .choiceCode(option.getChoiceCode().name())
                 .content(option.getContent())

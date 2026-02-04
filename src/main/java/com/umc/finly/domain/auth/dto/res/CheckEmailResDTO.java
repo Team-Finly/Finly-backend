@@ -7,13 +7,13 @@ import lombok.Getter;
 @Getter
 @Builder
 @AllArgsConstructor
-public class CheckEmailRes {
+public class CheckEmailResDTO {
 
     private final boolean available;
 
     // 이메일 중복 확인
-    public static CheckEmailRes of(boolean available){
-        return CheckEmailRes.builder()
+    public static CheckEmailResDTO of(boolean available){
+        return CheckEmailResDTO.builder()
                 .available(available)
                 .build();
     }

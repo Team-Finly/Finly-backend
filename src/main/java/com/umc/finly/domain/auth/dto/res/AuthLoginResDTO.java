@@ -5,7 +5,7 @@ import lombok.Getter;
 
 @Getter
 @Builder
-public class AuthLoginRes {
+public class AuthLoginResDTO {
     // 로그인 응답 DTO
 
     private String accessToken;

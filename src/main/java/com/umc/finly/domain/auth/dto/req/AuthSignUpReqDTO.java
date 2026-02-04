@@ -1,6 +1,6 @@
 package com.umc.finly.domain.auth.dto.req;
 
-import com.umc.finly.domain.member.dto.request.PersonaAnswerReq;
+import com.umc.finly.domain.member.dto.request.PersonaAnswerReqDTO;
 import jakarta.validation.Valid;
 import jakarta.validation.constraints.Email;
 import jakarta.validation.constraints.NotBlank;
@@ -16,7 +16,7 @@ import java.util.List;
 @NoArgsConstructor
 @AllArgsConstructor
 @Builder
-public class AuthSignUpReq {
+public class AuthSignUpReqDTO {
 
     @NotBlank(message = "email은 필수입니다.")
     @Email(message = "email 형식이 올바르지 않습니다.")
@@ -34,7 +34,7 @@ public class AuthSignUpReq {
 
     @NotEmpty(message = "personaAnswers는 필수입니다.")
     @Valid
-    private List<PersonaAnswerReq> personaAnswers;
+    private List<PersonaAnswerReqDTO> personaAnswers;
 
     @Getter
     @NoArgsConstructor

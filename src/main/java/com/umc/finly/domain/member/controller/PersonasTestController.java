@@ -1,9 +1,9 @@
 package com.umc.finly.domain.member.controller;
 
 import com.umc.finly.domain.auth.exception.AuthErrorCode;
-import com.umc.finly.domain.member.dto.request.PersonaTestSubmitReq;
-import com.umc.finly.domain.member.dto.response.PersonaTestQuestionRes;
-import com.umc.finly.domain.member.dto.response.PersonaTestSubmitRes;
+import com.umc.finly.domain.member.dto.request.PersonaTestSubmitReqDTO;
+import com.umc.finly.domain.member.dto.response.PersonaTestQuestionResDTO;
+import com.umc.finly.domain.member.dto.response.PersonaTestSubmitResDTO;
 import com.umc.finly.domain.member.exception.MemberErrorCode;
 import com.umc.finly.domain.member.service.PersonaTestService;
 import com.umc.finly.domain.member.service.PersonaTestSubmitService;
@@ -44,7 +44,7 @@ public class PersonasTestController {
     )
     @GetMapping("/questions")
     public ApiResponse<QuestionListResponse> getPersonasTestQuestions(){
-        List<PersonaTestQuestionRes> questions =
+        List<PersonaTestQuestionResDTO> questions =
                 personasTestService.getPersonasTestQuestions();
 
         return ApiResponse.onSuccess(
@@ -70,9 +70,9 @@ public class PersonasTestController {
                 """
     )
     @PostMapping("/submit")
-    public ApiResponse<PersonaTestSubmitRes> submit(
+    public ApiResponse<PersonaTestSubmitResDTO> submit(
             @RequestParam("mode") String mode,
-            @RequestBody PersonaTestSubmitReq request,
+            @RequestBody PersonaTestSubmitReqDTO request,
             @AuthenticationPrincipal AuthPrincipal authPrincipal
             ){
         if (!"signup".equals(mode) && !"retest".equals(mode)) {
@@ -95,6 +95,6 @@ public class PersonasTestController {
 
     // questions 리스트 wrapper 응답 DTO
     private record QuestionListResponse(
-            List<PersonaTestQuestionRes> questions
+            List<PersonaTestQuestionResDTO> questions
     ){}
 }

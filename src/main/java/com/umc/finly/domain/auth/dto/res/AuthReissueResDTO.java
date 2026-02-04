@@ -7,12 +7,12 @@ import lombok.Getter;
 @Getter
 @Builder
 @AllArgsConstructor
-public class AuthReissueRes {
+public class AuthReissueResDTO {
 
     private String accessToken;
 
-    public static AuthReissueRes of(String accessToken){
-        return AuthReissueRes.builder()
+    public static AuthReissueResDTO of(String accessToken){
+        return AuthReissueResDTO.builder()
                 .accessToken(accessToken)
                 .build();
     }

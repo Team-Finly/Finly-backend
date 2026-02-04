@@ -4,13 +4,12 @@ import lombok.AllArgsConstructor;
 import lombok.Getter;
 import lombok.NoArgsConstructor;
 
-import java.util.List;
-
 @Getter
 @NoArgsConstructor
 @AllArgsConstructor
-public class PersonaTestSubmitReq {
-    //  페르소나 테스트 제출 요청 DTO
+public class PersonaAnswerReqDTO {
+    // 페르소나 질문별 선택 답안 DTO
 
-    private List<PersonaAnswerReq> answers;
+    private Long questionId;
+    private Long optionId;
 }

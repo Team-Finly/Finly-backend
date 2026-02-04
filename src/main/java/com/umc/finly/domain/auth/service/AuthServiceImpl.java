@@ -1,15 +1,15 @@
 package com.umc.finly.domain.auth.service;
 
-import com.umc.finly.domain.auth.dto.req.AuthLoginReq;
-import com.umc.finly.domain.auth.dto.req.AuthSignUpReq;
-import com.umc.finly.domain.auth.dto.res.AuthLoginRes;
-import com.umc.finly.domain.auth.dto.res.AuthSignUpRes;
+import com.umc.finly.domain.auth.dto.req.AuthLoginReqDTO;
+import com.umc.finly.domain.auth.dto.req.AuthSignUpReqDTO;
+import com.umc.finly.domain.auth.dto.res.AuthLoginResDTO;
+import com.umc.finly.domain.auth.dto.res.AuthSignUpResDTO;
 import com.umc.finly.domain.auth.entity.Term;
 import com.umc.finly.domain.auth.entity.mapping.MemberTerm;
 import com.umc.finly.domain.auth.enums.TermType;
 import com.umc.finly.domain.auth.exception.AuthErrorCode;
 import com.umc.finly.domain.auth.repository.TermRepository;
-import com.umc.finly.domain.member.dto.request.PersonaAnswerReq;
+import com.umc.finly.domain.member.dto.request.PersonaAnswerReqDTO;
 import com.umc.finly.domain.member.entity.Member;
 import com.umc.finly.domain.member.entity.Persona;
 import com.umc.finly.domain.member.entity.mapping.MembersPersonasResult;
@@ -65,7 +65,7 @@ public class AuthServiceImpl implements AuthService {
 
     /** 회원가입 **/
     @Override
-    public AuthSignUpRes signup(AuthSignUpReq request){
+    public AuthSignUpResDTO signup(AuthSignUpReqDTO request){
         // 1. 이메일 중복 체크
         if (memberRepository.existsByEmail(request.getEmail())){
             throw new CustomException(AuthErrorCode.EMAIL_ALREADY_EXISTS);
@@ -105,7 +105,7 @@ public class AuthServiceImpl implements AuthService {
         // 8. 약관 동의 저장
         saveTermAgreements(savedMember, agreedMap);
 
-        return AuthSignUpRes.builder()
+        return AuthSignUpResDTO.builder()
                 .memberId(savedMember.getId())
                 .email(savedMember.getEmail())
                 .nickname(savedMember.getNickname())
@@ -115,7 +115,7 @@ public class AuthServiceImpl implements AuthService {
 
     /** 로그인 **/
     @Override
-    public LoginTokens login(AuthLoginReq request){
+    public LoginTokens login(AuthLoginReqDTO request){
         // 멤버 매칭
         Member member = memberRepository.findByEmail(request.getEmail())
                 .orElseThrow(() -> new CustomException(AuthErrorCode.INVALID_LOGIN_PASSWORD));
@@ -136,9 +136,9 @@ public class AuthServiceImpl implements AuthService {
         member.updateRefreshToken(refreshToken, refreshExpiredAt);
         memberRepository.save(member);
 
-        AuthLoginRes result = AuthLoginRes.builder()
+        AuthLoginResDTO result = AuthLoginResDTO.builder()
                 .accessToken(accessToken)
-                .member(AuthLoginRes.MemberInfo.builder()
+                .member(AuthLoginResDTO.MemberInfo.builder()
                         .memberId(member.getId())
                         .email(member.getEmail())
                         .nickname(member.getNickname())
@@ -241,14 +241,14 @@ public class AuthServiceImpl implements AuthService {
         return nickname != null && nickname.matches(NICKNAME_REGEX);
     }
 
-    private Map<Long, Boolean> toAgreedMap(List<AuthSignUpReq.TermAgreementReq> agreements) {
+    private Map<Long, Boolean> toAgreedMap(List<AuthSignUpReqDTO.TermAgreementReq> agreements) {
         if (agreements == null || agreements.isEmpty()) {
             throw new CustomException(AuthErrorCode.INVALID_TERM_REQUEST);
         }
 
         // termId 중복 요청 방지 겸 정규화
         return agreements.stream().collect(Collectors.toMap(
-                AuthSignUpReq.TermAgreementReq::getTermId,
+                AuthSignUpReqDTO.TermAgreementReq::getTermId,
                 a -> Boolean.TRUE.equals(a.getAgreed()),
                 (a, b) -> a // 중복이면 앞값 유지
         ));
@@ -270,13 +270,13 @@ public class AuthServiceImpl implements AuthService {
         }
     }
 
-    private Persona resolvePersonaFromSignup(List<PersonaAnswerReq> answers) {
+    private Persona resolvePersonaFromSignup(List<PersonaAnswerReqDTO> answers) {
         if (answers == null || answers.isEmpty()) {
             throw new CustomException(AuthErrorCode.INVALID_PERSONA_ANSWERS);
         }
 
-        List<PersonaAnswerReq> convertedAnswers = answers.stream()
-                .map(a -> new PersonaAnswerReq(
+        List<PersonaAnswerReqDTO> convertedAnswers = answers.stream()
+                .map(a -> new PersonaAnswerReqDTO(
                         a.getQuestionId(),
                         a.getOptionId()
                 ))
