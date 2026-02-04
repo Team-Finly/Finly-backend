@@ -27,6 +27,13 @@ public enum MarketErrorCode implements BaseCode {
             "시장 지표 응답 형식이 올바르지 않습니다."
     ),
 
+    // 종목
+    MARKET_STOCK_NOT_FOUND(
+            ErrorCode.NOT_FOUND,
+            "MARKET404",
+            "종목을 찾을 수 없습니다."
+    ),
+
     // 인사이트
     MARKET_INSIGHT_NOT_FOUND(
             ErrorCode.NOT_FOUND,
