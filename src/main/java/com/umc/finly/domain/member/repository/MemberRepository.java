@@ -15,16 +15,12 @@ public interface MemberRepository extends JpaRepository<Member, Long> {
 
     @Modifying(clearAutomatically = true, flushAutomatically = true)
     @Query("""
-        update Member m
-           set m.refreshToken = :newToken,
-               m.refreshTokenExpiredAt = :newExpiredAt
-         where m.id = :memberId
-           and m.refreshToken = :oldToken
-    """)
-    int rotateRefreshToken(
-            @Param("memberId") Long memberId,
-            @Param("oldToken") String oldToken,
-            @Param("newToken") String newToken,
-            @Param("newExpiredAt") LocalDateTime newExpiredAt
-    );
+    update Member m
+       set m.refreshToken = :newToken,
+           m.refreshTokenExpiredAt = :newExpiredAt
+     where m.id = :memberId
+       and m.refreshToken = :oldToken
+""")
+    int rotateRefreshToken(Long memberId, String oldToken, String newToken, LocalDateTime newExpiredAt);
+
 }

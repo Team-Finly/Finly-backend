@@ -157,41 +157,51 @@ public class AuthServiceImpl implements AuthService {
     @Override
     public ReissueTokens reissue(String refreshToken) {
 
-        if (refreshToken == null || refreshToken.isBlank()) {
+        // 0) refreshToken 존재 체크 + 정규화
+        if (refreshToken == null) {
             throw new CustomException(AuthErrorCode.REFRESH_TOKEN_MISSING);
         }
 
-        // 1) refresh 토큰 1차 검증 (서명/만료/type)
-        try {
-            jwtProvider.assertRefreshToken(refreshToken);
-        } catch (ExpiredJwtException e) {
-            throw new CustomException(AuthErrorCode.REFRESH_TOKEN_EXPIRED); // 또는 TOKEN_EXPIRED 정책에 맞게
-        } catch (JwtException | IllegalArgumentException e) {
-            throw new CustomException(AuthErrorCode.INVALID_REFRESH_TOKEN);
+        String rawRefreshToken = refreshToken.trim();
+        while (rawRefreshToken.startsWith("Bearer ")) {
+            rawRefreshToken = rawRefreshToken.substring(7).trim();
+        }
+        if (rawRefreshToken.isBlank()) {
+            throw new CustomException(AuthErrorCode.REFRESH_TOKEN_MISSING);
         }
 
-        // 2) memberId/email 추출
-        Long memberId;
+        // 1) refresh 토큰 1차 검증 (서명/만료/type=refresh) + 만료/무효 매핑
         try {
-            jwtProvider.assertRefreshToken(refreshToken);
-            memberId = jwtProvider.getMemberId(refreshToken);
+            jwtProvider.assertRefreshToken(rawRefreshToken);
         } catch (ExpiredJwtException e) {
             throw new CustomException(AuthErrorCode.REFRESH_TOKEN_EXPIRED);
         } catch (JwtException | IllegalArgumentException e) {
             throw new CustomException(AuthErrorCode.INVALID_REFRESH_TOKEN);
         }
 
+        // 2) memberId 추출
+        final Long memberId;
+        try {
+            memberId = jwtProvider.getMemberId(rawRefreshToken);
+        } catch (ExpiredJwtException e) {
+            throw new CustomException(AuthErrorCode.REFRESH_TOKEN_EXPIRED);
+        } catch (JwtException | IllegalArgumentException e) {
+            throw new CustomException(AuthErrorCode.INVALID_REFRESH_TOKEN);
+        }
+
+        // 3) Member 조회 + 최신 email 사용
         Member member = memberRepository.findById(memberId)
                 .orElseThrow(() -> new CustomException(AuthErrorCode.INVALID_REFRESH_TOKEN));
+
         String email = member.getEmail();
 
-        // 3) DB 만료 검증 (서버 저장 만료 시각)
+        // 4) DB 만료 검증 (서버 저장 만료 시각)
         LocalDateTime expiredAt = member.getRefreshTokenExpiredAt();
         if (expiredAt == null || !expiredAt.isAfter(LocalDateTime.now())) {
             throw new CustomException(AuthErrorCode.REFRESH_TOKEN_EXPIRED);
         }
 
-        // 4) 새 토큰 발급
+        // 5) 새 토큰 발급
         String newAccessToken = jwtProvider.createAccessToken(memberId, email);
 
         String newRefreshToken = jwtProvider.createRefreshToken(memberId, email);
@@ -200,11 +210,11 @@ public class AuthServiceImpl implements AuthService {
                 ZoneId.systemDefault()
         );
 
-        // 5) CAS로 refreshToken 회전 (경쟁 조건 차단)
+        // 6) CAS로 refreshToken 회전 (경쟁 조건 차단)
         int updated = memberRepository.rotateRefreshToken(
                 memberId,
-                refreshToken,          // old token
-                newRefreshToken,       // new token
+                rawRefreshToken,     // old token
+                newRefreshToken,     // new token
                 newRefreshExpiredAt
         );
 

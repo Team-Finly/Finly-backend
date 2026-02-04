@@ -111,4 +111,9 @@ public class JwtProvider {
         }
         return raw;
     }
+
+    public String normalize(String token) {
+        return resolveToken(token);
+    }
+
 }
