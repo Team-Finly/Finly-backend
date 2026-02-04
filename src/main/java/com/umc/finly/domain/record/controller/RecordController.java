@@ -1,13 +1,6 @@
 package com.umc.finly.domain.record.controller;
 
-import com.umc.finly.domain.record.dto.DailyReportRes;
-import com.umc.finly.domain.record.dto.RecordCreateReq;
-import com.umc.finly.domain.record.dto.RecordCreateRes;
-import com.umc.finly.domain.record.dto.RecordDetailRes;
-import com.umc.finly.domain.record.dto.RecordFeedbackRes;
-import com.umc.finly.domain.record.dto.RecordUpdateReq;
-import com.umc.finly.domain.record.dto.RecordUpdateRes;
-import com.umc.finly.domain.record.dto.TodayRecordRes;
+import com.umc.finly.domain.record.dto.*;
 import com.umc.finly.domain.record.service.RecordFeedbackService;
 import com.umc.finly.domain.record.service.RecordService;
 import com.umc.finly.global.apiPayload.response.ApiResponse;
