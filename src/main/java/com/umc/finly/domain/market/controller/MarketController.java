@@ -1,7 +1,7 @@
 package com.umc.finly.domain.market.controller;
 
-import com.umc.finly.domain.market.dto.MarketIndexResponse;
-import com.umc.finly.domain.market.dto.MarketInsightResponse;
+import com.umc.finly.domain.market.dto.MarketIndexResDTO;
+import com.umc.finly.domain.market.dto.MarketInsightResDTO;
 import com.umc.finly.domain.market.service.MarketIndexService;
 import com.umc.finly.domain.market.service.MarketInsightService;
 import com.umc.finly.global.apiPayload.response.ApiResponse;
@@ -17,7 +17,7 @@ public class MarketController {
     private final MarketInsightService marketInsightService;
 
     @GetMapping("/index")
-    public ApiResponse<MarketIndexResponse> getMarketIndex() {
+    public ApiResponse<MarketIndexResDTO> getMarketIndex() {
 
         return ApiResponse.onSuccess(
                 marketIndexService.getMarketIndex(),
@@ -26,7 +26,7 @@ public class MarketController {
     }
     // 실시간 인사이트 조회
     @GetMapping("/insight")
-    public ApiResponse<MarketInsightResponse> getInsightMarketIndex() {
+    public ApiResponse<MarketInsightResDTO> getInsightMarketIndex() {
         return ApiResponse.onSuccess(
                 marketInsightService.getMarketInsight(),
                 SuccessCode.OK

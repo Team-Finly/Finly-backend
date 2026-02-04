@@ -1,6 +1,6 @@
 package com.umc.finly.domain.auth.service;
 
-import com.umc.finly.domain.auth.dto.res.TermRes;
+import com.umc.finly.domain.auth.dto.res.TermResDTO;
 import com.umc.finly.domain.auth.entity.Term;
 import com.umc.finly.domain.auth.repository.TermRepository;
 import lombok.RequiredArgsConstructor;
@@ -19,18 +19,18 @@ public class TermQueryServiceImpl implements TermQueryService{
 
     // 약관 목록 조회
     @Override
-    public TermRes.TermList getTerms(){
+    public TermResDTO.TermList getTerms(){
         List<Term> terms = termRepository.findAllByOrderByIdAsc();
 
-        List<TermRes.TermItem> items = terms.stream()
-                .map(t -> TermRes.TermItem.builder()
+        List<TermResDTO.TermItem> items = terms.stream()
+                .map(t -> TermResDTO.TermItem.builder()
                         .termId(t.getId())
                         .title(t.getTitle())
                         .required(t.getTermType().isRequired())
                         .type(t.getTermType().name())
                         .build())
                 .toList();
-        return TermRes.TermList.builder()
+        return TermResDTO.TermList.builder()
                 .terms(items)
                 .build();
     }

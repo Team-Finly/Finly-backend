@@ -1,20 +1,28 @@
 package com.umc.finly.domain.auth.service;
 
-import com.umc.finly.domain.auth.dto.req.AuthLoginReq;
-import com.umc.finly.domain.auth.dto.req.AuthSignUpReq;
-import com.umc.finly.domain.auth.dto.res.AuthLoginRes;
-import com.umc.finly.domain.auth.dto.res.AuthSignUpRes;
+import com.umc.finly.domain.auth.dto.req.AuthLoginReqDTO;
+import com.umc.finly.domain.auth.dto.req.AuthSignUpReqDTO;
+import com.umc.finly.domain.auth.dto.res.AuthLoginResDTO;
+import com.umc.finly.domain.auth.dto.res.AuthSignUpResDTO;
 
 public interface AuthService {
     boolean isEmailAvailable(String email);
 
-    AuthSignUpRes signup(AuthSignUpReq request);
+    AuthSignUpResDTO signup(AuthSignUpReqDTO request);
 
-    LoginTokens login(AuthLoginReq request);
+    LoginTokens login(AuthLoginReqDTO request);
+
+    ReissueTokens reissue(String refreshToken);
 
     record LoginTokens(
-            AuthLoginRes body,
+            AuthLoginResDTO body,
             String refreshToken,
             long refreshMaxAgeSeconds
     ){}
+
+    record ReissueTokens(
+            String accessToken,
+            String refreshToken,
+            long refreshMaxAgeSeconds
+    ) {}
 }

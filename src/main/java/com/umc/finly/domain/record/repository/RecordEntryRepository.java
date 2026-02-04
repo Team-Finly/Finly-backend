@@ -14,7 +14,8 @@ public interface RecordEntryRepository extends JpaRepository<RecordEntry, Long> 
     boolean existsByClientRequestId(String clientRequestId);
     List<RecordEntry> findByMemberIdOrderByRecordDateDesc(Long memberId, Pageable pageable);
     List<RecordEntry> findByMemberIdAndRecordDateOrderByCreatedAtAsc(Long memberId, LocalDate recordDate);
-
+    List<RecordEntry> findAllByMemberIdAndStockId(Long memberId, Long stockId);
+    
     // fragment
     long countByMemberId(Long memberId); // 해당 회원이 기록한 전체 기록 개수
 
