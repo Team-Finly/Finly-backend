@@ -26,4 +26,17 @@ public class CookieUtil {
 
         response.addHeader("Set-Cookie", cookie.toString());
     }
+
+    // 로그아웃/강제삭제용
+    public void clearRefreshTokenCookie(HttpServletResponse response) {
+        ResponseCookie cookie = ResponseCookie.from("refreshToken", "")
+                .httpOnly(true)
+                .secure(cookieProperties.isSecure())
+                .path(cookieProperties.getPath())
+                .sameSite(cookieProperties.getSameSite())
+                .maxAge(0)
+                .build();
+
+        response.addHeader("Set-Cookie", cookie.toString());
+    }
 }

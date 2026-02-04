@@ -1,6 +1,6 @@
 package com.umc.finly.domain.member.service;
 
-import com.umc.finly.domain.member.dto.request.PersonaAnswerReq;
+import com.umc.finly.domain.member.dto.request.PersonaAnswerReqDTO;
 import com.umc.finly.domain.member.entity.Persona;
 import com.umc.finly.domain.member.entity.PersonaTestOption;
 import com.umc.finly.domain.member.entity.PersonaTestQuestion;
@@ -38,7 +38,7 @@ public class PersonaScoringService {
      * - 선택지가 해당 질문에 속하는지
      * - Q1~Q3 전부 제출 여부
      */
-    public Persona resolvePersona(List<PersonaAnswerReq> answers) {
+    public Persona resolvePersona(List<PersonaAnswerReqDTO> answers) {
         validateAnswersRequired(answers);
 
         Map<QuestionCode, ChoiceCode> answerMap = validateAndMapAnswers(answers);
@@ -49,7 +49,7 @@ public class PersonaScoringService {
                 .orElseThrow(() -> new CustomException(MemberErrorCode.PERSONA_RESULT_NOT_FOUND));
     }
 
-    private void validateAnswersRequired(List<PersonaAnswerReq> answers) {
+    private void validateAnswersRequired(List<PersonaAnswerReqDTO> answers) {
         if (answers == null || answers.size() != 3) {
             throw new CustomException(MemberErrorCode.PERSONA_ANSWERS_REQUIRED);
         }
@@ -58,10 +58,10 @@ public class PersonaScoringService {
     /**
      * questionId -> QuestionCode, optionId -> ChoiceCode 를 매핑하며 정합성 검증을 수행한다.
      */
-    private Map<QuestionCode, ChoiceCode> validateAndMapAnswers(List<PersonaAnswerReq> answers) {
+    private Map<QuestionCode, ChoiceCode> validateAndMapAnswers(List<PersonaAnswerReqDTO> answers) {
         Map<QuestionCode, ChoiceCode> answerMap = new EnumMap<>(QuestionCode.class);
 
-        for (PersonaAnswerReq answer : answers) {
+        for (PersonaAnswerReqDTO answer : answers) {
             PersonaTestQuestion question = questionRepository.findById(answer.getQuestionId())
                     .orElseThrow(() -> new CustomException(MemberErrorCode.INVALID_PERSONA_ANSWER));
 

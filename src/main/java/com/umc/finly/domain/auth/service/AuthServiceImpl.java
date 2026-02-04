@@ -1,25 +1,26 @@
 package com.umc.finly.domain.auth.service;
 
-import com.umc.finly.domain.auth.dto.req.AuthLoginReq;
-import com.umc.finly.domain.auth.dto.req.AuthSignUpReq;
-import com.umc.finly.domain.auth.dto.res.AuthLoginRes;
-import com.umc.finly.domain.auth.dto.res.AuthSignUpRes;
+import com.umc.finly.domain.auth.dto.req.AuthLoginReqDTO;
+import com.umc.finly.domain.auth.dto.req.AuthSignUpReqDTO;
+import com.umc.finly.domain.auth.dto.res.AuthLoginResDTO;
+import com.umc.finly.domain.auth.dto.res.AuthSignUpResDTO;
 import com.umc.finly.domain.auth.entity.Term;
 import com.umc.finly.domain.auth.entity.mapping.MemberTerm;
 import com.umc.finly.domain.auth.enums.TermType;
 import com.umc.finly.domain.auth.exception.AuthErrorCode;
 import com.umc.finly.domain.auth.repository.TermRepository;
-import com.umc.finly.domain.member.dto.request.PersonaAnswerReq;
+import com.umc.finly.domain.member.dto.request.PersonaAnswerReqDTO;
 import com.umc.finly.domain.member.entity.Member;
 import com.umc.finly.domain.member.entity.Persona;
 import com.umc.finly.domain.member.entity.mapping.MembersPersonasResult;
-import com.umc.finly.domain.member.exception.MemberErrorCode;
 import com.umc.finly.domain.member.repository.MemberPersonaResultRepository;
 import com.umc.finly.domain.member.repository.MemberRepository;
 import com.umc.finly.domain.member.repository.MemberTermRepository;
 import com.umc.finly.domain.member.service.PersonaScoringService;
 import com.umc.finly.global.apiPayload.exception.CustomException;
 import com.umc.finly.global.infra.jwt.JwtProvider;
+import io.jsonwebtoken.ExpiredJwtException;
+import io.jsonwebtoken.JwtException;
 import lombok.RequiredArgsConstructor;
 import org.springframework.security.crypto.password.PasswordEncoder;
 import org.springframework.stereotype.Service;
@@ -64,7 +65,7 @@ public class AuthServiceImpl implements AuthService {
 
     /** 회원가입 **/
     @Override
-    public AuthSignUpRes signup(AuthSignUpReq request){
+    public AuthSignUpResDTO signup(AuthSignUpReqDTO request){
         // 1. 이메일 중복 체크
         if (memberRepository.existsByEmail(request.getEmail())){
             throw new CustomException(AuthErrorCode.EMAIL_ALREADY_EXISTS);
@@ -104,7 +105,7 @@ public class AuthServiceImpl implements AuthService {
         // 8. 약관 동의 저장
         saveTermAgreements(savedMember, agreedMap);
 
-        return AuthSignUpRes.builder()
+        return AuthSignUpResDTO.builder()
                 .memberId(savedMember.getId())
                 .email(savedMember.getEmail())
                 .nickname(savedMember.getNickname())
@@ -114,7 +115,7 @@ public class AuthServiceImpl implements AuthService {
 
     /** 로그인 **/
     @Override
-    public LoginTokens login(AuthLoginReq request){
+    public LoginTokens login(AuthLoginReqDTO request){
         // 멤버 매칭
         Member member = memberRepository.findByEmail(request.getEmail())
                 .orElseThrow(() -> new CustomException(AuthErrorCode.INVALID_LOGIN_PASSWORD));
@@ -135,9 +136,9 @@ public class AuthServiceImpl implements AuthService {
         member.updateRefreshToken(refreshToken, refreshExpiredAt);
         memberRepository.save(member);
 
-        AuthLoginRes result = AuthLoginRes.builder()
+        AuthLoginResDTO result = AuthLoginResDTO.builder()
                 .accessToken(accessToken)
-                .member(AuthLoginRes.MemberInfo.builder()
+                .member(AuthLoginResDTO.MemberInfo.builder()
                         .memberId(member.getId())
                         .email(member.getEmail())
                         .nickname(member.getNickname())
@@ -152,6 +153,85 @@ public class AuthServiceImpl implements AuthService {
         return new LoginTokens(result, refreshToken, refreshMaxAgeSeconds);
     }
 
+    /** 토큰 재발급 **/
+    @Override
+    public ReissueTokens reissue(String refreshToken) {
+
+        // 0) refreshToken 존재 체크 + 정규화
+        if (refreshToken == null) {
+            throw new CustomException(AuthErrorCode.REFRESH_TOKEN_MISSING);
+        }
+
+        String rawRefreshToken = refreshToken.trim();
+        while (rawRefreshToken.startsWith("Bearer ")) {
+            rawRefreshToken = rawRefreshToken.substring(7).trim();
+        }
+        if (rawRefreshToken.isBlank()) {
+            throw new CustomException(AuthErrorCode.REFRESH_TOKEN_MISSING);
+        }
+
+        // 1) refresh 토큰 1차 검증 (서명/만료/type=refresh) + 만료/무효 매핑
+        try {
+            jwtProvider.assertRefreshToken(rawRefreshToken);
+        } catch (ExpiredJwtException e) {
+            throw new CustomException(AuthErrorCode.REFRESH_TOKEN_EXPIRED);
+        } catch (JwtException | IllegalArgumentException e) {
+            throw new CustomException(AuthErrorCode.INVALID_REFRESH_TOKEN);
+        }
+
+        // 2) memberId 추출
+        final Long memberId;
+        try {
+            memberId = jwtProvider.getMemberId(rawRefreshToken);
+        } catch (ExpiredJwtException e) {
+            throw new CustomException(AuthErrorCode.REFRESH_TOKEN_EXPIRED);
+        } catch (JwtException | IllegalArgumentException e) {
+            throw new CustomException(AuthErrorCode.INVALID_REFRESH_TOKEN);
+        }
+
+        // 3) Member 조회 + 최신 email 사용
+        Member member = memberRepository.findById(memberId)
+                .orElseThrow(() -> new CustomException(AuthErrorCode.INVALID_REFRESH_TOKEN));
+
+        String email = member.getEmail();
+
+        // 4) DB 만료 검증 (서버 저장 만료 시각)
+        LocalDateTime expiredAt = member.getRefreshTokenExpiredAt();
+        if (expiredAt == null || !expiredAt.isAfter(LocalDateTime.now())) {
+            throw new CustomException(AuthErrorCode.REFRESH_TOKEN_EXPIRED);
+        }
+
+        // 5) 새 토큰 발급
+        String newAccessToken = jwtProvider.createAccessToken(memberId, email);
+
+        String newRefreshToken = jwtProvider.createRefreshToken(memberId, email);
+        LocalDateTime newRefreshExpiredAt = LocalDateTime.ofInstant(
+                jwtProvider.getExpiration(newRefreshToken).toInstant(),
+                ZoneId.systemDefault()
+        );
+
+        // 6) CAS로 refreshToken 회전 (경쟁 조건 차단)
+        int updated = memberRepository.rotateRefreshToken(
+                memberId,
+                rawRefreshToken,     // old token
+                newRefreshToken,     // new token
+                newRefreshExpiredAt
+        );
+
+        if (updated == 0) {
+            // 동시에 다른 요청이 먼저 회전시켰거나, 서버 저장 토큰과 불일치
+            throw new CustomException(AuthErrorCode.REFRESH_TOKEN_MISMATCH);
+        }
+
+        long refreshMaxAgeSeconds = Math.max(
+                0,
+                (jwtProvider.getExpiration(newRefreshToken).getTime() - System.currentTimeMillis()) / 1000
+        );
+
+        return new ReissueTokens(newAccessToken, newRefreshToken, refreshMaxAgeSeconds);
+    }
+
+
     // -----------------------------------------------------------
     private boolean isValidPassword(String raw) {
         return raw != null && raw.matches(PASSWORD_REGEX);
@@ -161,14 +241,14 @@ public class AuthServiceImpl implements AuthService {
         return nickname != null && nickname.matches(NICKNAME_REGEX);
     }
 
-    private Map<Long, Boolean> toAgreedMap(List<AuthSignUpReq.TermAgreementReq> agreements) {
+    private Map<Long, Boolean> toAgreedMap(List<AuthSignUpReqDTO.TermAgreementReq> agreements) {
         if (agreements == null || agreements.isEmpty()) {
             throw new CustomException(AuthErrorCode.INVALID_TERM_REQUEST);
         }
 
         // termId 중복 요청 방지 겸 정규화
         return agreements.stream().collect(Collectors.toMap(
-                AuthSignUpReq.TermAgreementReq::getTermId,
+                AuthSignUpReqDTO.TermAgreementReq::getTermId,
                 a -> Boolean.TRUE.equals(a.getAgreed()),
                 (a, b) -> a // 중복이면 앞값 유지
         ));
@@ -190,13 +270,13 @@ public class AuthServiceImpl implements AuthService {
         }
     }
 
-    private Persona resolvePersonaFromSignup(List<PersonaAnswerReq> answers) {
+    private Persona resolvePersonaFromSignup(List<PersonaAnswerReqDTO> answers) {
         if (answers == null || answers.isEmpty()) {
             throw new CustomException(AuthErrorCode.INVALID_PERSONA_ANSWERS);
         }
 
-        List<PersonaAnswerReq> convertedAnswers = answers.stream()
-                .map(a -> new PersonaAnswerReq(
+        List<PersonaAnswerReqDTO> convertedAnswers = answers.stream()
+                .map(a -> new PersonaAnswerReqDTO(
                         a.getQuestionId(),
                         a.getOptionId()
                 ))

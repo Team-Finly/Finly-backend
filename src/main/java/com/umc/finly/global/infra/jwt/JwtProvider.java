@@ -1,6 +1,7 @@
 package com.umc.finly.global.infra.jwt;
 
 import io.jsonwebtoken.Claims;
+import io.jsonwebtoken.ExpiredJwtException;
 import io.jsonwebtoken.JwtException;
 import io.jsonwebtoken.Jwts;
 import io.jsonwebtoken.SignatureAlgorithm;
@@ -14,7 +15,6 @@ import java.util.Date;
 
 @Component
 public class JwtProvider {
-    // 토큰 생성 / 파싱 / 검증
 
     private final SecretKey secretKey;
     private final long accessTokenExpireMs;
@@ -30,34 +30,24 @@ public class JwtProvider {
         this.refreshTokenExpireMs = refreshTokenExpireMs;
     }
 
-    // token 생성
     public String createAccessToken(Long memberId, String email) {
         return buildToken(memberId, email, "access", accessTokenExpireMs);
     }
 
-    public String createRefreshToken(Long memberId, String email){
+    public String createRefreshToken(Long memberId, String email) {
         return buildToken(memberId, email, "refresh", refreshTokenExpireMs);
     }
 
-    // 토큰에서 추출
     public Long getMemberId(String token) {
         return parseClaims(token).get("memberId", Long.class);
     }
+
     public String getEmail(String token) {
         return parseClaims(token).get("email", String.class);
     }
-    public String getTokenType(String token) {
-        return parseClaims(token).get("type", String.class);
-    }
 
-    // 서명/만료 등 기본 검증
-    public boolean validate(String token) {
-        try {
-            parseClaims(token);
-            return true;
-        } catch (JwtException | IllegalArgumentException e) {
-            return false;
-        }
+    public String getType(String token) {
+        return parseClaims(token).get("type", String.class);
     }
 
     public boolean validateAccessToken(String token) {
@@ -78,9 +68,16 @@ public class JwtProvider {
         }
     }
 
-    // 만료시간 변환 (디버깅/로직에 사용)
     public Date getExpiration(String token) {
         return parseClaims(token).getExpiration();
+    }
+
+    public void assertRefreshToken(String token) throws ExpiredJwtException, JwtException {
+        Claims claims = parseClaims(token); // 여기서 만료/무효 예외 그대로 올라감
+        String type = claims.get("type", String.class);
+        if (!"refresh".equals(type)) {
+            throw new JwtException("Not a refresh token");
+        }
     }
 
     private String buildToken(Long memberId, String email, String type, long expireMs) {
@@ -88,7 +85,7 @@ public class JwtProvider {
         return Jwts.builder()
                 .claim("memberId", memberId)
                 .claim("email", email)
-                .claim("type", type)    // access | refresh
+                .claim("type", type)
                 .setIssuedAt(new Date(now))
                 .setExpiration(new Date(now + expireMs))
                 .signWith(secretKey, SignatureAlgorithm.HS256)
@@ -107,9 +104,16 @@ public class JwtProvider {
 
     private String resolveToken(String token) {
         if (token == null) return null;
-        if (token.startsWith("Bearer ")) {
-            return token.substring(7);
+
+        String raw = token.trim();
+        while (raw.startsWith("Bearer ")) {
+            raw = raw.substring(7).trim();
         }
-        return token;
+        return raw;
     }
+
+    public String normalize(String token) {
+        return resolveToken(token);
+    }
+
 }

@@ -24,15 +24,15 @@ management:
 
 kis:
   info:
-    kospi-url: ${KIS_KOSPI_URL:}
-    kosdaq-url: ${KIS_KOSDAQ_URL:}
+    kospi-url: ${KIS_KOSPI_URL}
+    kosdaq-url: ${KIS_KOSDAQ_URL}
 
 tradingview:
-  symbol-base-url: ${TRADINGVIEW_SYMBOL_URL:}
-  s3-logo-base-url: ${TRADINGVIEW_S3_LOGO_URL:}
+  symbol-base-url: ${TRADINGVIEW_SYMBOL_URL}
+  s3-logo-base-url: ${TRADINGVIEW_S3_LOGO_URL}
 
 openai:
-  api-key: ${OPENAI_API_KEY:}
+  api-key: ${OPENAI_API_KEY}
   model: gpt-4o-mini
   timeout-seconds: 60
 
