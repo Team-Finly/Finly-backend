@@ -1,8 +1,11 @@
 package com.umc.finly.domain.record.controller;
 
+import com.umc.finly.domain.auth.exception.AuthErrorCode;
 import com.umc.finly.domain.record.dto.response.FragmentSummaryResDTO;
 import com.umc.finly.domain.record.service.FragmentService;
+import com.umc.finly.global.apiPayload.exception.CustomException;
 import com.umc.finly.global.apiPayload.response.ApiResponse;
+import com.umc.finly.global.apiPayload.response.ErrorCode;
 import com.umc.finly.global.apiPayload.response.SuccessCode;
 import com.umc.finly.global.config.security.AuthPrincipal;
 import io.swagger.v3.oas.annotations.Operation;
@@ -26,6 +29,10 @@ public class FragmentController {
     public ApiResponse<FragmentSummaryResDTO> getFragmentSummary(
             @AuthenticationPrincipal AuthPrincipal principal
     ) {
+        if(principal == null){
+            throw new CustomException(ErrorCode.UNAUTHORIZED);
+        }
+
         FragmentSummaryResDTO result = fragmentService.getFragmentSummary(principal.getMemberId());
         return ApiResponse.onSuccess(result, SuccessCode.OK);
     }

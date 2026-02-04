@@ -115,11 +115,17 @@ public class FragmentServiceImpl implements FragmentService {
             // 퍼센트가 초과한 경우: count 작은 순서대로 -1
             summaries.sort((a, b) -> Long.compare(a.getCount(), b.getCount()));
 
-            for (int i = 0; i < -diff; i++) {
-                FragmentSummaryResDTO.TypeSummary target =  summaries.get(i % summaries.size());
-                if (target.getPercent() > 0) {
-                    target.setPercent(target.getPercent() - 1);
+            int remaining = -diff;
+            int attempts = 0;
+            int maxAttempts = remaining * summaries.size(); // 무한루프 방지
+
+            while (remaining > 0 && attempts < maxAttempts) {
+                FragmentSummaryResDTO.TypeSummary target = summaries.get(attempts % summaries.size());
+                if(target.getPercent()>0){
+                    target.setPercent(target.getPercent()-1);
+                    remaining--;
                 }
+                attempts++;
             }
         }
     }
