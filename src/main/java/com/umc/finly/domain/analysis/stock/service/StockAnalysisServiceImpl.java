@@ -1,6 +1,6 @@
 package com.umc.finly.domain.analysis.stock.service;
 
-import com.umc.finly.domain.analysis.stock.dto.response.StockSummaryRes;
+import com.umc.finly.domain.analysis.stock.dto.response.StockSummaryResDTO;
 import com.umc.finly.domain.market.exception.code.MarketErrorCode;
 import com.umc.finly.domain.market.stock.entity.Stock;
 import com.umc.finly.domain.market.stock.repository.StockRepository;
@@ -28,7 +28,7 @@ public class StockAnalysisServiceImpl implements StockAnalysisService {
     private final StockPriceService stockPriceService;
 
     @Override
-    public StockSummaryRes getStockSummary(Long memberId, String symbol) {
+    public StockSummaryResDTO getStockSummary(Long memberId, String symbol) {
         Stock stock = stockRepository.findBySymbol(symbol)
                 .orElseThrow(() -> new CustomException(MarketErrorCode.MARKET_STOCK_NOT_FOUND));
 
@@ -45,7 +45,7 @@ public class StockAnalysisServiceImpl implements StockAnalysisService {
         Integer currentPrice = stockPriceService.getCurrentPrice(symbol);
 
         if (records.isEmpty()) {
-            return StockSummaryRes.builder()
+            return StockSummaryResDTO.builder()
                     .averageBuyPrice(0)
                     .currentPrice(currentPrice)
                     .totalBuyCount(0)
@@ -124,7 +124,7 @@ public class StockAnalysisServiceImpl implements StockAnalysisService {
                     .divide(totalQuantity, 0, RoundingMode.HALF_UP)
                     .intValue();
 
-        return StockSummaryRes.builder()
+        return StockSummaryResDTO.builder()
                 .averageBuyPrice(averageBuyPrice)
                 .currentPrice(currentPrice)
                 .totalBuyCount(totalBuyCount)

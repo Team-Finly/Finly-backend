@@ -2,7 +2,7 @@ package com.umc.finly.domain.market.infra;
 
 import com.fasterxml.jackson.databind.JsonNode;
 import com.fasterxml.jackson.databind.ObjectMapper;
-import com.umc.finly.domain.market.dto.FearGreedRes;
+import com.umc.finly.domain.market.dto.FearGreedResDTO;
 import com.umc.finly.domain.market.enums.FearGreedStatus;
 import com.umc.finly.domain.market.exception.code.MarketErrorCode;
 import com.umc.finly.global.apiPayload.exception.CustomException;
@@ -27,7 +27,7 @@ public class CnnFearGreedIndexProvider implements FearGreedIndexProvider {
     }
 
     @Override
-    public FearGreedRes getFearGreedIndex() {
+    public FearGreedResDTO getFearGreedIndex() {
         try {
             // CNN은 미국 기준 날짜 사용
             String date = LocalDate.now(ZoneId.of("America/New_York"))
@@ -69,7 +69,7 @@ public class CnnFearGreedIndexProvider implements FearGreedIndexProvider {
 
             FearGreedStatus status = FearGreedStatus.getFearGreedStatus(ratingNode.asText());
 
-            return new FearGreedRes(score, status);
+            return new FearGreedResDTO(score, status);
         } catch (CustomException e) {
             throw e;
         } catch (Exception e) {

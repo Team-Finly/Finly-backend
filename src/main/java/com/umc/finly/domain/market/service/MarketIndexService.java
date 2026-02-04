@@ -1,8 +1,8 @@
 package com.umc.finly.domain.market.service;
 
-import com.umc.finly.domain.market.dto.FearGreedRes;
-import com.umc.finly.domain.market.dto.MarketIndexRes;
-import com.umc.finly.domain.market.dto.MarketIndices;
+import com.umc.finly.domain.market.dto.FearGreedResDTO;
+import com.umc.finly.domain.market.dto.MarketIndexResDTO;
+import com.umc.finly.domain.market.dto.MarketIndicesDTO;
 import com.umc.finly.domain.market.infra.FearGreedIndexProvider;
 import com.umc.finly.domain.market.infra.MarketIndexProvider;
 import lombok.RequiredArgsConstructor;
@@ -22,12 +22,12 @@ public class MarketIndexService {
             value = "marketIndex",
             unless = "#result == null"
     )
-    public MarketIndexRes getMarketIndex() {
-        MarketIndices indices = marketIndexProvider.getMarketIndices();
-        FearGreedRes fearGreed = fearGreedIndexProvider.getFearGreedIndex();
+    public MarketIndexResDTO getMarketIndex() {
+        MarketIndicesDTO indices = marketIndexProvider.getMarketIndices();
+        FearGreedResDTO fearGreed = fearGreedIndexProvider.getFearGreedIndex();
         LocalDateTime snapshotAt = LocalDateTime.now(ZoneId.of("Asia/Seoul"));
 
-        return MarketIndexRes.snapshot(
+        return MarketIndexResDTO.snapshot(
                 indices.getKospi(),
                 indices.getKosdaq(),
                 fearGreed.getScore(),

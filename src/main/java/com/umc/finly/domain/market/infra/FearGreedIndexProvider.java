@@ -1,7 +1,7 @@
 package com.umc.finly.domain.market.infra;
 
-import com.umc.finly.domain.market.dto.FearGreedRes;
+import com.umc.finly.domain.market.dto.FearGreedResDTO;
 
 public interface FearGreedIndexProvider {
-    FearGreedRes getFearGreedIndex();
+    FearGreedResDTO getFearGreedIndex();
 }

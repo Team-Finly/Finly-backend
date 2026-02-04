@@ -15,7 +15,7 @@ import java.time.LocalDateTime;
 @Builder
 @AllArgsConstructor
 @NoArgsConstructor
-public class MarketIndexRes {
+public class MarketIndexResDTO {
 
     private BigDecimal kospi;
     private BigDecimal kosdaq;
@@ -25,13 +25,13 @@ public class MarketIndexRes {
     @JsonFormat(pattern = "yyyy-MM-dd'T'HH:mm:ss")
     private LocalDateTime updatedAt;
 
-    public static MarketIndexRes snapshot(
+    public static MarketIndexResDTO snapshot(
             BigDecimal kospi,
             BigDecimal kosdaq,
             Integer fearGreed,
             String fearGreedStatus,
             LocalDateTime updatedAt) {
-        return MarketIndexRes.builder()
+        return MarketIndexResDTO.builder()
                 .kospi(kospi)
                 .kosdaq(kosdaq)
                 .fearGreed(fearGreed)

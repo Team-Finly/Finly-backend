@@ -1,6 +1,6 @@
 package com.umc.finly.domain.analysis.stock.controller;
 
-import com.umc.finly.domain.analysis.stock.dto.response.StockSummaryRes;
+import com.umc.finly.domain.analysis.stock.dto.response.StockSummaryResDTO;
 import com.umc.finly.domain.analysis.stock.service.StockAnalysisService;
 import com.umc.finly.global.apiPayload.response.ApiResponse;
 import com.umc.finly.global.apiPayload.response.SuccessCode;
@@ -51,11 +51,11 @@ public class StockAnalysisController {
             )
     })
     @GetMapping("/{symbol}/summary")
-    public ApiResponse<StockSummaryRes> getStockSummary(
+    public ApiResponse<StockSummaryResDTO> getStockSummary(
             @AuthenticationPrincipal AuthPrincipal principal,
             @PathVariable String symbol
     ) {
-        StockSummaryRes result = stockAnalysisService.getStockSummary(principal.getMemberId(), symbol);
+        StockSummaryResDTO result = stockAnalysisService.getStockSummary(principal.getMemberId(), symbol);
 
         return ApiResponse.onSuccess(result, SuccessCode.OK);
     }

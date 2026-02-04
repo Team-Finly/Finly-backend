@@ -1,6 +1,6 @@
 package com.umc.finly.domain.market.service;
 
-import com.umc.finly.domain.market.dto.MarketInsightResponse;
+import com.umc.finly.domain.market.dto.MarketInsightResDTO;
 import com.umc.finly.domain.market.repository.MarketInsightRepository;
 import com.umc.finly.domain.market.repository.projection.StockEmotionBuyAggregation;
 import lombok.RequiredArgsConstructor;
@@ -18,7 +18,7 @@ public class MarketInsightService {
     private final MarketInsightRepository marketInsightRepository;
 
     // 실시간 인사이트 (자동 캐러셀 1문장씩 가져오기)
-    public MarketInsightResponse getMarketInsight() {
+    public MarketInsightResDTO getMarketInsight() {
 
         LocalDate fromDate = LocalDate.now().minusDays(7);
 
@@ -26,7 +26,7 @@ public class MarketInsightService {
                 marketInsightRepository.aggregateBuyEmotionByStock(fromDate);
 
         if (rows.isEmpty()) {//사용자 데이터가 비어있을 때 (초기 상태)
-            return MarketInsightResponse.builder()
+            return MarketInsightResDTO.builder()
                     .message("아직 충분한 사용자 데이터가 없어요")
                     .dominantEmotion("EMPTY")
                     .buySellRatio("EMPTY")
@@ -61,7 +61,7 @@ public class MarketInsightService {
 
         String message = generateMessage(stockName, emotion);
 
-        return MarketInsightResponse.builder()
+        return MarketInsightResDTO.builder()
                 .stockName(stockName)
                 .message(message)
                 .dominantEmotion(emotion.name())
