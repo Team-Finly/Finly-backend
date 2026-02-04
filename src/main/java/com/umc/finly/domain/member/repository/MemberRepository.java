@@ -21,6 +21,11 @@ public interface MemberRepository extends JpaRepository<Member, Long> {
      where m.id = :memberId
        and m.refreshToken = :oldToken
 """)
-    int rotateRefreshToken(Long memberId, String oldToken, String newToken, LocalDateTime newExpiredAt);
+    int rotateRefreshToken(
+            @Param("memberId") Long memberId,
+            @Param("oldToken") String oldToken,
+            @Param("newToken") String newToken,
+            @Param("newExpiredAt") LocalDateTime newExpiredAt
+    );
 
 }
