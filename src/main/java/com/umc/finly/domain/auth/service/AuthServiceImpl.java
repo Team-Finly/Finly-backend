@@ -19,8 +19,11 @@ import com.umc.finly.domain.member.repository.MemberTermRepository;
 import com.umc.finly.domain.member.service.PersonaScoringService;
 import com.umc.finly.global.apiPayload.exception.CustomException;
 import com.umc.finly.global.infra.jwt.JwtProvider;
+import com.umc.finly.global.util.CookieUtil;
+import com.umc.finly.global.util.SecurityUtil;
 import io.jsonwebtoken.ExpiredJwtException;
 import io.jsonwebtoken.JwtException;
+import jakarta.servlet.http.HttpServletResponse;
 import lombok.RequiredArgsConstructor;
 import org.springframework.security.crypto.password.PasswordEncoder;
 import org.springframework.stereotype.Service;
@@ -56,6 +59,7 @@ public class AuthServiceImpl implements AuthService {
     // 필수 약관 정의
     private static final EnumSet<TermType> REQUIRED_TERMS =
             EnumSet.of(TermType.TERMS_AGREED, TermType.PRIVACY_AGREED);
+    private final CookieUtil cookieUtil;
 
     /** 이메일 중복 확인 **/
     @Override
@@ -231,6 +235,17 @@ public class AuthServiceImpl implements AuthService {
         return new ReissueTokens(newAccessToken, newRefreshToken, refreshMaxAgeSeconds);
     }
 
+    /** 로그아웃 **/
+    @Override
+    public void logout(HttpServletResponse response){
+        Long memberId = SecurityUtil.getCurrentMemberId();
+
+        Member member = memberRepository.findById(memberId)
+                .orElseThrow(()-> new CustomException(AuthErrorCode.INVALID_ACCESS_TOKEN));
+
+        member.clearRefreshToken();
+        cookieUtil.clearRefreshTokenCookie(response);
+    }
 
     // -----------------------------------------------------------
     private boolean isValidPassword(String raw) {

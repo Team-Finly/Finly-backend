@@ -1,6 +1,8 @@
 package com.umc.finly.domain.analysis.stock.service;
 
-import com.umc.finly.domain.analysis.stock.dto.response.StockSummaryResDTO;
+import com.umc.finly.domain.analysis.stock.dto.res.PriceDistributionResDTO;
+import com.umc.finly.domain.analysis.stock.dto.res.StockSummaryResDTO;
+import com.umc.finly.domain.analysis.stock.enums.PriceRangeType;
 import com.umc.finly.domain.market.exception.code.MarketErrorCode;
 import com.umc.finly.domain.market.stock.entity.Stock;
 import com.umc.finly.domain.market.stock.repository.StockRepository;
@@ -16,6 +18,7 @@ import java.math.BigDecimal;
 import java.math.RoundingMode;
 import java.time.LocalDate;
 import java.time.temporal.ChronoUnit;
+import java.util.ArrayList;
 import java.util.Comparator;
 import java.util.List;
 
@@ -23,6 +26,8 @@ import java.util.List;
 @RequiredArgsConstructor
 @Transactional(readOnly = true)
 public class StockAnalysisServiceImpl implements StockAnalysisService {
+    private static final int RANGE_PERCENT = 5;
+
     private final RecordEntryRepository recordEntryRepository;
     private final StockRepository stockRepository;
     private final StockPriceService stockPriceService;
@@ -130,5 +135,116 @@ public class StockAnalysisServiceImpl implements StockAnalysisService {
                 .totalBuyCount(totalBuyCount)
                 .maxHoldingDays(maxHoldingDays)
                 .build();
+    }
+
+    @Override
+    public PriceDistributionResDTO getPriceDistribution(Long memberId, String symbol) {
+        Stock stock = stockRepository.findBySymbol(symbol)
+                .orElseThrow(() -> new CustomException(MarketErrorCode.MARKET_STOCK_NOT_FOUND));
+
+        Long stockId = stock.getId();
+
+        // record 조회
+        List<RecordEntry> records =
+                recordEntryRepository.findAllByMemberIdAndStockIdAndTradeAction(memberId, stockId, TradeAction.BUY);
+
+        if (records.isEmpty()) {
+            return new PriceDistributionResDTO(
+                    0,
+                    new PriceDistributionResDTO.RangePolicy("AVERAGE_BUY_PRICE", RANGE_PERCENT),
+                    List.of()
+            );
+        }
+
+        // 평균 매수가
+        BigDecimal totalAmount = BigDecimal.ZERO;
+        BigDecimal totalQuantity = BigDecimal.ZERO;
+
+        for (RecordEntry record : records) {
+            totalAmount = totalAmount.add(record.getUnitPrice().multiply(record.getQuantity()));
+            totalQuantity = totalQuantity.add(record.getQuantity());
+        }
+
+        int averageBuyPrice = totalAmount
+                .divide(totalQuantity, 0, RoundingMode.HALF_UP)
+                .intValue();
+
+        // 구간 경계 계산
+        int lowerBound = BigDecimal.valueOf(averageBuyPrice)
+                .multiply(BigDecimal.valueOf(1 - RANGE_PERCENT / 100.0)) // 평균 매수가보다 RANGE_PERCENT% 낮은 가격
+                .setScale(0, RoundingMode.HALF_UP) // 반올림
+                .intValue();
+
+        int upperBound = BigDecimal.valueOf(averageBuyPrice)
+                .multiply(BigDecimal.valueOf(1 + RANGE_PERCENT / 100.0)) // 평균 매수가보다 RANGE_PERCENT% 높은 가격
+                .setScale(0, RoundingMode.HALF_UP) // 반올림
+                .intValue();
+
+        int low = 0, mid = 0, high = 0; // LOW / MID / HIGH 개수(count)
+
+        for (RecordEntry record : records) {
+            int price = record.getUnitPrice().intValue();
+
+            if (price < lowerBound) {
+                low++;
+            } else if (price <= upperBound) {
+                mid++;
+            } else {
+                high++;
+            }
+        }
+
+        int total = low + mid + high;
+
+        int lowRatio = (low * 100) / total;
+        int midRatio = (mid * 100) / total;
+        int highRatio = (high * 100) / total;
+
+        int sum = lowRatio + midRatio + highRatio;
+        int remain = 100 - sum;
+
+        int maxRatio = Math.max(lowRatio, Math.max(midRatio, highRatio));
+
+        if (midRatio == maxRatio) { // 모두 동률일 경우 MID를 강조
+            midRatio += remain;
+        } else if (lowRatio == maxRatio) {
+            lowRatio += remain;
+        } else {
+            highRatio += remain;
+        }
+
+        int finalMaxRatio = Math.max(lowRatio, Math.max(midRatio, highRatio));
+
+        List<PriceDistributionResDTO.PriceDistributionItem> items = new ArrayList<>();
+
+        items.add(new PriceDistributionResDTO.PriceDistributionItem(
+                PriceRangeType.LOW,
+                String.format("%,d원 미만", lowerBound),
+                low,
+                lowRatio,
+                lowRatio == finalMaxRatio ? true : null
+        ));
+
+        items.add(new PriceDistributionResDTO.PriceDistributionItem(
+                PriceRangeType.MID,
+                String.format("%,d원 ~ %,d원", lowerBound, upperBound),
+                mid,
+                midRatio,
+                midRatio == finalMaxRatio ? true : null
+        ));
+
+        items.add(new PriceDistributionResDTO.PriceDistributionItem(
+                PriceRangeType.HIGH,
+                String.format("%,d원 이상", upperBound),
+                high,
+                highRatio,
+                highRatio == finalMaxRatio ? true : null
+        ));
+
+        return new PriceDistributionResDTO(
+                averageBuyPrice,
+                new PriceDistributionResDTO.RangePolicy("AVERAGE_BUY_PRICE", RANGE_PERCENT),
+                items
+        );
     }
 }
