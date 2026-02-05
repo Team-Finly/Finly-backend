@@ -244,8 +244,7 @@ public class AuthServiceImpl implements AuthService {
                 .orElseThrow(()-> new CustomException(AuthErrorCode.INVALID_ACCESS_TOKEN));
 
         member.clearRefreshToken();
-        memberRepository.save(member);
-
+        cookieUtil.clearRefreshTokenCookie(response);
     }
 
     // -----------------------------------------------------------
