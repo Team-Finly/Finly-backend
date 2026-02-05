@@ -1,6 +1,5 @@
 package com.umc.finly.domain.record.repository;
 
-import com.umc.finly.domain.market.stock.entity.Stock;
 import com.umc.finly.domain.record.entity.RecordEntry;
 import com.umc.finly.domain.record.enums.EmotionCode;
 import org.springframework.data.domain.Pageable;
@@ -53,7 +52,7 @@ public interface RecordEntryRepository extends JpaRepository<RecordEntry, Long> 
         from RecordEntry r
         where r.memberId = :memberId
         group by r.stockId
-        order by count(r.id) desc
+        order by count(r.id) desc, max(r.createdAt) desc
         """)
-    Stock findTopStockByMemberId(@Param("memberId") Long memberId);
+    List<Long> findTopStockByMemberId(@Param("memberId") Long memberId, Pageable pageable);
 }
