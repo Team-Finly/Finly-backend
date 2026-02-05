@@ -35,7 +35,7 @@ public class AnalysisEntryService {
 
             // 집계된 종목 id가 없을 때
             if (topStockIds.isEmpty()) {
-                log.error("findTopStockByMemberId 결과가 비어있음. memberId={}, memberId");
+                log.error("findTopStockByMemberId 결과가 비어있음. memberId={}", memberId);
                 throw new AnalysisEntryException(AnalysisEntryErrorCode.TOP_STOCK_NOT_FOUND);
             }
 
