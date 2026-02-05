@@ -1,5 +1,6 @@
 package com.umc.finly.domain.record.repository;
 
+import com.umc.finly.domain.market.stock.entity.Stock;
 import com.umc.finly.domain.record.entity.RecordEntry;
 import com.umc.finly.domain.record.enums.EmotionCode;
 import org.springframework.data.domain.Pageable;
@@ -45,4 +46,14 @@ public interface RecordEntryRepository extends JpaRepository<RecordEntry, Long> 
         group by r.emotionCode
     """)
     List<EmotionCountProjection> countGroupByEmotionCode(@Param("memberId") Long memberId);
+
+    // 사용자가 가장 많이 기록한 종목 찾기
+    @Query("""
+        select r.stockId
+        from RecordEntry r
+        where r.memberId = :memberId
+        group by r.stockId
+        order by count(r.id) desc
+        """)
+    Stock findTopStockByMemberId(@Param("memberId") Long memberId);
 }
