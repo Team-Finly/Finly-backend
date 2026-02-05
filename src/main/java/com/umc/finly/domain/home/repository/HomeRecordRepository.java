@@ -5,10 +5,11 @@ import org.springframework.data.jpa.repository.JpaRepository;
 
 import java.time.LocalDate;
 import java.util.List;
+import java.util.Optional;
 
 public interface HomeRecordRepository extends JpaRepository<RecordEntry, Long> {
 
-    List<RecordEntry> findByMemberIdAndRecordDateBetween(
+    Optional<List<RecordEntry>> findByMemberIdAndRecordDateBetween(
             Long memberId,
             LocalDate start,
             LocalDate end

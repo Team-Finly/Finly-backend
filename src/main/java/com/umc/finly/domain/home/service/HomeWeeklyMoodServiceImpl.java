@@ -1,8 +1,10 @@
 package com.umc.finly.domain.home.service;
 
 import com.umc.finly.domain.home.dto.HomeWeeklyMoodRes;
+import com.umc.finly.domain.home.exception.code.HomeErrorCode;
 import com.umc.finly.domain.home.repository.HomeRecordRepository;
 import com.umc.finly.domain.record.entity.RecordEntry;
+import com.umc.finly.global.apiPayload.exception.CustomException;
 import lombok.RequiredArgsConstructor;
 import org.springframework.stereotype.Service;
 
@@ -20,6 +22,7 @@ public class HomeWeeklyMoodServiceImpl implements HomeWeeklyMoodService {
     @Override
     public HomeWeeklyMoodRes getWeeklyMood(Long memberId) {
 
+
         LocalDate today = LocalDate.now();
         LocalDate monday = today.with(DayOfWeek.MONDAY);
         LocalDate sunday = today.with(DayOfWeek.SUNDAY);
@@ -27,8 +30,10 @@ public class HomeWeeklyMoodServiceImpl implements HomeWeeklyMoodService {
 
         List<RecordEntry> records =
                 homeRecordRepository.findByMemberIdAndRecordDateBetween(
-                        //  ️이번 주 동안 사용자가 작성한 모든 기록 조회 recordDate 기준
+                        //  //  ️이번 주 동안 사용자가 작성한 모든 기록 조회 recordDate 기준
                         memberId, monday, sunday
+                ).orElseThrow(() ->
+                        new CustomException(HomeErrorCode.HOME_WEEKLY_MOOD_INTERNAL_ERROR) // 에러 추가
                 );
 
         //기록을 요일(DayOfWeek) 기준으로 그룹핑
@@ -69,7 +74,6 @@ public class HomeWeeklyMoodServiceImpl implements HomeWeeklyMoodService {
                     .emotion(lastRecord.getEmotionCode())
                     .build());
         }
-
 
         return HomeWeeklyMoodRes.builder()
                 .days(days)
