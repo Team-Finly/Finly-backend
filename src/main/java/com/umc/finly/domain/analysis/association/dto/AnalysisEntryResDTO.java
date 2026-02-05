@@ -9,7 +9,7 @@ import lombok.*;
 public class AnalysisEntryResDTO {
 
     private RecordLevel recordLevel;
-    private int recordCount;
+    private long totalRecordCount;
     private DefaultStockDto defaultStock;
 
     @Getter
@@ -23,11 +23,11 @@ public class AnalysisEntryResDTO {
     }
 
     public enum RecordLevel {
-        NONE, // recordCount == 0
-        LOW, // recordCount == 1 or 2
-        HIGH; // recordCount >= 3
+        NONE, // totalRecordCount == 0
+        LOW, // totalRecordCount == 1 or 2
+        HIGH; // totalRecordCount >= 3
 
-        public static RecordLevel fromRecordCount(int recordCount) {
+        public static RecordLevel fromRecordCount(long recordCount) {
             if (recordCount == 0) {
                 return NONE;
             }

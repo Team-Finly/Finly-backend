@@ -14,16 +14,16 @@ public class AnalysisEntryConverter {
      * - recordCount 1~2 -> LOW, defaultStock = null
      * - recordCount 3 이상 -> HIGH, defaultStock = topStock 기반 DTO
      */
-    public static AnalysisEntryResDTO toResDTO (int recordCount, Stock topStock) {
+    public static AnalysisEntryResDTO toResDTO (long recordCount, Stock topStock) {
         RecordLevel level = RecordLevel.fromRecordCount(recordCount);
 
         DefaultStockDto defaultStockDto = null;
         if (level == RecordLevel.HIGH && topStock != null) {
-            defaultStockDto = toDefaultStockDto(topStock);
+            defaultStockDto = toDefaultStock(topStock);
         }
         return AnalysisEntryResDTO.builder()
                 .recordLevel(level)
-                .recordCount(recordCount)
+                .totalRecordCount(recordCount)
                 .defaultStock(defaultStockDto)
                 .build();
 
@@ -32,7 +32,7 @@ public class AnalysisEntryConverter {
     /**
      * Stock 엔티티 -> DefaultStockDto
      */
-    public static DefaultStockDto toDefaultStockDto(Stock stock) {
+    public static DefaultStockDto toDefaultStock(Stock stock) {
         if (stock == null) {
             return null;
         }
