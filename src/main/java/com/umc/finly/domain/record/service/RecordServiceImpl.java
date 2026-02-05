@@ -328,11 +328,17 @@ public class RecordServiceImpl implements RecordService {
                         existing -> searchHistoryRepository.touchUpdatedAt(existing.getId()),
                         // 기존 기록이 없으면 새로 저장
                         () -> {
-                            SearchHistory history = SearchHistory.builder()
-                                    .memberId(memberId)
-                                    .keyword(keyword)
-                                    .build();
-                            searchHistoryRepository.save(history);
+                            try {
+                                SearchHistory history = SearchHistory.builder()
+                                        .memberId(memberId)
+                                        .keyword(keyword)
+                                        .build();
+                                searchHistoryRepository.save(history);
+                            } catch (DataIntegrityViolationException e) {
+                                // 동시 요청으로 이미 저장된 경우 updatedAt 갱신
+                                searchHistoryRepository.findByMemberIdAndKeyword(memberId, keyword)
+                                .ifPresent(existing -> searchHistoryRepository.touchUpdatedAt(existing.getId()));
+                            }
                         }
                 );
     }
