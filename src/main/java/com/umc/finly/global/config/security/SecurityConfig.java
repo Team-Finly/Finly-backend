@@ -85,6 +85,7 @@ public class SecurityConfig {
                 /** [URL 접근 권한 설정] **/
                 .authorizeHttpRequests(auth -> auth
                         .requestMatchers(HttpMethod.OPTIONS, "/**").permitAll()
+                        .requestMatchers(HttpMethod.POST, "/auth/logout").authenticated()
 
                         // PUBLIC
                         .requestMatchers("/auth/**", "/api/persona-test/questions").permitAll()
@@ -93,6 +94,7 @@ public class SecurityConfig {
                         // PROTECTED
                         .requestMatchers("/api/analysis/**").authenticated()
                         .requestMatchers("/api/mypage/**").authenticated()
+                        .requestMatchers("/api/home/**").authenticated()
                         .requestMatchers(retestMatcher).authenticated()
 
                         // 나머지
