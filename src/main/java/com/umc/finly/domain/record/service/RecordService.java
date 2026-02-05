@@ -1,6 +1,7 @@
 package com.umc.finly.domain.record.service;
 
 import com.umc.finly.domain.record.dto.DailyReportRes;
+import com.umc.finly.domain.record.dto.RecentSearchRes;
 import com.umc.finly.domain.record.dto.RecordCreateReq;
 import com.umc.finly.domain.record.dto.RecordCreateRes;
 import com.umc.finly.domain.record.dto.RecordDetailRes;
@@ -19,4 +20,5 @@ public interface RecordService {
     DailyReportRes getDailyReport(Long memberId, Long recordId);
     TodayRecordRes getTodayRecords(Long memberId, LocalDate date);
     RecordSearchRes searchRecords(Long memberId, String keyword, EmotionCode emotionCode);
+    RecentSearchRes getRecentSearchKeywords(Long memberId);
 }
