@@ -3,6 +3,7 @@ package com.umc.finly.domain.record.service;
 import com.umc.finly.domain.market.stock.entity.Stock;
 import com.umc.finly.domain.market.stock.repository.StockRepository;
 import com.umc.finly.domain.record.dto.DailyReportRes;
+import com.umc.finly.domain.record.dto.RecentSearchRes;
 import com.umc.finly.domain.record.dto.RecordCreateReq;
 import com.umc.finly.domain.record.dto.RecordCreateRes;
 import com.umc.finly.domain.record.dto.RecordDetailRes;
@@ -13,10 +14,12 @@ import com.umc.finly.domain.record.dto.TodayRecordRes;
 import com.umc.finly.domain.record.infra.OpenAiFeedbackClient;
 import com.umc.finly.domain.record.entity.RecordEntry;
 import com.umc.finly.domain.record.entity.RecordFeedback;
+import com.umc.finly.domain.record.entity.SearchHistory;
 import com.umc.finly.domain.record.enums.EmotionCode;
 import com.umc.finly.domain.record.enums.Session;
 import com.umc.finly.domain.record.enums.TradeAction;
 import com.umc.finly.domain.record.repository.RecordEntryRepository;
+import com.umc.finly.domain.record.repository.SearchHistoryRepository;
 import com.umc.finly.global.apiPayload.exception.CustomException;
 import com.umc.finly.domain.record.exception.RecordErrorCode;
 import com.umc.finly.domain.market.exception.code.MarketErrorCode;
@@ -44,6 +47,9 @@ public class RecordServiceImpl implements RecordService {
     private final RecordFeedbackService feedbackService;
     private final StockRepository stockRepository;
     private final OpenAiFeedbackClient openAiFeedbackClient;
+    private final SearchHistoryRepository searchHistoryRepository;
+
+    private static final int RECENT_SEARCH_LIMIT = 3;
 
     @Override
     @Transactional
@@ -253,8 +259,14 @@ public class RecordServiceImpl implements RecordService {
     }
 
     @Override
+    @Transactional
     public RecordSearchRes searchRecords(Long memberId, String keyword, EmotionCode emotionCode) {
-        // 1. keyword가 있으면 종목명 매칭 stockId 목록 조회
+        // 1. keyword가 있으면 검색 기록 저장 (중복 시 시간 업데이트)
+        if (keyword != null && !keyword.isBlank()) {
+            saveSearchHistory(memberId, keyword.trim());
+        }
+
+        // 2. keyword가 있으면 종목명 매칭 stockId 목록 조회
         List<Long> stockIds = null;
         if (keyword != null && !keyword.isBlank()) {
             stockIds = stockRepository.findByNameContaining(keyword).stream()
@@ -265,11 +277,11 @@ public class RecordServiceImpl implements RecordService {
             }
         }
 
-        // 2. RecordEntry 검색
+        // 3. RecordEntry 검색
         List<RecordEntry> entries = recordEntryRepository.searchRecords(
                 memberId, emotionCode, keyword, stockIds);
 
-        // 3. 결과의 stockId 일괄 조회 → Stock Map 생성
+        // 4. 결과의 stockId 일괄 조회 → Stock Map 생성
         List<Long> resultStockIds = entries.stream()
                 .map(RecordEntry::getStockId)
                 .distinct()
@@ -277,7 +289,7 @@ public class RecordServiceImpl implements RecordService {
         Map<Long, Stock> stockMap = stockRepository.findAllById(resultStockIds).stream()
                 .collect(Collectors.toMap(Stock::getId, Function.identity()));
 
-        // 4. 응답 DTO 생성
+        // 5. 응답 DTO 생성
         List<RecordSearchRes.SearchEntry> searchEntries = entries.stream()
                 .map(entry -> {
                     Stock stock = stockMap.get(entry.getStockId());
@@ -290,5 +302,39 @@ public class RecordServiceImpl implements RecordService {
                 .records(searchEntries)
                 .totalCount(searchEntries.size())
                 .build();
+    }
+
+    @Override
+    public RecentSearchRes getRecentSearchKeywords(Long memberId) {
+        List<String> recentKeywords = searchHistoryRepository
+                .findRecentKeywordsByMemberId(memberId, RECENT_SEARCH_LIMIT);
+        return RecentSearchRes.from(recentKeywords);
+    }
+
+    /**
+     * 검색 키워드 저장 (중복 키워드는 시간 업데이트)
+     */
+    private void saveSearchHistory(Long memberId, String keyword) {
+        searchHistoryRepository.findByMemberIdAndKeyword(memberId, keyword)
+                .ifPresentOrElse(
+                        // 기존 기록이 있으면 삭제 후 새로 저장 (최신 시간으로 갱신)
+                        existing -> {
+                            searchHistoryRepository.delete(existing);
+                            searchHistoryRepository.flush();
+                            SearchHistory newHistory = SearchHistory.builder()
+                                    .memberId(memberId)
+                                    .keyword(keyword)
+                                    .build();
+                            searchHistoryRepository.save(newHistory);
+                        },
+                        // 기존 기록이 없으면 새로 저장
+                        () -> {
+                            SearchHistory history = SearchHistory.builder()
+                                    .memberId(memberId)
+                                    .keyword(keyword)
+                                    .build();
+                            searchHistoryRepository.save(history);
+                        }
+                );
     }
 }
