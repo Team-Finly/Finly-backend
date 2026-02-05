@@ -5,10 +5,17 @@ import jakarta.persistence.*;
 import lombok.*;
 
 @Entity
-@Table(name = "search_history", indexes = {
-        @Index(name = "idx_search_history_member_keyword", columnList = "member_id, keyword"),
-        @Index(name = "idx_search_history_member_updated", columnList = "member_id, updated_at DESC")
-})
+@Table(name = "search_history",
+        uniqueConstraints = {
+                @UniqueConstraint(
+                        name = "uk_search_history_member_keyword",
+                        columnNames = {"member_id", "keyword"}
+                )
+        },
+        indexes = {
+                @Index(name = "idx_search_history_member_updated", columnList = "member_id, updated_at DESC")
+        }
+)
 @Getter
 @Setter
 @NoArgsConstructor(access = AccessLevel.PROTECTED)

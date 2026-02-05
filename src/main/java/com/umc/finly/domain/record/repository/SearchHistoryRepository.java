@@ -3,6 +3,7 @@ package com.umc.finly.domain.record.repository;
 import com.umc.finly.domain.record.entity.SearchHistory;
 import org.springframework.data.domain.Pageable;
 import org.springframework.data.jpa.repository.JpaRepository;
+import org.springframework.data.jpa.repository.Modifying;
 import org.springframework.data.jpa.repository.Query;
 import org.springframework.data.repository.query.Param;
 
@@ -25,4 +26,11 @@ public interface SearchHistoryRepository extends JpaRepository<SearchHistory, Lo
             ORDER BY sh.updatedAt DESC
             """)
     List<String> findRecentKeywordsByMemberId(@Param("memberId") Long memberId, Pageable pageable);
+
+    /**
+     * updatedAt 명시적 갱신 (touch)
+     */
+    @Modifying(clearAutomatically = true, flushAutomatically = true)
+    @Query("UPDATE SearchHistory sh SET sh.updatedAt = CURRENT_TIMESTAMP WHERE sh.id = :id")
+    int touchUpdatedAt(@Param("id") Long id);
 }

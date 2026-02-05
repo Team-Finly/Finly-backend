@@ -319,7 +319,7 @@ public class RecordServiceImpl implements RecordService {
         searchHistoryRepository.findByMemberIdAndKeyword(memberId, keyword)
                 .ifPresentOrElse(
                         // 기존 기록이 있으면 updatedAt 갱신 (touch)
-                        searchHistoryRepository::save,
+                        existing -> searchHistoryRepository.touchUpdatedAt(existing.getId()),
                         // 기존 기록이 없으면 새로 저장
                         () -> {
                             SearchHistory history = SearchHistory.builder()
