@@ -25,6 +25,7 @@ import com.umc.finly.domain.record.exception.RecordErrorCode;
 import com.umc.finly.domain.market.exception.code.MarketErrorCode;
 import lombok.RequiredArgsConstructor;
 import org.springframework.dao.DataIntegrityViolationException;
+import org.springframework.data.domain.PageRequest;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Propagation;
 import org.springframework.transaction.annotation.Transactional;
@@ -307,26 +308,18 @@ public class RecordServiceImpl implements RecordService {
     @Override
     public RecentSearchRes getRecentSearchKeywords(Long memberId) {
         List<String> recentKeywords = searchHistoryRepository
-                .findRecentKeywordsByMemberId(memberId, RECENT_SEARCH_LIMIT);
+                .findRecentKeywordsByMemberId(memberId, PageRequest.of(0, RECENT_SEARCH_LIMIT));
         return RecentSearchRes.from(recentKeywords);
     }
 
     /**
-     * 검색 키워드 저장 (중복 키워드는 시간 업데이트)
+     * 검색 키워드 저장 (중복 키워드는 updatedAt 갱신)
      */
     private void saveSearchHistory(Long memberId, String keyword) {
         searchHistoryRepository.findByMemberIdAndKeyword(memberId, keyword)
                 .ifPresentOrElse(
-                        // 기존 기록이 있으면 삭제 후 새로 저장 (최신 시간으로 갱신)
-                        existing -> {
-                            searchHistoryRepository.delete(existing);
-                            searchHistoryRepository.flush();
-                            SearchHistory newHistory = SearchHistory.builder()
-                                    .memberId(memberId)
-                                    .keyword(keyword)
-                                    .build();
-                            searchHistoryRepository.save(newHistory);
-                        },
+                        // 기존 기록이 있으면 updatedAt 갱신 (touch)
+                        searchHistoryRepository::save,
                         // 기존 기록이 없으면 새로 저장
                         () -> {
                             SearchHistory history = SearchHistory.builder()

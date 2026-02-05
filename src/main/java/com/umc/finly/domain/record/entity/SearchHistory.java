@@ -7,7 +7,7 @@ import lombok.*;
 @Entity
 @Table(name = "search_history", indexes = {
         @Index(name = "idx_search_history_member_keyword", columnList = "member_id, keyword"),
-        @Index(name = "idx_search_history_member_created", columnList = "member_id, created_at DESC")
+        @Index(name = "idx_search_history_member_updated", columnList = "member_id, updated_at DESC")
 })
 @Getter
 @Setter
