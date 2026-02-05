@@ -4,6 +4,9 @@ import com.umc.finly.domain.analysis.association.dto.AnalysisEntryResDTO;
 import com.umc.finly.global.apiPayload.response.ApiResponse;
 import com.umc.finly.global.config.security.AuthPrincipal;
 import io.swagger.v3.oas.annotations.Operation;
+import io.swagger.v3.oas.annotations.media.Content;
+import io.swagger.v3.oas.annotations.media.ExampleObject;
+import io.swagger.v3.oas.annotations.responses.ApiResponses;
 import io.swagger.v3.oas.annotations.tags.Tag;
 
 @Tag(name = "AssociationAnalysis", description = "통계 - 연관분석 관련 API")
@@ -16,8 +19,25 @@ public interface AssociationAnalysisApiSpecification {
               - 가장 많이 기록한 종목이 여러 개일 경우, 가장 최근에 기록한 종목 반환
             
             종목에 기반한 통계 관련 API를 호출할 때 API 경로에 symbol을 path variable로 넣습니다.
+              - 예) /api/analysis/stocks/{symbol}/summary (통계-주식데이터-종목 분석 조회 API)
               - 최다 기록 종목 자동 노출의 경우 본 API 응답에서 디폴트 종목 symbol 확인
               - 사용자가 직접 종목 선택할 경우 '사용자 기록 종목 조회 API' 응답에서 symbol 확인  
             """)
+    @ApiResponses(value = {
+            @io.swagger.v3.oas.annotations.responses.ApiResponse(
+                    responseCode = "200", description = "조회 성공"
+            ),
+            @io.swagger.v3.oas.annotations.responses.ApiResponse(
+                    responseCode = "404", description = "찾을 수 없음", content = @Content(
+                    mediaType = "application/json",
+                    examples = {
+                            @ExampleObject(
+                                    name = "최다 기록 종목 찾기 실패(최다 기록 종목 id를 찾지 못했거나, 찾은 id를 가진 종목이 존재하지 않을 때)",
+                                    summary = "최다 기록 종목을 찾을 수 없음",
+                                    value = "{ \"isSuccess\": false, \"code\": \"ANALYSIS_ENTRY404\", \"message\": \"사용자가 가장 많이 기록한 종목을 찾을 수 없습니다.\" }"
+                            )
+                    })
+            )
+    })
     public ApiResponse<AnalysisEntryResDTO> getEntryStatus(AuthPrincipal principal);
 }

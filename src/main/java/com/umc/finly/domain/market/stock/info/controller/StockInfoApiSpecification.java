@@ -9,7 +9,7 @@ import io.swagger.v3.oas.annotations.tags.Tag;
 
 import java.util.List;
 
-@Tag(name = "StockInfo", description = "종목 정보 관련 API (개발/운영/테스트용)")
+@Tag(name = "StockInfo", description = "종목 정보 관련 API (개발/운영/테스트용, 프론트 연동 X)")
 public interface StockInfoApiSpecification {
     @Operation(summary = "종목 정보 동기화", description = "KIS 코스피, 코스닥 종목 정보 파일을 다운로드 및 파싱한 후 DB에 저장합니다.")
     public ApiResponse<StockAdminResDTO.StockSync> syncStockInfo();
