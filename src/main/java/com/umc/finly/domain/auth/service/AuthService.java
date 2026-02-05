@@ -4,6 +4,7 @@ import com.umc.finly.domain.auth.dto.req.AuthLoginReqDTO;
 import com.umc.finly.domain.auth.dto.req.AuthSignUpReqDTO;
 import com.umc.finly.domain.auth.dto.res.AuthLoginResDTO;
 import com.umc.finly.domain.auth.dto.res.AuthSignUpResDTO;
+import jakarta.servlet.http.HttpServletResponse;
 
 public interface AuthService {
     boolean isEmailAvailable(String email);
@@ -13,6 +14,8 @@ public interface AuthService {
     LoginTokens login(AuthLoginReqDTO request);
 
     ReissueTokens reissue(String refreshToken);
+
+    void logout(HttpServletResponse response);
 
     record LoginTokens(
             AuthLoginResDTO body,
