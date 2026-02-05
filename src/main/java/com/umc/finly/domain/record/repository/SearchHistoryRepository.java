@@ -31,6 +31,6 @@ public interface SearchHistoryRepository extends JpaRepository<SearchHistory, Lo
      * updatedAt 명시적 갱신 (touch)
      */
     @Modifying(clearAutomatically = true, flushAutomatically = true)
-    @Query("UPDATE SearchHistory sh SET sh.updatedAt = CURRENT_TIMESTAMP WHERE sh.id = :id")
+    @Query("UPDATE SearchHistory sh SET sh.updatedAt = CURRENT_TIMESTAMP WHERE sh.id = :id AND sh.deletedAt IS NULL")
     int touchUpdatedAt(@Param("id") Long id);
 }

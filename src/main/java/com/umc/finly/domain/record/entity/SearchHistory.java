@@ -3,8 +3,10 @@ package com.umc.finly.domain.record.entity;
 import com.umc.finly.global.entity.CreatedUpdatedDeletedBaseEntity;
 import jakarta.persistence.*;
 import lombok.*;
+import org.hibernate.annotations.SQLRestriction;
 
 @Entity
+@SQLRestriction("deleted_at IS NULL")
 @Table(name = "search_history",
         uniqueConstraints = {
                 @UniqueConstraint(
