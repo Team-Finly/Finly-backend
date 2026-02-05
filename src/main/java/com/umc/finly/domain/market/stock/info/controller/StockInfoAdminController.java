@@ -1,7 +1,7 @@
 package com.umc.finly.domain.market.stock.info.controller;
 
-import com.umc.finly.domain.market.stock.info.dto.StockAdminResponse;
-import com.umc.finly.domain.market.stock.info.dto.StockInfoResponse;
+import com.umc.finly.domain.market.stock.info.dto.StockAdminResDTO;
+import com.umc.finly.domain.market.stock.info.dto.StockInfoResDTO;
 import com.umc.finly.domain.market.stock.repository.StockRepository;
 import com.umc.finly.domain.market.stock.info.service.StockInfoScheduler;
 import com.umc.finly.domain.market.stock.info.service.StockInfoSyncService;
@@ -28,40 +28,40 @@ public class StockInfoAdminController implements StockInfoApiSpecification {
 
     // KIS 종목정보 동기화
     @PostMapping("/sync")
-    public ApiResponse<StockAdminResponse.StockSync> syncStockInfo() {
-        StockAdminResponse.StockSync result = stockInfoSyncService.syncDomesticStocks();
+    public ApiResponse<StockAdminResDTO.StockSync> syncStockInfo() {
+        StockAdminResDTO.StockSync result = stockInfoSyncService.syncDomesticStocks();
         return ApiResponse.onSuccess(result, SuccessCode.OK);
     }
 
     // TradingView 로고 업데이트
     @PostMapping("/logo")
-    public ApiResponse<StockAdminResponse.LogoUpdate> updateLogos() {
-        StockAdminResponse.LogoUpdate result = stockLogoUpdateService.updateMissingLogos();
+    public ApiResponse<StockAdminResDTO.LogoUpdate> updateLogos() {
+        StockAdminResDTO.LogoUpdate result = stockLogoUpdateService.updateMissingLogos();
         return ApiResponse.onSuccess(result, SuccessCode.OK);
     }
 
     // 1,2 모두 실행
     @PostMapping("/all")
-    public ApiResponse<StockAdminResponse.TotalSync> syncStockInfoAndUpdateLogos() {
-        StockAdminResponse.StockSync syncResult = stockInfoSyncService.syncDomesticStocks();
-        StockAdminResponse.LogoUpdate logoResult = stockLogoUpdateService.updateMissingLogos();
+    public ApiResponse<StockAdminResDTO.TotalSync> syncStockInfoAndUpdateLogos() {
+        StockAdminResDTO.StockSync syncResult = stockInfoSyncService.syncDomesticStocks();
+        StockAdminResDTO.LogoUpdate logoResult = stockLogoUpdateService.updateMissingLogos();
 
-        StockAdminResponse.TotalSync totalResult = new StockAdminResponse.TotalSync(syncResult, logoResult);
+        StockAdminResDTO.TotalSync totalResult = new StockAdminResDTO.TotalSync(syncResult, logoResult);
         return ApiResponse.onSuccess(totalResult, SuccessCode.OK);
     }
 
     // 스케줄러 실행
     @PostMapping("/scheduler")
-    public ApiResponse<StockAdminResponse.TotalSync> triggerScheduler() {
-        StockAdminResponse.TotalSync result = stockInfoScheduler.runDailyJob();
+    public ApiResponse<StockAdminResDTO.TotalSync> triggerScheduler() {
+        StockAdminResDTO.TotalSync result = stockInfoScheduler.runDailyJob();
         return ApiResponse.onSuccess(result, SuccessCode.OK);
     }
 
     // DB 모든 종목 리스트 조회
     @GetMapping("/stocks")
-    public ApiResponse<List<StockInfoResponse>> getAllStocks() {
-        List<StockInfoResponse> result = stockRepository.findAll().stream()
-                .map(StockInfoResponse::from)
+    public ApiResponse<List<StockInfoResDTO>> getAllStocks() {
+        List<StockInfoResDTO> result = stockRepository.findAll().stream()
+                .map(StockInfoResDTO::from)
                 .toList();
 
         return ApiResponse.onSuccess(result, SuccessCode.OK);

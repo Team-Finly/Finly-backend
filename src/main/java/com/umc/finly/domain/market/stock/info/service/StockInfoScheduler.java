@@ -1,6 +1,6 @@
 package com.umc.finly.domain.market.stock.info.service;
 
-import com.umc.finly.domain.market.stock.info.dto.StockAdminResponse;
+import com.umc.finly.domain.market.stock.info.dto.StockAdminResDTO;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.scheduling.annotation.Scheduled;
@@ -18,11 +18,11 @@ public class StockInfoScheduler {
     private final StockLogoUpdateService stockLogoUpdateService;
 
     @Scheduled(cron = "0 0 9 * * *", zone = "Asia/Seoul")
-    public StockAdminResponse.TotalSync runDailyJob() {
+    public StockAdminResDTO.TotalSync runDailyJob() {
         log.info("⚪ StockInfoScheduler 시작");
 
-        StockAdminResponse.StockSync syncResult = null;
-        StockAdminResponse.LogoUpdate logoResult = null;
+        StockAdminResDTO.StockSync syncResult = null;
+        StockAdminResDTO.LogoUpdate logoResult = null;
 
         try {
             // 1단계: KIS 종목정보 동기화
@@ -35,6 +35,6 @@ public class StockInfoScheduler {
         }
         log.info("✅ StockInfoScheduler 종료");
 
-        return new StockAdminResponse.TotalSync(syncResult, logoResult);
+        return new StockAdminResDTO.TotalSync(syncResult, logoResult);
     }
 }

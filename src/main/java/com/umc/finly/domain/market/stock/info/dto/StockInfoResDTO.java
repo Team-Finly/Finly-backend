@@ -8,7 +8,7 @@ import lombok.Getter;
  * Stock 엔티티를 API 응답으로 보낼 때 사용하는 DTO.
  */
 @Getter
-public class StockInfoResponse {
+public class StockInfoResDTO {
     private String symbol;
     private String name;
     private MarketType marketType;
@@ -16,8 +16,8 @@ public class StockInfoResponse {
     private Boolean isActive;
     private String logoUrl;
 
-    public static StockInfoResponse from(Stock stock) {
-        StockInfoResponse dto = new StockInfoResponse();
+    public static StockInfoResDTO from(Stock stock) {
+        StockInfoResDTO dto = new StockInfoResDTO();
         dto.symbol = stock.getSymbol();
         dto.name = stock.getName();
         dto.marketType = stock.getMarketType();

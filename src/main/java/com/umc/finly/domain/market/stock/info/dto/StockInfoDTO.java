@@ -10,7 +10,7 @@ import lombok.Getter;
  */
 @Getter
 @AllArgsConstructor
-public class StockInfoDto {
+public class StockInfoDTO {
     private final MarketType marketType; // KOSPI / KOSDAQ
     private final String symbol;         // KRX 종목 코드
     private final String name;           // 종목명

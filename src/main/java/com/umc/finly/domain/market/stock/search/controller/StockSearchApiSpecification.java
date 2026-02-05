@@ -1,6 +1,6 @@
 package com.umc.finly.domain.market.stock.search.controller;
 
-import com.umc.finly.domain.market.stock.search.dto.StockSearchResponse;
+import com.umc.finly.domain.market.stock.search.dto.StockSearchResDTO;
 import com.umc.finly.global.apiPayload.response.ApiResponse;
 import io.swagger.v3.oas.annotations.Operation;
 import io.swagger.v3.oas.annotations.Parameter;
@@ -17,5 +17,5 @@ public interface StockSearchApiSpecification {
             @Parameter(name = "size", description = "한 페이지에 표시될 종목 개수", example = "20", required = false),
             @Parameter(name = "sort", description = "정렬 기준(필드,방향)", example = "name,asc", required = false)
     })
-    public ApiResponse<StockSearchResponse> searchStocks(String keyword, Pageable pageable);
+    public ApiResponse<StockSearchResDTO> searchStocks(String keyword, Pageable pageable);
 }
