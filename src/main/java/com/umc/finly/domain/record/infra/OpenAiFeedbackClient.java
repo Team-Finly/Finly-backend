@@ -2,7 +2,7 @@ package com.umc.finly.domain.record.infra;
 
 import com.fasterxml.jackson.annotation.JsonProperty;
 import com.umc.finly.global.apiPayload.exception.CustomException;
-import com.umc.finly.global.apiPayload.response.ErrorCode;
+import com.umc.finly.domain.record.exception.RecordErrorCode;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.beans.factory.annotation.Qualifier;
 import org.springframework.beans.factory.annotation.Value;
@@ -44,7 +44,7 @@ public class OpenAiFeedbackClient {
                     .body(ChatResponse.class);
 
             if (response == null || response.choices() == null || response.choices().isEmpty()) {
-                throw new CustomException(ErrorCode.OPENAI_API_FAILED);
+                throw new CustomException(RecordErrorCode.OPENAI_API_FAILED);
             }
 
             String content = response.choices().get(0).message().content();
@@ -54,7 +54,7 @@ public class OpenAiFeedbackClient {
             return new FeedbackResponse(content, promptTokens, completionTokens);
         } catch (RestClientException e) {
             log.error("OpenAI API call failed", e);
-            throw new CustomException(ErrorCode.OPENAI_API_FAILED);
+            throw new CustomException(RecordErrorCode.OPENAI_API_FAILED);
         }
     }
 

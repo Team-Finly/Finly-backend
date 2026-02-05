@@ -1,6 +1,16 @@
 package com.umc.finly.domain.record.controller;
 
-import com.umc.finly.domain.record.dto.*;
+import com.umc.finly.domain.record.dto.DailyReportRes;
+import com.umc.finly.domain.record.dto.RecentSearchRes;
+import com.umc.finly.domain.record.dto.RecordCreateReq;
+import com.umc.finly.domain.record.dto.RecordCreateRes;
+import com.umc.finly.domain.record.dto.RecordDetailRes;
+import com.umc.finly.domain.record.dto.RecordFeedbackRes;
+import com.umc.finly.domain.record.dto.RecordSearchRes;
+import com.umc.finly.domain.record.dto.RecordUpdateReq;
+import com.umc.finly.domain.record.dto.RecordUpdateRes;
+import com.umc.finly.domain.record.dto.TodayRecordRes;
+import com.umc.finly.domain.record.enums.EmotionCode;
 import com.umc.finly.domain.record.service.RecordFeedbackService;
 import com.umc.finly.domain.record.service.RecordService;
 import com.umc.finly.global.apiPayload.response.ApiResponse;
@@ -37,6 +47,24 @@ public class RecordController {
             @RequestParam @DateTimeFormat(iso = DateTimeFormat.ISO.DATE) LocalDate date
     ) {
         TodayRecordRes result = recordService.getTodayRecords(principal.getMemberId(), date);
+        return ApiResponse.onSuccess(result, SuccessCode.OK);
+    }
+
+    @GetMapping("/search")
+    public ApiResponse<RecordSearchRes> searchRecords(
+            @AuthenticationPrincipal AuthPrincipal principal,
+            @RequestParam(required = false) String keyword,
+            @RequestParam(required = false) EmotionCode emotionCode
+    ) {
+        RecordSearchRes result = recordService.searchRecords(principal.getMemberId(), keyword, emotionCode);
+        return ApiResponse.onSuccess(result, SuccessCode.OK);
+    }
+
+    @GetMapping("/search/recent")
+    public ApiResponse<RecentSearchRes> getRecentSearchKeywords(
+            @AuthenticationPrincipal AuthPrincipal principal
+    ) {
+        RecentSearchRes result = recordService.getRecentSearchKeywords(principal.getMemberId());
         return ApiResponse.onSuccess(result, SuccessCode.OK);
     }
 

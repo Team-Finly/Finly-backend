@@ -11,5 +11,17 @@ public interface RecordEntryRepository extends JpaRepository<RecordEntry, Long> 
     boolean existsByClientRequestId(String clientRequestId);
     List<RecordEntry> findByMemberIdOrderByRecordDateDesc(Long memberId, Pageable pageable);
     List<RecordEntry> findByMemberIdAndRecordDateOrderByCreatedAtAsc(Long memberId, LocalDate recordDate);
+
+    @Query("SELECT r FROM RecordEntry r WHERE r.memberId = :memberId" +
+            " AND (:emotionCode IS NULL OR r.emotionCode = :emotionCode)" +
+            " AND (:keyword IS NULL OR r.memo LIKE CONCAT('%', :keyword, '%')" +
+            "      OR (:stockIds IS NOT NULL AND r.stockId IN :stockIds))" +
+            " ORDER BY r.createdAt DESC")
+    List<RecordEntry> searchRecords(
+            @Param("memberId") Long memberId,
+            @Param("emotionCode") EmotionCode emotionCode,
+            @Param("keyword") String keyword,
+            @Param("stockIds") List<Long> stockIds);
+
     List<RecordEntry> findAllByMemberIdAndStockId(Long memberId, Long stockId);
 }

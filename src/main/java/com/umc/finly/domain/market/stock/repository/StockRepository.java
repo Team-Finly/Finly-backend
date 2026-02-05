@@ -24,11 +24,13 @@ public interface StockRepository extends JpaRepository<Stock, Long> {
         where s.name like concat('%', :keyword, '%')
         order by
             case
-                when s.name like concat(:keyword, '%') then 0     
-                when s.name like concat('%', :keyword) then 1     
-                else 2                                           
+                when s.name like concat(:keyword, '%') then 0
+                when s.name like concat('%', :keyword) then 1
+                else 2
             end,
             s.name asc
         """)
     Page<Stock> searchByName(@Param("keyword") String keyword, Pageable pageable);
+    // 종목명 검색 (부분 일치) - 기록 검색용
+    List<Stock> findByNameContaining(String keyword);
 }

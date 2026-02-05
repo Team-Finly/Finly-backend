@@ -7,7 +7,7 @@ import com.umc.finly.domain.record.enums.FeedbackStatus;
 import com.umc.finly.domain.record.repository.RecordEntryRepository;
 import com.umc.finly.domain.record.repository.RecordFeedbackRepository;
 import com.umc.finly.global.apiPayload.exception.CustomException;
-import com.umc.finly.global.apiPayload.response.ErrorCode;
+import com.umc.finly.domain.record.exception.RecordErrorCode;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.dao.DataIntegrityViolationException;
@@ -53,7 +53,7 @@ public class RecordFeedbackServiceImpl implements RecordFeedbackService {
     @Transactional(readOnly = true)
     public RecordFeedbackRes getFeedback(Long memberId, Long recordEntryId) {
         RecordFeedback feedback = feedbackRepository.findByRecordEntryIdAndMemberId(recordEntryId, memberId)
-                .orElseThrow(() -> new CustomException(ErrorCode.FEEDBACK_NOT_FOUND));
+                .orElseThrow(() -> new CustomException(RecordErrorCode.FEEDBACK_NOT_FOUND));
 
         return RecordFeedbackRes.from(feedback);
     }
@@ -63,10 +63,10 @@ public class RecordFeedbackServiceImpl implements RecordFeedbackService {
     public RecordFeedbackRes regenerateFeedback(Long memberId, Long recordEntryId) {
         // 1. 기록이 존재하고 본인 것인지 확인
         RecordEntry recordEntry = recordEntryRepository.findById(recordEntryId)
-                .orElseThrow(() -> new CustomException(ErrorCode.RECORD_NOT_FOUND));
+                .orElseThrow(() -> new CustomException(RecordErrorCode.RECORD_NOT_FOUND));
 
         if (!recordEntry.getMemberId().equals(memberId)) {
-            throw new CustomException(ErrorCode.RECORD_FORBIDDEN);
+            throw new CustomException(RecordErrorCode.RECORD_FORBIDDEN);
         }
 
         // 2. 피드백 조회 (행 잠금으로 동시 재생성 요청 경쟁 조건 방지)
@@ -83,13 +83,13 @@ public class RecordFeedbackServiceImpl implements RecordFeedbackService {
                         .build();
                 feedback = feedbackRepository.save(feedback);
             } catch (DataIntegrityViolationException e) {
-                throw new CustomException(ErrorCode.FEEDBACK_GENERATION_IN_PROGRESS);
+                throw new CustomException(RecordErrorCode.FEEDBACK_GENERATION_IN_PROGRESS);
             }
         } else {
             // 피드백이 대기 중이거나 생성 중이면 에러
             if (feedback.getStatus() == FeedbackStatus.PENDING
                     || feedback.getStatus() == FeedbackStatus.GENERATING) {
-                throw new CustomException(ErrorCode.FEEDBACK_GENERATION_IN_PROGRESS);
+                throw new CustomException(RecordErrorCode.FEEDBACK_GENERATION_IN_PROGRESS);
             }
             feedback.resetForRegeneration();
             feedback = feedbackRepository.save(feedback);

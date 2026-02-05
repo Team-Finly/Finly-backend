@@ -3,22 +3,29 @@ package com.umc.finly.domain.record.service;
 import com.umc.finly.domain.market.stock.entity.Stock;
 import com.umc.finly.domain.market.stock.repository.StockRepository;
 import com.umc.finly.domain.record.dto.DailyReportRes;
+import com.umc.finly.domain.record.dto.RecentSearchRes;
 import com.umc.finly.domain.record.dto.RecordCreateReq;
 import com.umc.finly.domain.record.dto.RecordCreateRes;
 import com.umc.finly.domain.record.dto.RecordDetailRes;
+import com.umc.finly.domain.record.dto.RecordSearchRes;
 import com.umc.finly.domain.record.dto.RecordUpdateReq;
 import com.umc.finly.domain.record.dto.RecordUpdateRes;
 import com.umc.finly.domain.record.dto.TodayRecordRes;
 import com.umc.finly.domain.record.infra.OpenAiFeedbackClient;
 import com.umc.finly.domain.record.entity.RecordEntry;
 import com.umc.finly.domain.record.entity.RecordFeedback;
+import com.umc.finly.domain.record.entity.SearchHistory;
+import com.umc.finly.domain.record.enums.EmotionCode;
 import com.umc.finly.domain.record.enums.Session;
 import com.umc.finly.domain.record.enums.TradeAction;
 import com.umc.finly.domain.record.repository.RecordEntryRepository;
+import com.umc.finly.domain.record.repository.SearchHistoryRepository;
 import com.umc.finly.global.apiPayload.exception.CustomException;
-import com.umc.finly.global.apiPayload.response.ErrorCode;
+import com.umc.finly.domain.record.exception.RecordErrorCode;
+import com.umc.finly.domain.market.exception.code.MarketErrorCode;
 import lombok.RequiredArgsConstructor;
 import org.springframework.dao.DataIntegrityViolationException;
+import org.springframework.data.domain.PageRequest;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Propagation;
 import org.springframework.transaction.annotation.Transactional;
@@ -41,29 +48,32 @@ public class RecordServiceImpl implements RecordService {
     private final RecordFeedbackService feedbackService;
     private final StockRepository stockRepository;
     private final OpenAiFeedbackClient openAiFeedbackClient;
+    private final SearchHistoryRepository searchHistoryRepository;
+
+    private static final int RECENT_SEARCH_LIMIT = 3;
 
     @Override
     @Transactional
     public RecordCreateRes createRecord(Long memberId, RecordCreateReq request) {
         // 1. clientRequestId 중복 체크
         if (recordEntryRepository.existsByClientRequestId(request.getClientRequestId())) {
-            throw new CustomException(ErrorCode.RECORD_DUPLICATE_SUBMISSION);
+            throw new CustomException(RecordErrorCode.RECORD_DUPLICATE_SUBMISSION);
         }
 
         // 2. tradeAction이 BUY/SELL이면 unitPrice, quantity 필수 및 0보다 커야 함
         if (request.getTradeAction() == TradeAction.BUY || request.getTradeAction() == TradeAction.SELL) {
             if (request.getUnitPrice() == null || request.getQuantity() == null) {
-                throw new CustomException(ErrorCode.RECORD_INVALID_REQUEST);
+                throw new CustomException(RecordErrorCode.RECORD_INVALID_REQUEST);
             }
             if (request.getUnitPrice().compareTo(BigDecimal.ZERO) <= 0
                     || request.getQuantity().compareTo(BigDecimal.ZERO) <= 0) {
-                throw new CustomException(ErrorCode.RECORD_INVALID_REQUEST);
+                throw new CustomException(RecordErrorCode.RECORD_INVALID_REQUEST);
             }
         }
 
         // 3. symbol로 Stock 조회
         Stock stock = stockRepository.findBySymbol(request.getSymbol())
-                .orElseThrow(() -> new CustomException(ErrorCode.MARKET_STOCK_NOT_FOUND));
+                .orElseThrow(() -> new CustomException(MarketErrorCode.MARKET_STOCK_NOT_FOUND));
 
         // 4. Session 자동 계산 (현재 시간 기반)
         Session session = Session.fromTime(LocalTime.now());
@@ -87,7 +97,7 @@ public class RecordServiceImpl implements RecordService {
         try {
             savedEntry = recordEntryRepository.save(entry);
         } catch (DataIntegrityViolationException e) {
-            throw new CustomException(ErrorCode.RECORD_DUPLICATE_SUBMISSION);
+            throw new CustomException(RecordErrorCode.RECORD_DUPLICATE_SUBMISSION);
         }
 
         // 6. AI 피드백 비동기 생성 요청
@@ -101,16 +111,16 @@ public class RecordServiceImpl implements RecordService {
     public RecordDetailRes getRecord(Long memberId, Long recordId) {
         // 1. 기록 조회
         RecordEntry entry = recordEntryRepository.findById(recordId)
-                .orElseThrow(() -> new CustomException(ErrorCode.RECORD_NOT_FOUND));
+                .orElseThrow(() -> new CustomException(RecordErrorCode.RECORD_NOT_FOUND));
 
         // 2. 본인 기록인지 확인
         if (!entry.getMemberId().equals(memberId)) {
-            throw new CustomException(ErrorCode.RECORD_FORBIDDEN);
+            throw new CustomException(RecordErrorCode.RECORD_FORBIDDEN);
         }
 
         // 3. Stock 조회
         Stock stock = stockRepository.findById(entry.getStockId())
-                .orElseThrow(() -> new CustomException(ErrorCode.MARKET_STOCK_NOT_FOUND));
+                .orElseThrow(() -> new CustomException(MarketErrorCode.MARKET_STOCK_NOT_FOUND));
 
         // 4. 응답 DTO 반환
         return RecordDetailRes.from(entry, stock);
@@ -121,11 +131,11 @@ public class RecordServiceImpl implements RecordService {
     public RecordUpdateRes updateRecord(Long memberId, Long recordId, RecordUpdateReq request) {
         // 1. 기록 조회
         RecordEntry entry = recordEntryRepository.findById(recordId)
-                .orElseThrow(() -> new CustomException(ErrorCode.RECORD_NOT_FOUND));
+                .orElseThrow(() -> new CustomException(RecordErrorCode.RECORD_NOT_FOUND));
 
         // 2. 본인 기록인지 확인
         if (!entry.getMemberId().equals(memberId)) {
-            throw new CustomException(ErrorCode.RECORD_FORBIDDEN);
+            throw new CustomException(RecordErrorCode.RECORD_FORBIDDEN);
         }
 
         // 3. 부분 업데이트 (null이 아닌 필드만 수정)
@@ -135,7 +145,7 @@ public class RecordServiceImpl implements RecordService {
         }
         if (request.getSymbol() != null) {
             stock = stockRepository.findBySymbol(request.getSymbol())
-                    .orElseThrow(() -> new CustomException(ErrorCode.MARKET_STOCK_NOT_FOUND));
+                    .orElseThrow(() -> new CustomException(MarketErrorCode.MARKET_STOCK_NOT_FOUND));
             entry.setStockId(stock.getId());
         }
         if (request.getTradeAction() != null) {
@@ -160,18 +170,18 @@ public class RecordServiceImpl implements RecordService {
         // 4. tradeAction이 BUY/SELL이면 unitPrice, quantity 필수 및 0보다 커야 함
         if (entry.getTradeAction() == TradeAction.BUY || entry.getTradeAction() == TradeAction.SELL) {
             if (entry.getUnitPrice() == null || entry.getQuantity() == null) {
-                throw new CustomException(ErrorCode.RECORD_INVALID_REQUEST);
+                throw new CustomException(RecordErrorCode.RECORD_INVALID_REQUEST);
             }
             if (entry.getUnitPrice().compareTo(BigDecimal.ZERO) <= 0
                     || entry.getQuantity().compareTo(BigDecimal.ZERO) <= 0) {
-                throw new CustomException(ErrorCode.RECORD_INVALID_REQUEST);
+                throw new CustomException(RecordErrorCode.RECORD_INVALID_REQUEST);
             }
         }
 
         // 5. symbol이 변경되지 않은 경우 기존 Stock 조회
         if (stock == null) {
             stock = stockRepository.findById(entry.getStockId())
-                    .orElseThrow(() -> new CustomException(ErrorCode.MARKET_STOCK_NOT_FOUND));
+                    .orElseThrow(() -> new CustomException(MarketErrorCode.MARKET_STOCK_NOT_FOUND));
         }
 
         // 6. 응답 DTO 반환
@@ -183,16 +193,16 @@ public class RecordServiceImpl implements RecordService {
     public DailyReportRes getDailyReport(Long memberId, Long recordId) {
         // 1. 기록 조회
         RecordEntry entry = recordEntryRepository.findById(recordId)
-                .orElseThrow(() -> new CustomException(ErrorCode.RECORD_NOT_FOUND));
+                .orElseThrow(() -> new CustomException(RecordErrorCode.RECORD_NOT_FOUND));
 
         // 2. 본인 기록인지 확인
         if (!entry.getMemberId().equals(memberId)) {
-            throw new CustomException(ErrorCode.RECORD_FORBIDDEN);
+            throw new CustomException(RecordErrorCode.RECORD_FORBIDDEN);
         }
 
         // 3. Stock 조회
         Stock stock = stockRepository.findById(entry.getStockId())
-                .orElseThrow(() -> new CustomException(ErrorCode.MARKET_STOCK_NOT_FOUND));
+                .orElseThrow(() -> new CustomException(MarketErrorCode.MARKET_STOCK_NOT_FOUND));
 
         // 4. memo 요약 (빈 값이면 OpenAI 호출 스킵)
         String content = "";
@@ -247,5 +257,89 @@ public class RecordServiceImpl implements RecordService {
                 .hasRecords(!entries.isEmpty())
                 .recordCount(entries.size())
                 .build();
+    }
+
+    @Override
+    @Transactional
+    public RecordSearchRes searchRecords(Long memberId, String keyword, EmotionCode emotionCode) {
+        // 1. 키워드 정규화
+        String normalizedKeyword = (keyword == null) ? null : keyword.strip();
+        if (normalizedKeyword != null && normalizedKeyword.isBlank()) {
+            normalizedKeyword = null;
+        }
+
+        // 2. keyword가 있으면 검색 기록 저장 (중복 시 시간 업데이트)
+        if (normalizedKeyword != null) {
+            saveSearchHistory(memberId, normalizedKeyword);
+        }
+
+        // 3. keyword가 있으면 종목명 매칭 stockId 목록 조회
+        List<Long> stockIds = null;
+        if (normalizedKeyword != null) {
+            stockIds = stockRepository.findByNameContaining(normalizedKeyword).stream()
+                    .map(Stock::getId)
+                    .toList();
+            if (stockIds.isEmpty()) {
+                stockIds = null;
+            }
+        }
+
+        // 4. RecordEntry 검색
+        List<RecordEntry> entries = recordEntryRepository.searchRecords(
+                memberId, emotionCode, normalizedKeyword, stockIds);
+
+        // 5. 결과의 stockId 일괄 조회 → Stock Map 생성
+        List<Long> resultStockIds = entries.stream()
+                .map(RecordEntry::getStockId)
+                .distinct()
+                .toList();
+        Map<Long, Stock> stockMap = stockRepository.findAllById(resultStockIds).stream()
+                .collect(Collectors.toMap(Stock::getId, Function.identity()));
+
+        // 6. 응답 DTO 생성
+        List<RecordSearchRes.SearchEntry> searchEntries = entries.stream()
+                .map(entry -> {
+                    Stock stock = stockMap.get(entry.getStockId());
+                    String symbol = stock != null ? stock.getSymbol() : "";
+                    return RecordSearchRes.SearchEntry.from(entry, symbol);
+                })
+                .toList();
+
+        return RecordSearchRes.builder()
+                .records(searchEntries)
+                .totalCount(searchEntries.size())
+                .build();
+    }
+
+    @Override
+    public RecentSearchRes getRecentSearchKeywords(Long memberId) {
+        List<String> recentKeywords = searchHistoryRepository
+                .findRecentKeywordsByMemberId(memberId, PageRequest.of(0, RECENT_SEARCH_LIMIT));
+        return RecentSearchRes.from(recentKeywords);
+    }
+
+    /**
+     * 검색 키워드 저장 (중복 키워드는 updatedAt 갱신)
+     */
+    private void saveSearchHistory(Long memberId, String keyword) {
+        searchHistoryRepository.findByMemberIdAndKeyword(memberId, keyword)
+                .ifPresentOrElse(
+                        // 기존 기록이 있으면 updatedAt 갱신 (touch)
+                        existing -> searchHistoryRepository.touchUpdatedAt(existing.getId()),
+                        // 기존 기록이 없으면 새로 저장
+                        () -> {
+                            try {
+                                SearchHistory history = SearchHistory.builder()
+                                        .memberId(memberId)
+                                        .keyword(keyword)
+                                        .build();
+                                searchHistoryRepository.save(history);
+                            } catch (DataIntegrityViolationException e) {
+                                // 동시 요청으로 이미 저장된 경우 updatedAt 갱신
+                                searchHistoryRepository.findByMemberIdAndKeyword(memberId, keyword)
+                                .ifPresent(existing -> searchHistoryRepository.touchUpdatedAt(existing.getId()));
+                            }
+                        }
+                );
     }
 }
