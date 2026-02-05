@@ -28,6 +28,17 @@ public interface AssociationAnalysisApiSpecification {
                     responseCode = "200", description = "조회 성공"
             ),
             @io.swagger.v3.oas.annotations.responses.ApiResponse(
+                    responseCode = "401", description = "인증되지 않음", content = @Content(
+                    mediaType = "application/json",
+                    examples = {
+                            @ExampleObject(
+                                    name = "사용자 인증 없이 접근 불가",
+                                    summary = "인증 실패",
+                                    value = "{ \"isSuccess\": false, \"code\": \"AUTH401_2\", \"message\": \"인증이 필요합니다.\", \"result\": \"인증이 필요합니다.\" }"
+                            )
+                    })
+            ),
+            @io.swagger.v3.oas.annotations.responses.ApiResponse(
                     responseCode = "404", description = "찾을 수 없음", content = @Content(
                     mediaType = "application/json",
                     examples = {
