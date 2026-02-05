@@ -94,6 +94,7 @@ public class SecurityConfig {
                         // PROTECTED
                         .requestMatchers("/api/analysis/**").authenticated()
                         .requestMatchers("/api/mypage/**").authenticated()
+                        .requestMatchers("/api/home/**").authenticated()
                         .requestMatchers(retestMatcher).authenticated()
 
                         // 나머지

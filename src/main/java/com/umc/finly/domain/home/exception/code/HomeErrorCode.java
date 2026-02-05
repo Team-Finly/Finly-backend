@@ -26,7 +26,14 @@ public enum HomeErrorCode implements BaseCode {
             HttpStatus.INTERNAL_SERVER_ERROR,
             "HOME_RECENT_RECORDS_INTERNAL_ERROR",
             "최근 나의 기록 조회 중 서버 오류가 발생했습니다."
+    ),
+
+    HOME_WEEKLY_MOOD_INTERNAL_ERROR(
+            HttpStatus.INTERNAL_SERVER_ERROR,
+            "HOME_WEEKLY_MOOD_INTERNAL_ERROR",
+            "위클리 무드 조회 중 서버 오류가 발생했습니다."
     );
+
 
     private final HttpStatus httpStatus;
     private final String code;
