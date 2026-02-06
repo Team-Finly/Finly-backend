@@ -71,7 +71,7 @@ public class RecordFeedbackAsyncExecutor {
 
             OpenAiFeedbackClient.FeedbackResponse response = openAiFeedbackClient.generateFeedback(systemPrompt, userPrompt);
 
-            feedback.markCompleted(response.content(), response.promptTokens(), response.completionTokens());
+            feedback.markCompleted(response.content(), response.suggestion(), response.promptTokens(), response.completionTokens());
             feedbackRepository.save(feedback);
 
             log.info("Feedback generated successfully for recordEntryId: {}", recordEntryId);

@@ -1,6 +1,8 @@
 package com.umc.finly.domain.record.infra;
 
 import com.fasterxml.jackson.annotation.JsonProperty;
+import com.fasterxml.jackson.core.JsonProcessingException;
+import com.fasterxml.jackson.databind.ObjectMapper;
 import com.umc.finly.global.apiPayload.exception.CustomException;
 import com.umc.finly.domain.record.exception.RecordErrorCode;
 import lombok.extern.slf4j.Slf4j;
@@ -17,9 +19,12 @@ import java.util.List;
 public class OpenAiFeedbackClient {
 
     private final RestClient openAiRestClient;
+    private final ObjectMapper objectMapper;
 
-    public OpenAiFeedbackClient(@Qualifier("openAiRestClient") RestClient openAiRestClient) {
+    public OpenAiFeedbackClient(@Qualifier("openAiRestClient") RestClient openAiRestClient,
+                                 ObjectMapper objectMapper) {
         this.openAiRestClient = openAiRestClient;
+        this.objectMapper = objectMapper;
     }
 
     @Value("${openai.model:gpt-4o-mini}")
@@ -33,7 +38,7 @@ public class OpenAiFeedbackClient {
                         new Message("user", userPrompt)
                 ),
                 0.7,
-                1000
+                1500
         );
 
         try {
@@ -47,19 +52,55 @@ public class OpenAiFeedbackClient {
                 throw new CustomException(RecordErrorCode.OPENAI_API_FAILED);
             }
 
-            String content = response.choices().get(0).message().content();
+            String rawContent = response.choices().get(0).message().content();
             Integer promptTokens = response.usage() != null ? response.usage().promptTokens() : null;
             Integer completionTokens = response.usage() != null ? response.usage().completionTokens() : null;
 
-            return new FeedbackResponse(content, promptTokens, completionTokens);
+            return parseFeedbackJson(rawContent, promptTokens, completionTokens);
         } catch (RestClientException e) {
             log.error("OpenAI API call failed", e);
             throw new CustomException(RecordErrorCode.OPENAI_API_FAILED);
         }
     }
 
+    private FeedbackResponse parseFeedbackJson(String rawContent, Integer promptTokens, Integer completionTokens) {
+        try {
+            String jsonContent = extractJson(rawContent);
+            FeedbackJsonResponse parsed = objectMapper.readValue(jsonContent, FeedbackJsonResponse.class);
+
+            String suggestion = null;
+            if (parsed.suggestions() != null && !parsed.suggestions().isEmpty()) {
+                suggestion = String.join("\n", parsed.suggestions());
+            }
+
+            return new FeedbackResponse(parsed.content(), suggestion, promptTokens, completionTokens);
+        } catch (JsonProcessingException e) {
+            log.warn("Failed to parse feedback JSON, using raw content: {}", e.getMessage());
+            return new FeedbackResponse(rawContent, null, promptTokens, completionTokens);
+        }
+    }
+
+    private String extractJson(String rawContent) {
+        String trimmed = rawContent.trim();
+        if (trimmed.startsWith("```json")) {
+            trimmed = trimmed.substring(7);
+        } else if (trimmed.startsWith("```")) {
+            trimmed = trimmed.substring(3);
+        }
+        if (trimmed.endsWith("```")) {
+            trimmed = trimmed.substring(0, trimmed.length() - 3);
+        }
+        return trimmed.trim();
+    }
+
+    private record FeedbackJsonResponse(
+            String content,
+            List<String> suggestions
+    ) {}
+
     public record FeedbackResponse(
             String content,
+            String suggestion,
             Integer promptTokens,
             Integer completionTokens
     ) {}
