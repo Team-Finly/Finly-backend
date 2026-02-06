@@ -1,6 +1,7 @@
 package com.umc.finly.domain.analysis.stock.service;
 
 import com.umc.finly.domain.analysis.stock.dto.res.PriceDistributionResDTO;
+import com.umc.finly.domain.analysis.stock.dto.res.RecentDecisionResDTO;
 import com.umc.finly.domain.analysis.stock.dto.res.StockSummaryResDTO;
 import com.umc.finly.domain.analysis.stock.enums.PriceRangeType;
 import com.umc.finly.domain.market.exception.code.MarketErrorCode;
@@ -19,6 +20,7 @@ import java.math.RoundingMode;
 import java.time.LocalDate;
 import java.time.temporal.ChronoUnit;
 import java.util.ArrayList;
+import java.util.Collections;
 import java.util.Comparator;
 import java.util.List;
 
@@ -246,5 +248,78 @@ public class StockAnalysisServiceImpl implements StockAnalysisService {
                 new PriceDistributionResDTO.RangePolicy("AVERAGE_BUY_PRICE", RANGE_PERCENT),
                 items
         );
+    }
+
+    @Override
+    public List<RecentDecisionResDTO> getRecentDecisions(Long memberId, String symbol, int limit) {
+        if (limit <= 0) {
+            return List.of();
+        }
+
+        Stock stock = stockRepository.findBySymbol(symbol)
+                .orElseThrow(() -> new CustomException(MarketErrorCode.MARKET_STOCK_NOT_FOUND));
+
+        Long stockId = stock.getId();
+
+        List<RecordEntry> records = recordEntryRepository.findAllByMemberIdAndStockId(memberId, stockId);
+
+        if (records.isEmpty()) {
+            return List.of();
+        }
+
+        // 같은 날짜라면 매도는 그날의 판단 결과, 매수는 다음 판단 사이클의 시작으로 봄
+        records.sort(Comparator
+                .comparing(RecordEntry::getRecordDate)
+                .thenComparing(record ->
+                        record.getTradeAction() == TradeAction.SELL ? 0 : 1
+                )
+        );
+
+        List<RecentDecisionResDTO> results = new ArrayList<>();
+
+        BigDecimal accumulatedBuyAmount = BigDecimal.ZERO; // 누적 매수 가격
+
+        for (RecordEntry record : records) {
+            if (record.getTradeAction() == TradeAction.BUY) {
+                // 매수 누적
+                accumulatedBuyAmount = accumulatedBuyAmount.add(
+                        record.getUnitPrice().multiply(record.getQuantity())
+                );
+            }
+
+            if (record.getTradeAction() == TradeAction.SELL) {
+                if (accumulatedBuyAmount.compareTo(BigDecimal.ZERO) == 0) { // 일 단위 계산으로 인한 로직
+                    continue;
+                }
+
+                BigDecimal sellAmount = record.getUnitPrice().multiply(record.getQuantity());
+
+                int decisionResult = sellAmount
+                        .subtract(accumulatedBuyAmount)
+                        .multiply(BigDecimal.valueOf(100))
+                        .divide(accumulatedBuyAmount, 0, RoundingMode.HALF_UP)
+                        .intValue();
+
+                results.add(
+                        RecentDecisionResDTO.builder()
+                                .stockName(stock.getName())
+                                .emotion(record.getEmotionCode().name())
+                                .tradeType("매도")
+                                .price(record.getUnitPrice().intValue())
+                                .date(record.getRecordDate())
+                                .quantity(record.getQuantity().intValue())
+                                .decisionResult(decisionResult)
+                                .build()
+                );
+
+                accumulatedBuyAmount = BigDecimal.ZERO;
+            }
+        }
+
+        Collections.reverse(results);
+
+        return results.stream()
+                .limit(limit)
+                .toList();
     }
 }

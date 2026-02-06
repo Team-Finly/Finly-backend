@@ -1,6 +1,7 @@
 package com.umc.finly.domain.analysis.stock.controller;
 
 import com.umc.finly.domain.analysis.stock.dto.res.PriceDistributionResDTO;
+import com.umc.finly.domain.analysis.stock.dto.res.RecentDecisionResDTO;
 import com.umc.finly.domain.analysis.stock.dto.res.StockSummaryResDTO;
 import com.umc.finly.domain.analysis.stock.service.StockAnalysisService;
 import com.umc.finly.global.apiPayload.response.ApiResponse;
@@ -11,6 +12,8 @@ import io.swagger.v3.oas.annotations.responses.ApiResponses;
 import lombok.RequiredArgsConstructor;
 import org.springframework.security.core.annotation.AuthenticationPrincipal;
 import org.springframework.web.bind.annotation.*;
+
+import java.util.List;
 
 @RequiredArgsConstructor
 @RestController
@@ -94,6 +97,50 @@ public class StockAnalysisController {
     ) {
         PriceDistributionResDTO result =
                 stockAnalysisService.getPriceDistribution(principal.getMemberId(), symbol);
+
+        return ApiResponse.onSuccess(result, SuccessCode.OK);
+    }
+
+    @Operation(
+            summary = "최근 판단 결과 조회",
+            description = """
+            사용자가 기록한 매도 완료 기록을 기준으로 최근 판단 결과 조회 정보를 반환합니다.
+            
+            계산 기준
+            - 날짜 단위 기록만 제공되므로 동일 날짜의 BUY/SELL 순서는 구분할 수 없습니다.
+              이에 따라 동일 날짜의 매도는 해당 날짜 이전의 매수 판단을 기준으로 계산됩니다.
+            - 수익률(%) = (매도금액 - 매수금액) / 매수금액 × 100이며
+              여기서 매수금액은 이전 매도 이후부터 이번 매도 직전까지 발생한 매수 기록들의 합으로 정의됩니다.
+            
+            유의사항
+            - 최근 판단 결과는 기본적으로 3개를 반환합니다. (limit 기본값 = 3)
+            - 추후 설계 변경 및 확장성을 고려하여 limit 파라미터로 반환 개수를 조절할 수 있도록 해놓았습니다.
+            - 실제 시세 기반 수익률이 아닙니다.
+            - 사용자가 기록한 매수/매도 가격을 기준으로 계산됩니다.
+            - 투자 판단 기록 분석을 위한 지표입니다.
+            """
+    )
+    @ApiResponses({
+            @io.swagger.v3.oas.annotations.responses.ApiResponse(
+                    responseCode = "200", description = "조회 성공"
+            ),
+            @io.swagger.v3.oas.annotations.responses.ApiResponse(
+                    responseCode = "401", description = "인증 실패"
+            ),
+            @io.swagger.v3.oas.annotations.responses.ApiResponse(
+                    responseCode = "404", description = "존재하지 않는 종목"
+            ),
+            @io.swagger.v3.oas.annotations.responses.ApiResponse(
+                    responseCode = "500", description = "서버 내부 오류"
+            )
+    })
+    @GetMapping("/{symbol}/recent")
+    public ApiResponse<List<RecentDecisionResDTO>> getRecentDecisions(
+            @AuthenticationPrincipal AuthPrincipal principal,
+            @PathVariable String symbol,
+            @RequestParam(defaultValue = "3") int limit
+    ) {
+        List<RecentDecisionResDTO> result = stockAnalysisService.getRecentDecisions(principal.getMemberId(), symbol, limit);
 
         return ApiResponse.onSuccess(result, SuccessCode.OK);
     }
