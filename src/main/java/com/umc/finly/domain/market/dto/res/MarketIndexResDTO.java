@@ -1,4 +1,4 @@
-package com.umc.finly.domain.market.dto;
+package com.umc.finly.domain.market.dto.res;
 
 import com.fasterxml.jackson.annotation.JsonFormat;
 import com.fasterxml.jackson.annotation.JsonPropertyOrder;
