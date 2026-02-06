@@ -20,6 +20,7 @@ import com.umc.finly.domain.member.service.PersonaScoringService;
 import com.umc.finly.global.apiPayload.exception.CustomException;
 import com.umc.finly.global.infra.jwt.JwtProvider;
 import com.umc.finly.global.util.CookieUtil;
+import com.umc.finly.global.util.PasswordPolicy;
 import com.umc.finly.global.util.SecurityUtil;
 import io.jsonwebtoken.ExpiredJwtException;
 import io.jsonwebtoken.JwtException;
@@ -51,8 +52,6 @@ public class AuthServiceImpl implements AuthService {
     private final PasswordEncoder passwordEncoder;
     private final JwtProvider jwtProvider;
 
-    // 비밀번호 양식
-    private static final String PASSWORD_REGEX = "^(?=.*[A-Za-z])(?=.*\\d).{6,}$";
     // 닉네임 양식
     private static final String NICKNAME_REGEX = "^[가-힣a-zA-Z0-9]{2,}$";
 
@@ -249,7 +248,7 @@ public class AuthServiceImpl implements AuthService {
 
     // -----------------------------------------------------------
     private boolean isValidPassword(String raw) {
-        return raw != null && raw.matches(PASSWORD_REGEX);
+        return PasswordPolicy.isValid(raw);
     }
 
     private boolean isValidNickname(String nickname) {
