@@ -38,7 +38,6 @@ public class EmotionAnalysisServiceImpl implements EmotionAnalysisService {
         // symbol로 Stock을 찾아서 stockId/stockName 확보
         Stock stock = stockRepository.findBySymbol(symbol)
                 .orElseThrow(() -> new CustomException(EmotionAnalysisErrorCode.ANALYSIS_STOCK_NOT_FOUND));
-        // // 너희 프로젝트에 맞는 "종목 없음" 에러코드로 교체해줘
 
         // 종목 DTO 생성
         EmotionDistributionResDTO.SelectedStock stockDto =
@@ -69,29 +68,15 @@ public class EmotionAnalysisServiceImpl implements EmotionAnalysisService {
         // 모든 EmotionCode를 포함하는 summary 리스트 생성(0건도 포함)
         List<EmotionDistributionResDTO.TypeSummary> summaries = new ArrayList<>();
 
-        // percent 합계와 최댓값(보정 대상) 추적
-        int sumPercent = 0;
-        EmotionCode maxType = null;
-        long maxCount = -1;
-
         for (EmotionCode code : EmotionCode.values()) {
             // 해당 감정 count 가져오기(없으면 0)
             long count = countMap.getOrDefault(code, 0L);
-
-            // 가장 count 큰 감정 찾기(나중에 remain 보정)
-            if (maxType == null || count > maxCount) {
-                maxType = code;
-                maxCount = count;
-            }
 
             // percent 계산(버림)
             int percent = 0;
             if (totalCount > 0) {
                 percent = (int) ((count * 100) / totalCount);
             }
-
-            // percent 합 누적
-            sumPercent += percent;
 
             // TypeSummary 생성
             summaries.add(EmotionDistributionResDTO.TypeSummary.builder()

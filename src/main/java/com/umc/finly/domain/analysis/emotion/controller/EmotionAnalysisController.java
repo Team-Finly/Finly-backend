@@ -7,6 +7,7 @@ import com.umc.finly.global.apiPayload.response.ApiResponse;
 import com.umc.finly.global.apiPayload.response.ErrorCode;
 import com.umc.finly.global.apiPayload.response.SuccessCode;
 import com.umc.finly.global.config.security.AuthPrincipal;
+import io.swagger.v3.oas.annotations.Operation;
 import io.swagger.v3.oas.annotations.tags.Tag;
 import lombok.RequiredArgsConstructor;
 import org.springframework.security.core.annotation.AuthenticationPrincipal;
@@ -23,6 +24,7 @@ public class EmotionAnalysisController {
 
     private final EmotionAnalysisService emotionAnalysisService;
 
+    @Operation(summary = "감정 분포 그래프 API", description = "각 종목의 조각 감정 분포 통계")
     @GetMapping("/{symbol}/emotion-distribution")
     public ApiResponse<EmotionDistributionResDTO> getEmotionDistribution(
             @AuthenticationPrincipal AuthPrincipal principal,
