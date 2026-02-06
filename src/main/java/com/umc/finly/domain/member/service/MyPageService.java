@@ -11,4 +11,6 @@ public interface MyPageService {
     MyPageMeResDTO getMyInfo(Long memberId);
     // 내 닉네임 변경
     UpdateNicknameResDTO updateMyNickname(Long memberId, String nickname);
+    // 내 비밀번호 변경
+    void changePassword(Long memberId, String newPassword, String newPasswordConfirm);
 }
