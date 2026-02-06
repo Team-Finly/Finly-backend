@@ -51,12 +51,12 @@ public class AssociationAnalysisRecordController {
                                               "result": [
                                                 {
                                                   "stockId": 123,
-                                                  "stockCode": "005930",
+                                                  "symbol": "005930",
                                                   "stockName": "삼성전자"
                                                 },
                                                 {
                                                   "stockId": 124,
-                                                  "stockCode": "000660",
+                                                  "symbol": "000660",
                                                   "stockName": "SK하이닉스"
                                                 }
                                               ]

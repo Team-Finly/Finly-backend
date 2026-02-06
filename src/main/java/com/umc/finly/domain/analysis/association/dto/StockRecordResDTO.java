@@ -7,12 +7,12 @@ import lombok.Getter;
 @Builder
 public class StockRecordResDTO {
     private Long stockId; // 종목 아이디
-    private String stockCode;// 종목 코드
+    private String symbol;// 종목 코드
     private String stockName; // 종목 이름
 
-    public StockRecordResDTO(Long stockId, String stockCode, String stockName) {
+    public StockRecordResDTO(Long stockId, String symbol, String stockName) {
         this.stockId = stockId;
-        this.stockCode = stockCode;
+        this.symbol = symbol;
         this.stockName = stockName;
     }
 }
