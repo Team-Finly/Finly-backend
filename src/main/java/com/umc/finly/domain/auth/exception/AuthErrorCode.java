@@ -29,6 +29,9 @@ public enum AuthErrorCode implements BaseCode {
     //403
     FORBIDDEN(HttpStatus.FORBIDDEN, "AUTH403", "접근 권한이 없습니다."),
 
+    // 404
+    TERM_NOT_FOUND(HttpStatus.NOT_FOUND, "AUTH404", "해당 약관이 없습니다."),
+
     // 422
     REQUIRED_TERM_NOT_AGREED(HttpStatus.UNPROCESSABLE_ENTITY, "AUTH422", "필수 약관에 동의해야 합니다.");
 
