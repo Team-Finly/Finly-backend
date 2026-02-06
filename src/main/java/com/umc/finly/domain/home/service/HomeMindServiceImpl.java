@@ -5,15 +5,14 @@ import com.umc.finly.domain.home.exception.code.HomeErrorCode;
 import com.umc.finly.domain.home.repository.HomeMindRepository;
 import com.umc.finly.domain.member.entity.Member;
 import com.umc.finly.domain.member.entity.Persona;
-import com.umc.finly.domain.member.repository.MemberRepository;
-import com.umc.finly.domain.member.repository.PersonaRepository;
+import com.umc.finly.domain.record.entity.RecordEntry;
+import com.umc.finly.domain.record.enums.EmotionCode;
+import com.umc.finly.domain.record.enums.TradeAction;
 import com.umc.finly.global.apiPayload.exception.CustomException;
-import com.umc.finly.domain.home.exception.code.HomeErrorCode;
 import lombok.RequiredArgsConstructor;
 import org.springframework.stereotype.Service;
 
 import java.time.LocalDate;
-import java.time.YearMonth;
 import java.util.List;
 
 @Service
@@ -21,83 +20,101 @@ import java.util.List;
 public class HomeMindServiceImpl implements HomeMindService {
 
     private final HomeMindRepository homeMindRepository;
-    private final MemberRepository memberRepository;
-    private final PersonaRepository personaRepository;
 
     @Override
-    public HomeMindRes getHomeMind(Long memberId) {
+    public HomeMindRes getMind(Long memberId) {
 
 
-        // Member 조회
-        Member member = memberRepository.findById(memberId)
+        // 사용자 + 페르소나 조회
+        Object[] result = homeMindRepository.findMemberWithPersona(memberId)
                 .orElseThrow(() ->
-                        new CustomException(HomeErrorCode.HOME_MIND_MEMBER_NOT_FOUND)
+                        new CustomException(HomeErrorCode.HOME_MIND_ACCESS_DENIED));
+
+        Member member = (Member) result[0];
+        Persona persona = (Persona) result[1];
+
+
+        // C. 기록 성실도
+        LocalDate now = LocalDate.now();
+        LocalDate startOfMonth = now.withDayOfMonth(1);
+
+        int recordedDays = homeMindRepository
+                .findDistinctRecordDates(memberId, startOfMonth, now)
+                .size();
+
+        int businessDays = now.lengthOfMonth();
+        int cScore = (int) ((double) recordedDays / businessDays * 100);
+
+
+        // B. 의사결정 일치도
+        List<RecordEntry> confidenceBuys =
+                homeMindRepository.findByMemberIdAndEmotionCodeAndTradeAction(
+                        memberId,
+                        EmotionCode.CONFIDENCE,
+                        TradeAction.BUY
                 );
 
-        // Persona 조회
-        Long personaId = member.getPersonaId();
+        int totalConfidence = confidenceBuys.size();
+        int hitCount = 0;
 
-        Persona persona = personaRepository.findById(personaId)
-                .orElseThrow(() ->
-                        new CustomException(HomeErrorCode.HOME_MIND_PERSONA_NOT_FOUND)
+        for (RecordEntry record : confidenceBuys) {
+            // 현재는 가격 히스토리 미연동 → 임시 정책: 기록 존재 시 적중 처리
+            hitCount++;
+        }
+
+        int bScore = totalConfidence == 0 ? 0 :
+                (int) ((double) hitCount / totalConfidence * 100);
+
+        // A. 하락장 회복탄력성
+        LocalDate start = now.minusMonths(1);
+
+        List<RecordEntry> allRecords =
+                homeMindRepository.findByMemberIdAndRecordDateBetween(
+                        memberId, start, now
                 );
 
+        long negativeCount = allRecords.stream()
+                .filter(r ->
+                        r.getEmotionCode() == EmotionCode.ANXIETY ||
+                                r.getEmotionCode() == EmotionCode.REGRET)
+                .count();
 
-        //FIM 계산
-        int mindIndex;
-        try {
-            mindIndex = calculateMindIndex(memberId);
-        } catch (Exception e) {
-            throw new CustomException(HomeErrorCode.HOME_MIND_CALCULATION_FAILED);
-        }
+        int total = allRecords.size();
+        int aScore = total == 0 ? 0 :
+                (int) ((1 - (double) negativeCount / total) * 100);
 
-        // 점수 구간 해석
-        String grade;
-        String description;
 
-        if (mindIndex < 40) {
-            grade = "감정 영향 높음";
-            description = "시장의 흐름보다 감정의 영향을 더 많이 받고 있습니다.";
-        } else if (mindIndex < 70) {
-            grade = "평균적 대응";
-            description = "일부 상황에서는 이성적으로 대응하고 있습니다.";
-        } else if (mindIndex < 85) {
-            grade = "안정적 멘탈";
-            description = "변동성 속에서도 비교적 안정적인 투자 태도를 유지하고 있습니다.";
-        } else {
-            grade = "고도화된 멘탈";
-            description = "시장을 감정이 아닌 기준으로 대하고 있습니다.";
-        }
+        // FMI 계산
+        int fmi = (int) (
+                aScore * 0.4 +
+                        bScore * 0.3 +
+                        cScore * 0.3
+        );
 
         return HomeMindRes.builder()
-                .userName(member.getNickname())
-                .personaTitle(persona.getTitle())
-                .mindIndex(mindIndex)
-                .grade(grade)
-                .description(description)
+                .nickname(member.getNickname())
+                .persona(
+                        HomeMindRes.Persona.builder()
+                                .personaType(persona.getPersonaType().name())
+                                .title(persona.getTitle())
+                                .build()
+                )
+                .fmi(fmi)
+                .levelMessage(resolveMessage(fmi))
+                .scores(
+                        HomeMindRes.Scores.builder()
+                                .resilience(aScore)
+                                .decision(bScore)
+                                .record(cScore)
+                                .build()
+                )
                 .build();
     }
 
-    /**
-     * FMI 계산 로직
-     */
-    private int calculateMindIndex(Long memberId) {
-
-        YearMonth now = YearMonth.now();
-        LocalDate start = now.atDay(1);
-        LocalDate end = now.atEndOfMonth();
-
-        List<LocalDate> recordedDates =
-                homeMindRepository.findRecordedDatesInPeriod(memberId, start, end);
-
-        int recordDays = recordedDates.size();
-        int businessDays = 20; // 실제 영업일
-
-        int cScore = Math.min(100, (recordDays * 100) / businessDays); //기록 성실도
-
-        int aScore = 60; // 하락장 회복 탄력성 (일단은 더미로)
-        int bScore = 60; // 의사 결정 일치도  (일단은 더미로)
-
-        return (int) ((aScore * 0.4) + (bScore * 0.3) + (cScore * 0.3));
+    private String resolveMessage(int fmi) {
+        if (fmi < 40) return "시장의 흐름보다 감정의 영향을 더 많이 받고 있습니다.";
+        if (fmi < 70) return "일부 상황에서는 이성적으로 대응하고 있습니다.";
+        if (fmi < 85) return "변동성 속에서도 비교적 안정적인 투자 태도를 유지하고 있습니다.";
+        return "시장을 감정이 아닌 기준으로 대하고 있습니다.";
     }
 }
