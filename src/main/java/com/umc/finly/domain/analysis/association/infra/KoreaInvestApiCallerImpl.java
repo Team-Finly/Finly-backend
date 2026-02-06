@@ -3,13 +3,10 @@ package com.umc.finly.domain.analysis.association.infra;
 import com.umc.finly.domain.analysis.association.dto.KoreaInvestRawResponse;
 import com.umc.finly.domain.analysis.association.exception.KoreaInvestErrorCode;
 import com.umc.finly.domain.analysis.association.exception.KoreaInvestException;
-import lombok.RequiredArgsConstructor;
 import org.springframework.beans.factory.annotation.Qualifier;
 import org.springframework.http.HttpStatusCode;
 import org.springframework.stereotype.Component;
-import org.springframework.web.bind.annotation.PathVariable;
 import org.springframework.web.client.RestClient;
-import org.springframework.web.client.RestTemplate;
 
 import java.util.List;
 import java.util.Map;
