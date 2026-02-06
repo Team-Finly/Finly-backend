@@ -2,7 +2,7 @@ package com.umc.finly.domain.market.infra;
 
 import com.fasterxml.jackson.databind.JsonNode;
 import com.fasterxml.jackson.databind.ObjectMapper;
-import com.umc.finly.domain.market.dto.MarketIndicesDTO;
+import com.umc.finly.domain.market.dto.res.MarketIndicesDTO;
 import com.umc.finly.domain.market.exception.code.MarketErrorCode;
 import com.umc.finly.global.apiPayload.exception.CustomException;
 import org.springframework.beans.factory.annotation.Qualifier;
