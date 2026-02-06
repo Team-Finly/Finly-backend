@@ -9,7 +9,7 @@ import java.util.List;
 @Getter
 @Builder
 @AllArgsConstructor
-public class StockSearchResponse {
+public class StockSearchResDTO {
 
     private String searchKeyword;
     private long totalCount;
