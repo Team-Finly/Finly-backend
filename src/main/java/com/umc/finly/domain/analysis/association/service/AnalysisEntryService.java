@@ -6,6 +6,7 @@ import com.umc.finly.domain.analysis.association.exception.AnalysisEntryErrorCod
 import com.umc.finly.domain.analysis.association.exception.AnalysisEntryException;
 import com.umc.finly.domain.market.stock.entity.Stock;
 import com.umc.finly.domain.market.stock.repository.StockRepository;
+import com.umc.finly.domain.record.repository.FragmentRepository;
 import com.umc.finly.domain.record.repository.RecordEntryRepository;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
@@ -23,9 +24,10 @@ public class AnalysisEntryService {
 
     private final RecordEntryRepository recordEntryRepository;
     private final StockRepository stockRepository;
+    private final FragmentRepository fragmentRepository;
 
     public AnalysisEntryResDTO getEntryStatus(Long memberId) {
-        Long recordCount = recordEntryRepository.countByMemberId(memberId);
+        Long recordCount = fragmentRepository.countByMemberId(memberId);
 
         Stock topStock = null;
 
