@@ -6,6 +6,7 @@ import com.umc.finly.global.apiPayload.response.ApiResponse;
 import com.umc.finly.global.apiPayload.response.SuccessCode;
 import com.umc.finly.global.config.security.AuthPrincipal;
 import io.swagger.v3.oas.annotations.Operation;
+import io.swagger.v3.oas.annotations.tags.Tag;
 import lombok.RequiredArgsConstructor;
 import org.springframework.security.core.annotation.AuthenticationPrincipal;
 import org.springframework.web.bind.annotation.*;
@@ -13,6 +14,7 @@ import org.springframework.web.bind.annotation.*;
 @RestController
 @RequiredArgsConstructor
 @RequestMapping("/api/home")
+@Tag(name = "Home", description = "위클리 무드 조회 API")
 public class HomeWeeklyMoodController {
 
     private final HomeWeeklyMoodService homeWeeklyMoodService;
