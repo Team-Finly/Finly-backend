@@ -138,4 +138,32 @@ public class AuthController {
                 SuccessCode.OK
         );
     }
+
+    /**
+     * 로그아웃
+     */
+    @Operation(
+            summary = "로그아웃",
+            description = """
+                Access Token 기반으로 로그아웃 처리합니다.
+                
+                - Authorization 헤더의 Access Token으로 사용자를 인증합니다.
+                - 서버(DB)에 저장된 해당 사용자의 Refresh Token 및 만료 시각을 제거합니다.
+                - 클라이언트에 저장된 Refresh Token 쿠키(refreshToken)를 Max-Age=0으로 설정하여 삭제합니다.
+                - 성공 시 빈 result({})를 반환합니다.
+                
+                ✅ 요청 헤더
+                - Authorization: Bearer {accessToken}
+                
+                ✅ 동작 방식
+                - Refresh Token은 HttpOnly Cookie로 관리되므로, 서버는 쿠키를 삭제(Set-Cookie)로 무효화합니다.
+                - (참고) Access Token은 서버 저장소가 없으므로 만료 전까지는 클라이언트에서 폐기하는 것이 일반적입니다.
+                """
+    )
+    @PostMapping("/logout")
+    public ApiResponse<Object> logout(HttpServletResponse response){
+        authService.logout(response);
+
+        return ApiResponse.onSuccess(new Object(), SuccessCode.OK);
+    }
 }

@@ -1,6 +1,9 @@
 package com.umc.finly.global.apiPayload.exception;
 
 import com.fasterxml.jackson.databind.exc.InvalidFormatException;
+import com.umc.finly.domain.record.enums.EmotionCode;
+import com.umc.finly.domain.record.enums.FragmentPeriodKey;
+import com.umc.finly.domain.record.exception.code.RecordErrorCode;
 import com.umc.finly.global.apiPayload.response.ApiResponse;
 import com.umc.finly.global.apiPayload.response.ErrorCode;
 import jakarta.servlet.http.HttpServletRequest;
@@ -16,6 +19,7 @@ import org.springframework.web.bind.annotation.RestController;
 import org.springframework.web.bind.annotation.RestControllerAdvice;
 import org.springframework.web.context.request.ServletWebRequest;
 import org.springframework.web.context.request.WebRequest;
+import org.springframework.web.method.annotation.MethodArgumentTypeMismatchException;
 import org.springframework.web.servlet.mvc.method.annotation.ResponseEntityExceptionHandler;
 
 import java.util.LinkedHashMap;
@@ -106,5 +110,24 @@ public class ExceptionAdvice extends ResponseEntityExceptionHandler {
                 ApiResponse.onFailure(ErrorCode.INVALID_REQUEST, null)
         );
     }
+
+    // FragmentController
+    @ExceptionHandler(MethodArgumentTypeMismatchException.class)
+    public void handleTypeMismatch(MethodArgumentTypeMismatchException e) {
+
+        // boxType enum 변환 실패
+        if ("boxType".equals(e.getName()) && e.getRequiredType() == EmotionCode.class) {
+            throw new CustomException(RecordErrorCode.INVALID_BOX_TYPE);
+        }
+
+        // periodKey enum 변환 실패 (에러코드 있으면)
+        if ("periodKey".equals(e.getName()) && e.getRequiredType() == FragmentPeriodKey.class) {
+            throw new CustomException(RecordErrorCode.INVALID_PERIOD_KEY);
+        }
+
+        // 그 외는 공통 400
+        throw new CustomException(ErrorCode.INVALID_REQUEST);
+    }
+
 
 }

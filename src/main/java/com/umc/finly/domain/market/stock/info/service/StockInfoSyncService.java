@@ -1,7 +1,7 @@
 package com.umc.finly.domain.market.stock.info.service;
 
-import com.umc.finly.domain.market.stock.info.dto.StockAdminResponse;
-import com.umc.finly.domain.market.stock.info.dto.StockInfoDto;
+import com.umc.finly.domain.market.stock.info.dto.StockAdminResDTO;
+import com.umc.finly.domain.market.stock.info.dto.StockInfoDTO;
 import com.umc.finly.domain.market.stock.entity.Stock;
 import com.umc.finly.domain.market.stock.enums.MarketType;
 import com.umc.finly.domain.market.stock.info.exception.StockInfoErrorCode;
@@ -30,16 +30,16 @@ public class StockInfoSyncService {
     private final StockInfoFileParser stockInfoFileParser;
     private final StockRepository stockRepository;
 
-    public StockAdminResponse.StockSync syncDomesticStocks() {
+    public StockAdminResDTO.StockSync syncDomesticStocks() {
         log.info(">>> ⚪ 국내 종목 정보 동기화 시작");
-        List<StockInfoDto> allInfos = new ArrayList<>();
+        List<StockInfoDTO> allInfos = new ArrayList<>();
 
         int kospiCount = 0;
         int kosdaqCount = 0;
 
         // 1. 코스피 데이터 처리
         try (InputStream is = kisStockInfoFileClient.downloadKospi()) {
-            List<StockInfoDto> kospiList = stockInfoFileParser.parse(is, MarketType.KOSPI);
+            List<StockInfoDTO> kospiList = stockInfoFileParser.parse(is, MarketType.KOSPI);
             kospiCount = kospiList.size();
             allInfos.addAll(kospiList);
             log.info("✅ KOSPI 다운로드 및 파싱 완료: {} 건", kospiCount);
@@ -50,7 +50,7 @@ public class StockInfoSyncService {
 
         // 2. 코스닥 데이터 처리
         try (InputStream is = kisStockInfoFileClient.downloadKosdaq()) {
-            List<StockInfoDto> kosdaqList = stockInfoFileParser.parse(is, MarketType.KOSDAQ);
+            List<StockInfoDTO> kosdaqList = stockInfoFileParser.parse(is, MarketType.KOSDAQ);
             kosdaqCount = kosdaqList.size();
             allInfos.addAll(kosdaqList);
             log.info("✅ KOSDAQ 다운로드 및 파싱 완료: {} 건", kosdaqCount);
@@ -67,8 +67,8 @@ public class StockInfoSyncService {
         int deactivatedCount = processStocks(allInfos, kospiCount, kosdaqCount);
 
         // 4. DTO 응답용 리스트 생성
-        List<StockAdminResponse.StockSync.StockSummary> updatedStocks = allInfos.stream()
-                .map(info -> new StockAdminResponse.StockSync.StockSummary(
+        List<StockAdminResDTO.StockSync.StockSummary> updatedStocks = allInfos.stream()
+                .map(info -> new StockAdminResDTO.StockSync.StockSummary(
                         info.getSymbol(),
                         info.getName(),
                         info.getIsin(),
@@ -80,7 +80,7 @@ public class StockInfoSyncService {
         log.info(">>> ✅ 국내 종목 정보 동기화 완료");
 
         // 5. 최종 결과 DTO 반환
-        return new StockAdminResponse.StockSync(
+        return new StockAdminResDTO.StockSync(
                 allInfos.size(),
                 kospiCount,
                 kosdaqCount,
@@ -91,20 +91,20 @@ public class StockInfoSyncService {
     }
 
     @Transactional
-    public int processStocks(List<StockInfoDto> allInfos, int kospiCount, int kosdaqCount) {
+    public int processStocks(List<StockInfoDTO> allInfos, int kospiCount, int kosdaqCount) {
         // DB에 있는 기존 모든 종목을 Symbol 기준으로 Map 생성
         Map<String, Stock> existingStockMap = stockRepository.findAll().stream()
                 .collect(Collectors.toMap(Stock::getSymbol, stock -> stock));
 
         // 이번 파일에 포함된 Symbol 세트
         Set<String> newSymbolSet = allInfos.stream()
-                .map(StockInfoDto::getSymbol)
+                .map(StockInfoDTO::getSymbol)
                 .collect(Collectors.toSet());
 
         log.info("\uD83D\uDD35 DB 기존 종목 수: {} 건", existingStockMap.size());
 
         // 1. 신규 추가 및 기존 정보 업데이트
-        for (StockInfoDto info : allInfos) {
+        for (StockInfoDTO info : allInfos) {
             Stock stock = existingStockMap.get(info.getSymbol());
 
             if (stock != null) {

@@ -3,7 +3,7 @@ package com.umc.finly.domain.market.stock.search.service;
 import com.umc.finly.domain.market.stock.entity.Stock;
 import com.umc.finly.domain.market.stock.repository.StockRepository;
 import com.umc.finly.domain.market.stock.search.converter.StockSearchConverter;
-import com.umc.finly.domain.market.stock.search.dto.StockSearchResponse;
+import com.umc.finly.domain.market.stock.search.dto.StockSearchResDTO;
 import com.umc.finly.domain.market.stock.search.exception.StockSearchErrorCode;
 import com.umc.finly.domain.market.stock.search.exception.StockSearchException;
 import com.umc.finly.global.apiPayload.exception.CustomException;
@@ -19,13 +19,11 @@ import org.springframework.transaction.annotation.Transactional;
 @Transactional(readOnly = true)
 public class StockSearchServiceImpl implements StockSearchService {
 
-    private static final int MIN_KEYWORD_LENGTH = 2;
-
     private final StockRepository stockRepository;
     private final StockSearchConverter stockSearchConverter;
 
     @Override
-    public StockSearchResponse searchStocks(String keyword, Pageable pageable) {
+    public StockSearchResDTO searchStocks(String keyword, Pageable pageable) {
         try {
             String trimmedKeyword = validateKeyword(keyword);
 
@@ -50,10 +48,6 @@ public class StockSearchServiceImpl implements StockSearchService {
 
         if (trimmed.isEmpty()) {
             throw new StockSearchException(StockSearchErrorCode.EMPTY_KEYWORD);
-        }
-
-        if (trimmed.length() < MIN_KEYWORD_LENGTH) {
-            throw new StockSearchException(StockSearchErrorCode.INVALID_KEYWORD);
         }
 
         return trimmed;

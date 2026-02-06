@@ -19,8 +19,12 @@ import com.umc.finly.domain.member.repository.MemberTermRepository;
 import com.umc.finly.domain.member.service.PersonaScoringService;
 import com.umc.finly.global.apiPayload.exception.CustomException;
 import com.umc.finly.global.infra.jwt.JwtProvider;
+import com.umc.finly.global.util.CookieUtil;
+import com.umc.finly.global.util.PasswordPolicy;
+import com.umc.finly.global.util.SecurityUtil;
 import io.jsonwebtoken.ExpiredJwtException;
 import io.jsonwebtoken.JwtException;
+import jakarta.servlet.http.HttpServletResponse;
 import lombok.RequiredArgsConstructor;
 import org.springframework.security.crypto.password.PasswordEncoder;
 import org.springframework.stereotype.Service;
@@ -48,14 +52,13 @@ public class AuthServiceImpl implements AuthService {
     private final PasswordEncoder passwordEncoder;
     private final JwtProvider jwtProvider;
 
-    // 비밀번호 양식
-    private static final String PASSWORD_REGEX = "^(?=.*[A-Za-z])(?=.*\\d).{6,}$";
     // 닉네임 양식
     private static final String NICKNAME_REGEX = "^[가-힣a-zA-Z0-9]{2,}$";
 
     // 필수 약관 정의
     private static final EnumSet<TermType> REQUIRED_TERMS =
             EnumSet.of(TermType.TERMS_AGREED, TermType.PRIVACY_AGREED);
+    private final CookieUtil cookieUtil;
 
     /** 이메일 중복 확인 **/
     @Override
@@ -231,10 +234,21 @@ public class AuthServiceImpl implements AuthService {
         return new ReissueTokens(newAccessToken, newRefreshToken, refreshMaxAgeSeconds);
     }
 
+    /** 로그아웃 **/
+    @Override
+    public void logout(HttpServletResponse response){
+        Long memberId = SecurityUtil.getCurrentMemberId();
+
+        Member member = memberRepository.findById(memberId)
+                .orElseThrow(()-> new CustomException(AuthErrorCode.INVALID_ACCESS_TOKEN));
+
+        member.clearRefreshToken();
+        cookieUtil.clearRefreshTokenCookie(response);
+    }
 
     // -----------------------------------------------------------
     private boolean isValidPassword(String raw) {
-        return raw != null && raw.matches(PASSWORD_REGEX);
+        return PasswordPolicy.isValid(raw);
     }
 
     private boolean isValidNickname(String nickname) {
