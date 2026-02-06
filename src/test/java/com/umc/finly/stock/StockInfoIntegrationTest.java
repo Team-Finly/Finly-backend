@@ -1,6 +1,6 @@
 package com.umc.finly.stock;
 
-import com.umc.finly.domain.market.stock.info.dto.StockInfoDto;
+import com.umc.finly.domain.market.stock.info.dto.StockInfoDTO;
 import com.umc.finly.domain.market.stock.enums.MarketType;
 import com.umc.finly.domain.market.stock.info.infra.StockInfoFileParser;
 import org.junit.jupiter.api.DisplayName;
@@ -34,7 +34,7 @@ class StockInfoIntegrationTest {
 
         try (FileInputStream fis = new FileInputStream(file)) {
             // 파싱 수행
-            List<StockInfoDto> stocks = parser.parse(fis, MarketType.KOSPI);
+            List<StockInfoDTO> stocks = parser.parse(fis, MarketType.KOSPI);
 
             // 검증 및 로그 출력
             assertThat(stocks).isNotEmpty();

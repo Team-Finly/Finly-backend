@@ -1,7 +1,7 @@
 package com.umc.finly.domain.market.stock.info.service;
 
 import com.google.common.collect.Lists;
-import com.umc.finly.domain.market.stock.info.dto.StockAdminResponse;
+import com.umc.finly.domain.market.stock.info.dto.StockAdminResDTO;
 import com.umc.finly.domain.market.stock.entity.Stock;
 import com.umc.finly.domain.market.stock.info.exception.StockInfoErrorCode;
 import com.umc.finly.domain.market.stock.info.exception.StockInfoException;
@@ -27,20 +27,20 @@ public class StockLogoUpdateService {
     private final TradingViewSymbolClient tradingViewSymbolClient;
     private final TradingViewLogoExtractor tradingViewLogoExtractor;
 
-    public StockAdminResponse.LogoUpdate updateMissingLogos() {
+    public StockAdminResDTO.LogoUpdate updateMissingLogos() {
         List<Stock> targets = stockRepository.findByLogoUrlIsNull();
         int total = targets.size();
 
         // 업데이트 대상이 없는 경우
         if (targets.isEmpty()) {
             log.info("⚪ 업데이트할 로고가 없습니다.");
-            return new StockAdminResponse.LogoUpdate(0, 0, 0, List.of(), "업데이트 할 로고가 없습니다.");
+            return new StockAdminResDTO.LogoUpdate(0, 0, 0, List.of(), "업데이트 할 로고가 없습니다.");
         }
 
         // 업데이트 시작
         log.info("🚀 로고 업데이트 시작: 총 {}건", total);
 
-        List<StockAdminResponse.LogoUpdate.LogoDetail> updatedLogos = Collections.synchronizedList(new ArrayList<>());
+        List<StockAdminResDTO.LogoUpdate.LogoDetail> updatedLogos = Collections.synchronizedList(new ArrayList<>());
         AtomicInteger successCount = new AtomicInteger(0);
         AtomicInteger notFoundCount = new AtomicInteger(0);
         AtomicInteger failCount = new AtomicInteger(0);
@@ -63,7 +63,7 @@ public class StockLogoUpdateService {
                 updateSingleStock(stock, successCount, notFoundCount, failCount);
 
                 if (stock.getLogoUrl() != null) {
-                    updatedLogos.add(new StockAdminResponse.LogoUpdate.LogoDetail(
+                    updatedLogos.add(new StockAdminResDTO.LogoUpdate.LogoDetail(
                             stock.getSymbol(),
                             stock.getName(),
                             stock.getMarketType(),
@@ -94,7 +94,7 @@ public class StockLogoUpdateService {
         log.info(">> 초당 처리량(TPS): {}건/sec", String.format("%.2f", tps));
         log.info(">> 병렬 처리 방식: ParallelStream (Partition Size: {})", partitionSize);
 
-        return new StockAdminResponse.LogoUpdate(
+        return new StockAdminResDTO.LogoUpdate(
                 total,
                 successCount.get(),
                 notFoundCount.get() + failCount.get(), // 실패(로고없음+에러) 합산

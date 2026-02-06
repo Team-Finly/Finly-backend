@@ -1,6 +1,6 @@
 package com.umc.finly.domain.market.stock.search.service;
 
-import com.umc.finly.domain.market.stock.search.dto.StockSearchResponse;
+import com.umc.finly.domain.market.stock.search.dto.StockSearchResDTO;
 import org.springframework.data.domain.Pageable;
 
 public interface StockSearchService {
@@ -11,5 +11,5 @@ public interface StockSearchService {
      * @param pageable 페이지 정보 (page, size, sort)
      * @return 검색 결과 (검색어, 총 개수, 종목 리스트, 페이지 정보)
      */
-    StockSearchResponse searchStocks(String keyword, Pageable pageable);
+    StockSearchResDTO searchStocks(String keyword, Pageable pageable);
 }

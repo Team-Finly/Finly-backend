@@ -1,6 +1,6 @@
 package com.umc.finly.domain.market.stock.info.infra;
 
-import com.umc.finly.domain.market.stock.info.dto.StockInfoDto;
+import com.umc.finly.domain.market.stock.info.dto.StockInfoDTO;
 import com.umc.finly.domain.market.stock.enums.MarketType;
 import com.umc.finly.domain.market.stock.info.exception.StockInfoErrorCode;
 import com.umc.finly.domain.market.stock.info.exception.StockInfoException;
@@ -21,8 +21,8 @@ public class StockInfoFileParser {
     private static final Charset KIS_CHARSET = Charset.forName("MS949");
     private static final String STOCK_GROUP_CODE = "ST";
 
-    public List<StockInfoDto> parse(InputStream inputStream, MarketType marketType) {
-        List<StockInfoDto> result = new ArrayList<>();
+    public List<StockInfoDTO> parse(InputStream inputStream, MarketType marketType) {
+        List<StockInfoDTO> result = new ArrayList<>();
 
         try (BufferedReader reader = new BufferedReader(new InputStreamReader(inputStream, KIS_CHARSET))) {
             String line;
@@ -46,7 +46,7 @@ public class StockInfoFileParser {
                     continue;
                 }
 
-                result.add(new StockInfoDto(
+                result.add(new StockInfoDTO(
                         marketType,
                         symbol,
                         name,

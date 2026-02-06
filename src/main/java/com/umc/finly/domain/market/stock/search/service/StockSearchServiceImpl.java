@@ -3,7 +3,7 @@ package com.umc.finly.domain.market.stock.search.service;
 import com.umc.finly.domain.market.stock.entity.Stock;
 import com.umc.finly.domain.market.stock.repository.StockRepository;
 import com.umc.finly.domain.market.stock.search.converter.StockSearchConverter;
-import com.umc.finly.domain.market.stock.search.dto.StockSearchResponse;
+import com.umc.finly.domain.market.stock.search.dto.StockSearchResDTO;
 import com.umc.finly.domain.market.stock.search.exception.StockSearchErrorCode;
 import com.umc.finly.domain.market.stock.search.exception.StockSearchException;
 import com.umc.finly.global.apiPayload.exception.CustomException;
@@ -23,7 +23,7 @@ public class StockSearchServiceImpl implements StockSearchService {
     private final StockSearchConverter stockSearchConverter;
 
     @Override
-    public StockSearchResponse searchStocks(String keyword, Pageable pageable) {
+    public StockSearchResDTO searchStocks(String keyword, Pageable pageable) {
         try {
             String trimmedKeyword = validateKeyword(keyword);
 

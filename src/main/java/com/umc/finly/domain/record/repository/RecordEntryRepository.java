@@ -29,4 +29,14 @@ public interface RecordEntryRepository extends JpaRepository<RecordEntry, Long> 
 
     List<RecordEntry> findAllByMemberIdAndStockId(Long memberId, Long stockId);
     List<RecordEntry> findAllByMemberIdAndStockIdAndTradeAction(Long memberId, Long stockId, TradeAction tradeAction);
+
+    // 사용자가 가장 많이 기록한 종목 찾기
+    @Query("""
+        select r.stockId
+        from RecordEntry r
+        where r.memberId = :memberId
+        group by r.stockId
+        order by count(r.id) desc, max(r.createdAt) desc
+        """)
+    List<Long> findTopStockByMemberId(@Param("memberId") Long memberId, Pageable pageable);
 }

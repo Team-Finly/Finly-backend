@@ -4,7 +4,7 @@ import com.umc.finly.domain.market.stock.enums.MarketType;
 
 import java.util.List;
 
-public class StockAdminResponse {
+public class StockAdminResDTO {
     public record StockSync(
             int totalCount,
             int kospiCount,

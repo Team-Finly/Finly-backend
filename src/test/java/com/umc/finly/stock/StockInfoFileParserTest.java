@@ -1,6 +1,6 @@
 package com.umc.finly.stock;
 
-import com.umc.finly.domain.market.stock.info.dto.StockInfoDto;
+import com.umc.finly.domain.market.stock.info.dto.StockInfoDTO;
 import com.umc.finly.domain.market.stock.enums.MarketType;
 import com.umc.finly.domain.market.stock.info.infra.StockInfoFileParser;
 import org.junit.jupiter.api.BeforeEach;
@@ -35,7 +35,7 @@ class StockInfoFileParserTest {
         InputStream inputStream = new ByteArrayInputStream(content.getBytes(KIS_CHARSET));
 
         // When
-        List<StockInfoDto> result = parser.parse(inputStream, MarketType.KOSPI);
+        List<StockInfoDTO> result = parser.parse(inputStream, MarketType.KOSPI);
 
         // [LOG] 콘솔 출력
         System.out.println("========= 파싱 결과 확인 =========");
@@ -64,7 +64,7 @@ class StockInfoFileParserTest {
         InputStream inputStream = new ByteArrayInputStream(content.getBytes(KIS_CHARSET));
 
         // When
-        List<StockInfoDto> result = parser.parse(inputStream, MarketType.KOSPI);
+        List<StockInfoDTO> result = parser.parse(inputStream, MarketType.KOSPI);
 
         // [LOG] 콘솔 출력
         System.out.println("========= 필터링 결과 확인 =========");
