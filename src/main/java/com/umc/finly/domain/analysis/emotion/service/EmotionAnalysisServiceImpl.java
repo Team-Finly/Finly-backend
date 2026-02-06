@@ -2,21 +2,24 @@ package com.umc.finly.domain.analysis.emotion.service;
 
 import com.umc.finly.domain.analysis.emotion.converter.EmotionAnalysisConverter;
 import com.umc.finly.domain.analysis.emotion.dto.response.EmotionDistributionResDTO;
+import com.umc.finly.domain.analysis.emotion.dto.response.ShakenKeywordsResDTO;
 import com.umc.finly.domain.analysis.emotion.exception.code.EmotionAnalysisErrorCode;
 import com.umc.finly.domain.analysis.emotion.repository.EmotionAnalysisRepository;
+import com.umc.finly.domain.analysis.emotion.util.KeywordExtractor;
 import com.umc.finly.domain.market.stock.entity.Stock;
 import com.umc.finly.domain.market.stock.repository.StockRepository;
+import com.umc.finly.domain.record.entity.RecordEntry;
 import com.umc.finly.domain.record.enums.EmotionCode;
+import com.umc.finly.domain.record.repository.RecordEntryRepository;
 import com.umc.finly.global.apiPayload.exception.CustomException;
 import com.umc.finly.global.apiPayload.response.ErrorCode;
 import lombok.RequiredArgsConstructor;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
-import java.util.ArrayList;
-import java.util.EnumMap;
-import java.util.List;
-import java.util.Map;
+import java.util.*;
+import java.util.regex.Matcher;
+import java.util.regex.Pattern;
 
 @Service
 @RequiredArgsConstructor
@@ -26,6 +29,12 @@ public class EmotionAnalysisServiceImpl implements EmotionAnalysisService {
     private final StockRepository stockRepository;
     private final EmotionAnalysisRepository emotionAnalysisRepository;
     private final EmotionAnalysisConverter emotionAnalysisConverter;
+    private final RecordEntryRepository recordEntryRepository;
+
+    // 키워드 추출 상위 8개, 최대 4자, 강조 키워드 3개
+    private static final int MAX_KEYWORDS = 8;
+    private static final int SHAKEN_KEYWORDS_SCREEN_SIZE = 4;
+    private static final int SHAKEN_KEYWORDS_HIGHLIGHTED_COUNT = 3;
 
     @Override
     public EmotionDistributionResDTO getEmotionDistribution(Long memberId, String symbol) {
@@ -99,6 +108,68 @@ public class EmotionAnalysisServiceImpl implements EmotionAnalysisService {
                 totalCount,
                 stockDto,
                 summaries
+        );
+    }
+
+    @Override
+    public ShakenKeywordsResDTO getShakenKeywords(Long memberId, String symbol) {
+        // memberId가 없으면 잘못된 요청으로 처리
+        if (memberId == null) {
+            throw new CustomException(ErrorCode.UNAUTHORIZED);
+        }
+
+        // symbol 검증
+        if (symbol == null || symbol.isBlank()) {
+            throw new CustomException(ErrorCode.INVALID_REQUEST);
+        }
+
+        // 종목 조회
+        Stock stock = stockRepository.findBySymbol(symbol)
+                .orElseThrow(() -> new CustomException(EmotionAnalysisErrorCode.ANALYSIS_STOCK_NOT_FOUND));
+
+        // 기록 조회(매수/매도 모두 포함)
+        List<RecordEntry> records = recordEntryRepository.findAllByMemberIdAndStockId(memberId, stock.getId());
+
+        // soft delete 제외
+        List<RecordEntry> aliveRecords = new ArrayList<>();
+        for (RecordEntry r : records) {
+            if (!r.isDeleted()) {
+                aliveRecords.add(r);
+            }
+        }
+
+        // DF(Document Frequency): 메모 1개에서 토큰은 1번만 카운트
+        Map<String, Integer> dfCountMap = new HashMap<>();
+
+        for (RecordEntry r : aliveRecords) {
+            // 메모에서 중복 제거된 토큰 추출
+            Set<String> tokens = KeywordExtractor.extractUniqueTokens(r.getMemo());
+
+            for (String token : tokens) {
+                Integer old = dfCountMap.get(token);
+                dfCountMap.put(token, old == null ? 1 : old + 1);
+            }
+        }
+
+        // 정렬(DF 내림차순, 키워드 오름차순)
+        List<Map.Entry<String, Integer>> rankedKeywords = new ArrayList<>(dfCountMap.entrySet());
+        rankedKeywords.sort((a, b) -> {
+            int cmp = Integer.compare(b.getValue(), a.getValue());
+            return (cmp != 0) ? cmp : a.getKey().compareTo(b.getKey());
+        });
+
+        // 상위 8개만 잘라서 내려주기
+        if (rankedKeywords.size() > MAX_KEYWORDS) {
+            rankedKeywords = rankedKeywords.subList(0, MAX_KEYWORDS);
+        }
+
+        // highlightedCount도 최대 3개, 단 키워드 개수보다 크면 안 됨
+        int highlightedCount = Math.min(SHAKEN_KEYWORDS_HIGHLIGHTED_COUNT, rankedKeywords.size());
+
+        // converter로 응답 조립
+        return emotionAnalysisConverter.toShakenKeywordsResDTO(
+                stock,
+                rankedKeywords
         );
     }
 

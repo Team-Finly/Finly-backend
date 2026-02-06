@@ -20,7 +20,6 @@ public interface EmotionAnalysisRepository extends JpaRepository<RecordEntry, Lo
     """)
     List<EmotionCountProjection> countGroupByEmotionCode(@Param("memberId") Long memberId, @Param("stockId") Long stockId);
 
-
     // ===== Projection interfaces =====
 
     // 감정 타입별 개수 조회 결과를 받기 위한 Projection
