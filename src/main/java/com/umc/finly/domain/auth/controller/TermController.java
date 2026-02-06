@@ -44,7 +44,7 @@ public class TermController {
             description = """
                 약관 ID로 약관 상세(제목/본문)를 조회합니다.
                 
-                - 로그인 없이 접근 가능하도록 permitAll 권장
+                - 로그인 없이 접근 가능
                 - 약관 종류(termType)도 함께 반환합니다.
                 """
     )
