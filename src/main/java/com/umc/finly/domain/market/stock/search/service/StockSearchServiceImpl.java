@@ -19,8 +19,6 @@ import org.springframework.transaction.annotation.Transactional;
 @Transactional(readOnly = true)
 public class StockSearchServiceImpl implements StockSearchService {
 
-    private static final int MIN_KEYWORD_LENGTH = 2;
-
     private final StockRepository stockRepository;
     private final StockSearchConverter stockSearchConverter;
 
@@ -50,10 +48,6 @@ public class StockSearchServiceImpl implements StockSearchService {
 
         if (trimmed.isEmpty()) {
             throw new StockSearchException(StockSearchErrorCode.EMPTY_KEYWORD);
-        }
-
-        if (trimmed.length() < MIN_KEYWORD_LENGTH) {
-            throw new StockSearchException(StockSearchErrorCode.INVALID_KEYWORD);
         }
 
         return trimmed;
