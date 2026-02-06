@@ -98,7 +98,7 @@ public class OpenAiFeedbackClient {
 
     private String extractJson(String rawContent) {
         String trimmed = rawContent.trim();
-        if (trimmed.startsWith("```json")) {
+        if (trimmed.toLowerCase().startsWith("```json")) {
             trimmed = trimmed.substring(7);
         } else if (trimmed.startsWith("```")) {
             trimmed = trimmed.substring(3);

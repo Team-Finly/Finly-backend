@@ -31,7 +31,7 @@ public class FeedbackPromptBuilder {
             응답 형식 (반드시 JSON으로 응답):
             {
               "content": "피드백 본문 (1~4번 항목을 자연스럽게 연결하여 작성)",
-              "suggestion": 행동 제안 1, 행동 제안 2
+              "suggestion": 행동 제안 1\\n행동 제안 2
             }
 
             content 구조 (1~4번을 자연스럽게 연결):
