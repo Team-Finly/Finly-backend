@@ -41,6 +41,7 @@ public class EmotionAnalysisController {
         return ApiResponse.onSuccess(result, SuccessCode.OK);
     }
 
+    @Operation(summary = "나를 흔든 키워드 API", description = "DF 방식의 키워드 추출로 상위 8개 키워드 반환")
     @GetMapping("/{symbol}/shaken-keywords")
     public ApiResponse<ShakenKeywordsResDTO> getShakenKeywords(
             @AuthenticationPrincipal AuthPrincipal principal,

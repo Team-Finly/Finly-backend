@@ -31,10 +31,8 @@ public class EmotionAnalysisServiceImpl implements EmotionAnalysisService {
     private final EmotionAnalysisConverter emotionAnalysisConverter;
     private final RecordEntryRepository recordEntryRepository;
 
-    // 키워드 추출 상위 8개, 최대 4자, 강조 키워드 3개
+    // 키워드 추출 상위 8개
     private static final int MAX_KEYWORDS = 8;
-    private static final int SHAKEN_KEYWORDS_SCREEN_SIZE = 4;
-    private static final int SHAKEN_KEYWORDS_HIGHLIGHTED_COUNT = 3;
 
     @Override
     public EmotionDistributionResDTO getEmotionDistribution(Long memberId, String symbol) {
@@ -162,9 +160,6 @@ public class EmotionAnalysisServiceImpl implements EmotionAnalysisService {
         if (rankedKeywords.size() > MAX_KEYWORDS) {
             rankedKeywords = rankedKeywords.subList(0, MAX_KEYWORDS);
         }
-
-        // highlightedCount도 최대 3개, 단 키워드 개수보다 크면 안 됨
-        int highlightedCount = Math.min(SHAKEN_KEYWORDS_HIGHLIGHTED_COUNT, rankedKeywords.size());
 
         // converter로 응답 조립
         return emotionAnalysisConverter.toShakenKeywordsResDTO(
