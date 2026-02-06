@@ -23,4 +23,7 @@ public class Term extends CreatedBaseEntity {
     @Enumerated(EnumType.STRING)
     @Column(name = "term_type", nullable = false, length = 50, unique = true)
     private TermType termType;
+
+    @Column(nullable = false, columnDefinition = "TEXT")
+    private String content;
 }
