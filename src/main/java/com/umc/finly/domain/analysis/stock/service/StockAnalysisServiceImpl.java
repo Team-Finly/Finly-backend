@@ -252,6 +252,10 @@ public class StockAnalysisServiceImpl implements StockAnalysisService {
 
     @Override
     public List<RecentDecisionResDTO> getRecentDecisions(Long memberId, String symbol, int limit) {
+        if (limit <= 0) {
+            return List.of();
+        }
+
         Stock stock = stockRepository.findBySymbol(symbol)
                 .orElseThrow(() -> new CustomException(MarketErrorCode.MARKET_STOCK_NOT_FOUND));
 
