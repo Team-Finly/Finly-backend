@@ -17,7 +17,7 @@ import io.swagger.v3.oas.annotations.tags.Tag;
 @RestController
 @RequestMapping("/api/markets")
 @RequiredArgsConstructor
-@Tag(name = "market", description = "시장 지수 및 실시간 시장 인사이트 API")
+@Tag(name = "Market", description = "시장 지수 및 실시간 시장 인사이트 API")
 public class MarketController {
     private final MarketIndexService marketIndexService;
     private final MarketInsightService marketInsightService;
