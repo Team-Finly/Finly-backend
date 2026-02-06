@@ -1,6 +1,7 @@
 package com.umc.finly.domain.analysis.association.controller;
 
 import com.umc.finly.domain.analysis.association.dto.AnalysisEntryResDTO;
+import com.umc.finly.domain.analysis.association.dto.DailyChartResDTO;
 import com.umc.finly.global.apiPayload.response.ApiResponse;
 import com.umc.finly.global.config.security.AuthPrincipal;
 import io.swagger.v3.oas.annotations.Operation;
@@ -51,4 +52,59 @@ public interface AssociationAnalysisApiSpecification {
             )
     })
     public ApiResponse<AnalysisEntryResDTO> getEntryStatus(AuthPrincipal principal);
+
+
+    @Operation(summary = "일별 주가 감정 그래프 조회", description = """
+            오늘부터 과거 최근 7영업일 동안의 종목별 주가 데이터와 사용자의 기록 데이터를 결합하여 날짜별로 모아 반환합니다.
+            - 7영업일 확보 방법: 오늘부터 14일 전까지 데이터 요청 → 데이터가 7개가 안되면 조회 시작일을 더 과거(30일 전)로 밀어서 재요청 → 데이터가 7개 모이면 중단하고 최신순으로 자르기
+            - 7영업일 치의 주가 데이터를 확보한 후, 해당 데이터 리스트의 양 끝값(첫 날과 마지막 날)에서 실제 조회된 시작일과 종료일을 추출
+            - 주가 데이터 API: 한국투자증권 API [국내주식] 기본시세 - 국내주식기간별시세(일/주/월/년)[v1_국내주식-016] (일봉)
+            
+            - today: 서버 실행 날짜(프론트에서 API 호출한 날짜)
+            - 종목 정보 - 종목ID, symbol(종목 코드), 이름
+            - 날짜 - 시작일, 종료일
+            - 일별 데이터
+                - 주식 영업일자 (날짜, 요일)
+                - 주가 데이터 - 해당 일의 해당 종목 종가
+                - 사용자 기록 데이터 - 해당 일에 남긴 기록 전체 개수, 기록된 감정들, 메인 감정(횟수 비교 (최다 선택) → 강도 비교 (최대 선택) → 생성 시각 비교 (최신 선택))
+            """)
+    @ApiResponses(value = {
+            @io.swagger.v3.oas.annotations.responses.ApiResponse(
+                    responseCode = "200", description = "조회 성공"
+            ),
+            @io.swagger.v3.oas.annotations.responses.ApiResponse(
+                    responseCode = "401", description = "인증되지 않음", content = @Content(
+                    mediaType = "application/json",
+                    examples = {
+                            @ExampleObject(
+                                    name = "사용자 인증 없이 접근 불가",
+                                    summary = "인증 실패",
+                                    value = "{ \"isSuccess\": false, \"code\": \"AUTH401_2\", \"message\": \"인증이 필요합니다.\", \"result\": \"인증이 필요합니다.\" }"
+                            )
+                    })
+            ),
+            @io.swagger.v3.oas.annotations.responses.ApiResponse(
+                    responseCode = "400", description = "잘못된 요청", content = @Content(
+                    mediaType = "application/json",
+                    examples = {
+                            @ExampleObject(
+                                    name = "종목 코드(symbol) 형식이 잘못됨",
+                                    summary = "잘못된 종목 코드",
+                                    value = "{ \"isSuccess\": false, \"code\": \"KI400\", \"message\": \"종목 코드 형식이 올바르지 않습니다. 종목 코드는 숫자 6자리 형식이어야 합니다.\" }"
+                            )
+                    })
+            ),
+            @io.swagger.v3.oas.annotations.responses.ApiResponse(
+                    responseCode = "404", description = "찾을 수 없음", content = @Content(
+                    mediaType = "application/json",
+                    examples = {
+                            @ExampleObject(
+                                    name = "해당 종목 코드를 가진 종목을 찾을 수 없음",
+                                    summary = "종목이 존재하지 않음",
+                                    value = "{ \"isSuccess\": false, \"code\": \"KI404\", \"message\": \"존재하지 않는 종목입니다.\" }"
+                            )
+                    })
+            )
+    })
+    public ApiResponse<DailyChartResDTO> getDailyChart(AuthPrincipal principal, String symbol);
 }
