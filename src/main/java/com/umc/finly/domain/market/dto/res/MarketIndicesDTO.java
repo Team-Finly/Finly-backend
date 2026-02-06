@@ -1,4 +1,4 @@
-package com.umc.finly.domain.market.dto;
+package com.umc.finly.domain.market.dto.res;
 
 import lombok.AllArgsConstructor;
 import lombok.Getter;
