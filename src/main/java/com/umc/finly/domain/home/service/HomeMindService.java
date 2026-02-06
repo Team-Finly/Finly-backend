@@ -1,7 +1,7 @@
 package com.umc.finly.domain.home.service;
 
-import com.umc.finly.domain.home.dto.res.HomeMindRes;
+import com.umc.finly.domain.home.dto.res.HomeMindResDTO;
 
 public interface HomeMindService {
-    HomeMindRes getHomeMind(Long memberId);
+    HomeMindResDTO getHomeMind(Long memberId);
 }

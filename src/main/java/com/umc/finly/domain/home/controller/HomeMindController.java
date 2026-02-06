@@ -1,6 +1,6 @@
 package com.umc.finly.domain.home.controller;
 
-import com.umc.finly.domain.home.dto.res.HomeMindRes;
+import com.umc.finly.domain.home.dto.res.HomeMindResDTO;
 import com.umc.finly.domain.home.service.HomeMindService;
 import com.umc.finly.global.apiPayload.response.ApiResponse;
 import com.umc.finly.global.apiPayload.response.SuccessCode;
@@ -17,10 +17,10 @@ public class HomeMindController {
     private final HomeMindService homeMindService;
 
     @GetMapping("/mind")
-    public ApiResponse<HomeMindRes> getHomeMind(
+    public ApiResponse<HomeMindResDTO> getHomeMind(
             @AuthenticationPrincipal AuthPrincipal principal
     ) {
-        HomeMindRes result =
+        HomeMindResDTO result =
                 homeMindService.getHomeMind(principal.getMemberId());
 
         return ApiResponse.onSuccess(result, SuccessCode.OK);

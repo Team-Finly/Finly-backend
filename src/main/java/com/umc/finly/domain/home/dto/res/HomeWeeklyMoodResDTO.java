@@ -8,7 +8,7 @@ import java.util.List;
 
 @Getter
 @Builder
-public class HomeWeeklyMoodRes {
+public class HomeWeeklyMoodResDTO {
 
     private List<DayMood> days;
 

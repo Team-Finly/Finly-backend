@@ -1,6 +1,6 @@
 package com.umc.finly.domain.home.service;
 
-import com.umc.finly.domain.home.dto.res.HomeWeeklyMoodRes;
+import com.umc.finly.domain.home.dto.res.HomeWeeklyMoodResDTO;
 import com.umc.finly.domain.home.exception.code.HomeErrorCode;
 import com.umc.finly.domain.home.repository.HomeRecordRepository;
 import com.umc.finly.domain.record.entity.RecordEntry;
@@ -20,7 +20,7 @@ public class HomeWeeklyMoodServiceImpl implements HomeWeeklyMoodService {
     private final HomeRecordRepository homeRecordRepository;
 
     @Override
-    public HomeWeeklyMoodRes getWeeklyMood(Long memberId) {
+    public HomeWeeklyMoodResDTO getWeeklyMood(Long memberId) {
 
 
         LocalDate today = LocalDate.now();
@@ -44,7 +44,7 @@ public class HomeWeeklyMoodServiceImpl implements HomeWeeklyMoodService {
                         ));
 
         //월요일 ~ 일요일 순서로 위클리 무드 응답 생성
-        List<HomeWeeklyMoodRes.DayMood> days = new ArrayList<>();
+        List<HomeWeeklyMoodResDTO.DayMood> days = new ArrayList<>();
 
         for (DayOfWeek day : DayOfWeek.values()) {
 
@@ -54,7 +54,7 @@ public class HomeWeeklyMoodServiceImpl implements HomeWeeklyMoodService {
 
             //해당 요일에 기록이 없는 경우 null, false로 설정
             if (dayRecords.isEmpty()) {
-                days.add(HomeWeeklyMoodRes.DayMood.builder()
+                days.add(HomeWeeklyMoodResDTO.DayMood.builder()
                         .dayOfWeek(day.name().substring(0, 3))
                         .hasRecord(false)
                         .emotion(null)
@@ -68,14 +68,14 @@ public class HomeWeeklyMoodServiceImpl implements HomeWeeklyMoodService {
                             .max(Comparator.comparing(RecordEntry::getCreatedAt))
                             .orElseThrow();
 
-            days.add(HomeWeeklyMoodRes.DayMood.builder()
+            days.add(HomeWeeklyMoodResDTO.DayMood.builder()
                     .dayOfWeek(toKoreanDay(day))
                     .hasRecord(true)
                     .emotion(lastRecord.getEmotionCode())
                     .build());
         }
 
-        return HomeWeeklyMoodRes.builder()
+        return HomeWeeklyMoodResDTO.builder()
                 .days(days)
                 .build();
     }

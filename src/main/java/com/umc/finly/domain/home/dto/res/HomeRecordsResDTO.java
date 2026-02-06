@@ -12,7 +12,7 @@ import java.util.List;
 
 @Getter
 @Builder
-public class HomeRecordsRes {
+public class HomeRecordsResDTO {
 
     private List<Record> records;
 
@@ -33,8 +33,8 @@ public class HomeRecordsRes {
         private String memo;
     }
 
-    public static HomeRecordsRes from(List<Record> records) {
-        return HomeRecordsRes.builder()
+    public static HomeRecordsResDTO from(List<Record> records) {
+        return HomeRecordsResDTO.builder()
                 .records(records)
                 .build();
     }

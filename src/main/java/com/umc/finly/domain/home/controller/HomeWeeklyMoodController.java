@@ -1,6 +1,6 @@
 package com.umc.finly.domain.home.controller;
 
-import com.umc.finly.domain.home.dto.res.HomeWeeklyMoodRes;
+import com.umc.finly.domain.home.dto.res.HomeWeeklyMoodResDTO;
 import com.umc.finly.domain.home.service.HomeWeeklyMoodService;
 import com.umc.finly.global.apiPayload.response.ApiResponse;
 import com.umc.finly.global.apiPayload.response.SuccessCode;
@@ -26,10 +26,10 @@ public class HomeWeeklyMoodController {
             """
     )
     @GetMapping("/weekly")
-    public ApiResponse<HomeWeeklyMoodRes> getWeeklyMood(
+    public ApiResponse<HomeWeeklyMoodResDTO> getWeeklyMood(
             @AuthenticationPrincipal AuthPrincipal principal
     ) {
-        HomeWeeklyMoodRes result =
+        HomeWeeklyMoodResDTO result =
                 homeWeeklyMoodService.getWeeklyMood(principal.getMemberId());
 
         return ApiResponse.onSuccess(result, SuccessCode.OK);

@@ -6,7 +6,7 @@ import lombok.Getter;
 
 @Getter
 @Builder
-public class HomeMindRes {
+public class HomeMindResDTO {
 
     private String nickname; // 사용자 닉네임
 

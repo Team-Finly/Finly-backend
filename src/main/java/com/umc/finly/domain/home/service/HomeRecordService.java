@@ -1,8 +1,8 @@
 package com.umc.finly.domain.home.service;
 
-import com.umc.finly.domain.home.dto.res.HomeRecordsRes;
+import com.umc.finly.domain.home.dto.res.HomeRecordsResDTO;
 
 public interface HomeRecordService {
 
-    HomeRecordsRes getRecentMyRecords(Long memberId);
+    HomeRecordsResDTO getRecentMyRecords(Long memberId);
 }

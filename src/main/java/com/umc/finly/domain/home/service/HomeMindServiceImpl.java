@@ -1,6 +1,6 @@
 package com.umc.finly.domain.home.service;
 
-import com.umc.finly.domain.home.dto.res.HomeMindRes;
+import com.umc.finly.domain.home.dto.res.HomeMindResDTO;
 import com.umc.finly.domain.home.exception.code.HomeErrorCode;
 import com.umc.finly.domain.home.repository.HomeMindRepository;
 import com.umc.finly.domain.member.entity.Member;
@@ -22,7 +22,7 @@ public class HomeMindServiceImpl implements HomeMindService {
     private final HomeMindRepository homeMindRepository;
 
     @Override
-    public HomeMindRes getHomeMind(Long memberId) {
+    public HomeMindResDTO getHomeMind(Long memberId) {
 
 
         // 사용자 + 페르소나 조회
@@ -91,10 +91,10 @@ public class HomeMindServiceImpl implements HomeMindService {
                         cScore * 0.3
         );
 
-        return HomeMindRes.builder()
+        return HomeMindResDTO.builder()
                 .nickname(member.getNickname())
                 .persona(
-                        HomeMindRes.Persona.builder()
+                        HomeMindResDTO.Persona.builder()
                                 .personaType(persona.getPersonaType().name())
                                 .title(persona.getTitle())
                                 .build()
@@ -102,7 +102,7 @@ public class HomeMindServiceImpl implements HomeMindService {
                 .fmi(fmi)
                 .levelMessage(resolveMessage(fmi))
                 .scores(
-                        HomeMindRes.Scores.builder()
+                        HomeMindResDTO.Scores.builder()
                                 .resilience(aScore)
                                 .decision(bScore)
                                 .record(cScore)
