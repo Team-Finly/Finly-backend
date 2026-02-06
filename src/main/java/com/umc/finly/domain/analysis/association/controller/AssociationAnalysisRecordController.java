@@ -19,7 +19,7 @@ import org.springframework.web.bind.annotation.RestController;
 
 import java.util.List;
 
-@Tag(name = "연관 분석 - 기록", description = "사용자 기록 기반 종목 조회 API")
+@Tag(name = "AssociationAnalysisRecord", description = "사용자 기록 기반 종목 조회 API")
 @RequiredArgsConstructor
 @RestController
 @RequestMapping("/api/analysis")
