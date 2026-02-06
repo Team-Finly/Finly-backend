@@ -1,4 +1,4 @@
-package com.umc.finly.domain.market.dto;
+package com.umc.finly.domain.market.dto.res;
 
 import com.umc.finly.domain.market.enums.FearGreedStatus;
 import lombok.AllArgsConstructor;
