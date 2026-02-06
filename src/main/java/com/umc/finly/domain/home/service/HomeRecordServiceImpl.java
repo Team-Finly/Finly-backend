@@ -1,6 +1,6 @@
 package com.umc.finly.domain.home.service;
 
-import com.umc.finly.domain.home.dto.HomeRecordsRes;
+import com.umc.finly.domain.home.dto.res.HomeRecordsRes;
 import com.umc.finly.domain.record.dto.RecordSearchRes;
 import com.umc.finly.domain.record.service.RecordService;
 import lombok.RequiredArgsConstructor;

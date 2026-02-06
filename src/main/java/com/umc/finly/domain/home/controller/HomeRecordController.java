@@ -1,6 +1,6 @@
 package com.umc.finly.domain.home.controller;
 
-import com.umc.finly.domain.home.dto.HomeRecordsRes;
+import com.umc.finly.domain.home.dto.res.HomeRecordsRes;
 import com.umc.finly.domain.home.service.HomeRecordService;
 import com.umc.finly.global.apiPayload.response.ApiResponse;
 import com.umc.finly.global.apiPayload.response.SuccessCode;

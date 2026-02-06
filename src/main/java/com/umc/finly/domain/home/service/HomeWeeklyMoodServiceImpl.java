@@ -1,6 +1,6 @@
 package com.umc.finly.domain.home.service;
 
-import com.umc.finly.domain.home.dto.HomeWeeklyMoodRes;
+import com.umc.finly.domain.home.dto.res.HomeWeeklyMoodRes;
 import com.umc.finly.domain.home.exception.code.HomeErrorCode;
 import com.umc.finly.domain.home.repository.HomeRecordRepository;
 import com.umc.finly.domain.record.entity.RecordEntry;
