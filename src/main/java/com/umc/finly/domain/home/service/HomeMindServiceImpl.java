@@ -22,7 +22,7 @@ public class HomeMindServiceImpl implements HomeMindService {
     private final HomeMindRepository homeMindRepository;
 
     @Override
-    public HomeMindRes getMind(Long memberId) {
+    public HomeMindRes getHomeMind(Long memberId) {
 
 
         // 사용자 + 페르소나 조회
