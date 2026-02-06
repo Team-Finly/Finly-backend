@@ -126,15 +126,7 @@ public class EmotionAnalysisServiceImpl implements EmotionAnalysisService {
                 .orElseThrow(() -> new CustomException(EmotionAnalysisErrorCode.ANALYSIS_STOCK_NOT_FOUND));
 
         // 기록 조회(매수/매도 모두 포함)
-        List<RecordEntry> records = recordEntryRepository.findAllByMemberIdAndStockId(memberId, stock.getId());
-
-        // soft delete 제외
-        List<RecordEntry> aliveRecords = new ArrayList<>();
-        for (RecordEntry r : records) {
-            if (!r.isDeleted()) {
-                aliveRecords.add(r);
-            }
-        }
+        List<RecordEntry> aliveRecords  = emotionAnalysisRepository.findAllByMemberIdAndStockIdAndDeletedAtIsNull(memberId, stock.getId());
 
         // DF(Document Frequency): 메모 1개에서 토큰은 1번만 카운트
         Map<String, Integer> dfCountMap = new HashMap<>();
