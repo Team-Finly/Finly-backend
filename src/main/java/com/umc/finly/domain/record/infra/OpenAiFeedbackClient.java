@@ -68,16 +68,32 @@ public class OpenAiFeedbackClient {
             String jsonContent = extractJson(rawContent);
             FeedbackJsonResponse parsed = objectMapper.readValue(jsonContent, FeedbackJsonResponse.class);
 
-            String suggestion = null;
-            if (parsed.suggestions() != null && !parsed.suggestions().isEmpty()) {
-                suggestion = String.join("\n", parsed.suggestions());
-            }
-
-            return new FeedbackResponse(parsed.content(), suggestion, promptTokens, completionTokens);
+            return new FeedbackResponse(parsed.content(), parsed.suggestion(), promptTokens, completionTokens);
         } catch (JsonProcessingException e) {
-            log.warn("Failed to parse feedback JSON, using raw content: {}", e.getMessage());
-            return new FeedbackResponse(rawContent, null, promptTokens, completionTokens);
+            log.warn("Failed to parse feedback JSON: {}", e.getMessage());
+            return extractFallbackContent(rawContent, promptTokens, completionTokens);
         }
+    }
+
+    private FeedbackResponse extractFallbackContent(String rawContent, Integer promptTokens, Integer completionTokens) {
+        // JSON 파싱 실패 시 정규식으로 content 필드 추출 시도
+        java.util.regex.Pattern contentPattern = java.util.regex.Pattern.compile(
+                "\"content\"\\s*:\\s*\"((?:[^\"\\\\]|\\\\.)*)\"",
+                java.util.regex.Pattern.DOTALL
+        );
+        java.util.regex.Matcher matcher = contentPattern.matcher(rawContent);
+
+        if (matcher.find()) {
+            String extractedContent = matcher.group(1)
+                    .replace("\\n", "\n")
+                    .replace("\\\"", "\"");
+            log.info("Extracted content from raw response using regex fallback");
+            return new FeedbackResponse(extractedContent, null, promptTokens, completionTokens);
+        }
+
+        // 정규식 추출도 실패하면 에러 처리
+        log.error("Failed to extract content from OpenAI response");
+        throw new CustomException(RecordErrorCode.OPENAI_API_FAILED);
     }
 
     private String extractJson(String rawContent) {
@@ -95,7 +111,7 @@ public class OpenAiFeedbackClient {
 
     private record FeedbackJsonResponse(
             String content,
-            List<String> suggestions
+            String suggestion
     ) {}
 
     public record FeedbackResponse(

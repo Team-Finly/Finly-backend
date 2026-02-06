@@ -31,7 +31,7 @@ public class FeedbackPromptBuilder {
             응답 형식 (반드시 JSON으로 응답):
             {
               "content": "피드백 본문 (1~4번 항목을 자연스럽게 연결하여 작성)",
-              "suggestions": ["행동 제안 1", "행동 제안 2"]
+              "suggestion": 행동 제안 1, 행동 제안 2
             }
 
             content 구조 (1~4번을 자연스럽게 연결):
@@ -41,7 +41,7 @@ public class FeedbackPromptBuilder {
             4. 현재 결정에 대한 통찰 (1-2문장)
 
             suggestion 구조:
-            - 즉시 실행 가능한 행동 제안 2개를 배열로 작성
+            - 즉시 실행 가능한 행동 제안 2개를 작성
             - 각 제안은 반드시 구체적으로
             - 첫 번째 제안은 ~요 체로, 두 번째 제안은 ~하면 어떨까요? 체로 작성
             """;
