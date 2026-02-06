@@ -14,7 +14,6 @@ import io.swagger.v3.oas.annotations.media.ExampleObject;
 import io.swagger.v3.oas.annotations.responses.ApiResponses;
 import io.swagger.v3.oas.annotations.tags.Tag;
 
-
 @RestController
 @RequestMapping("/api/markets")
 @RequiredArgsConstructor
@@ -58,7 +57,6 @@ public class MarketController {
                     )
             )
     })
-
 
 
     @GetMapping("/index")
@@ -106,6 +104,7 @@ public class MarketController {
                     )
             )
     })
+
     // 실시간 인사이트 조회
     @GetMapping("/insight")
     public ApiResponse<MarketInsightResDTO> getInsightMarketIndex() {
