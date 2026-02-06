@@ -65,7 +65,7 @@ public class MyPageServiceImpl implements MyPageService{
     public void changePassword(Long memberId, String newPassword, String newPasswordConfirm){
 
         // 1) confirm 검증
-        if (newPassword == null || newPasswordConfirm == null || !newPassword.equals(newPasswordConfirm)){
+        if (newPassword == null || !newPassword.equals(newPasswordConfirm)){
             throw new CustomException(AuthErrorCode.PASSWORD_CONFIRM_MISMATCH);
         }
 
