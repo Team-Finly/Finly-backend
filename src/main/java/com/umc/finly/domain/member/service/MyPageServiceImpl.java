@@ -171,10 +171,11 @@ public class MyPageServiceImpl implements MyPageService{
         Member member = memberRepository.findById(memberId)
                 .orElseThrow(() -> new CustomException(MemberErrorCode.MEMBER_NOT_FOUND));
 
-        // TODO: 1) 프로필 이미지 파일 삭제
-        /*if (member.hasProfileImage()){
+        // 1) 프로필 이미지 파일 삭제
+        if (member.hasProfileImage()){
             imageStorageService.delete(member.getProfileImageUrl());
-        }*/
+            member.clearProfileImage();
+        }
 
         // 2) refresh token 제거
         member.clearRefreshToken();
