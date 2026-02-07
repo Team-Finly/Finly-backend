@@ -50,6 +50,11 @@ public class KoreaInvestApiCallerImpl implements DailyChartApiCaller {
     }
 
     private void validateResponse(KoreaInvestRawResponse response, String symbol) {
+        // response가 null인 경우
+        if (response == null) {
+            log.error("❌ 한투 API 응답 바디가 null입니다. (역직렬화 실패 또는 빈 응답) - 종목코드: {}", symbol);
+            throw new KoreaInvestException(KoreaInvestErrorCode.API_CALL_ERROR);
+        }
         // 한투 응답 에러 (rt_cd != "0") 발생한 경우
         if (!"0".equals(response.getRtCd())) {
             log.error("❌ 한투 API 응답 에러(rt_cd=1) [종목코드: {}]: msg_cd={}, msg1={}",
