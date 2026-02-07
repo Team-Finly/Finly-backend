@@ -3,10 +3,7 @@ package com.umc.finly.domain.member.controller;
 import com.umc.finly.domain.auth.exception.AuthErrorCode;
 import com.umc.finly.domain.member.dto.request.PasswordChangeReqDTO;
 import com.umc.finly.domain.member.dto.request.UpdateNicknameReqDTO;
-import com.umc.finly.domain.member.dto.response.MyPageMeResDTO;
-import com.umc.finly.domain.member.dto.response.MyPagePersonaResDTO;
-import com.umc.finly.domain.member.dto.response.ProfileImageResDTO;
-import com.umc.finly.domain.member.dto.response.UpdateNicknameResDTO;
+import com.umc.finly.domain.member.dto.response.*;
 import com.umc.finly.domain.member.service.MyPageService;
 import com.umc.finly.global.apiPayload.exception.CustomException;
 import com.umc.finly.global.apiPayload.response.ApiResponse;
@@ -28,6 +25,32 @@ import org.springframework.web.multipart.MultipartFile;
 public class MyPageController {
 
     private final MyPageService myPageService;
+
+    /**
+     * 마이페이지 상단 통합 조회
+     */
+    @Operation(
+            summary = "마이페이지 상단 조회",
+            description = """
+            마이페이지 상단에 필요한 정보를 한 번에 조회합니다.
+            
+            - JWT 인증이 필요한 API입니다.
+            - 닉네임 / 마음지수(finMindIdx) / 조각수(mindPieceCount) / 현재 페르소나(UI용 한글명) 반환
+            """
+    )
+    @GetMapping
+    public ApiResponse<MyPageResDTO> getMyPageTop(
+            @AuthenticationPrincipal AuthPrincipal principal
+    ) {
+        if (principal == null) {
+            throw new CustomException(AuthErrorCode.UNAUTHORIZED);
+        }
+
+        return ApiResponse.onSuccess(
+                myPageService.getMyPage(principal.getMemberId()),
+                SuccessCode.OK
+        );
+    }
 
     /**
      * 내 페르소나 조회
