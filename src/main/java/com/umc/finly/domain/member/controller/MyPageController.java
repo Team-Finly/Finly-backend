@@ -208,4 +208,31 @@ public class MyPageController {
         myPageService.changePassword(principal.getMemberId(), request.getNewPassword(), request.getNewPasswordConfirm());
         return ApiResponse.onSuccess(new Object(), SuccessCode.OK);
     }
+
+    @Operation(
+            summary = "회원 탈퇴",
+            description = """
+            로그인한 사용자가 회원 탈퇴를 진행합니다.
+            
+            - JWT 인증이 필요한 API입니다.
+            - 회원 정보는 논리 삭제 처리됩니다.
+            - 리프레시 토큰은 함께 정리됩니다.
+            - 프로필 이미지는 프로필 삭제 api 머지 이후 리팩토링할 예정입니다. 
+            """
+    )
+    @DeleteMapping("/members/me")
+    public ApiResponse<Object> withdraw(
+            @AuthenticationPrincipal AuthPrincipal principal
+    ){
+        if (principal == null){
+            throw new CustomException(AuthErrorCode.UNAUTHORIZED);
+        }
+
+        myPageService.withdraw(principal.getMemberId());
+
+        return ApiResponse.onSuccess(
+                java.util.Map.of(),
+                SuccessCode.OK
+        );
+    }
 }
