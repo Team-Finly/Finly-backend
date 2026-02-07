@@ -76,14 +76,14 @@ public class TodayRecordResDTO {
         }
         if (entries.size() == 1) {
             EmotionCode emotion = entries.get(0).getEmotionCode();
-            if (emotion == null) {
+            if (emotion == null) { // null 체크
                 return "오늘 하루도 기록을 남겼네요!";
             }
             return "{{" + emotion.getLabel() + "}}한 하루네요!";
         }
         EmotionCode first = entries.get(0).getEmotionCode();
         EmotionCode last = entries.get(entries.size() - 1).getEmotionCode();
-        if (first == null || last == null) {
+        if (first == null || last == null) { // null 체크
             return "오늘도 열심히 기록했네요!";
         }
         // {{감정}}으로/로 조사 처리 (particle 사용)
