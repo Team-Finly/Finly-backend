@@ -1,6 +1,6 @@
 package com.umc.finly.domain.analysis.association.repository;
 
-import com.umc.finly.domain.analysis.association.dto.StockRecordResDTO;
+import com.umc.finly.domain.analysis.association.dto.AnalysisStockResDTO;
 import com.umc.finly.domain.record.entity.RecordEntry;
 import org.springframework.data.jpa.repository.JpaRepository;
 import org.springframework.data.jpa.repository.Query;
@@ -8,11 +8,11 @@ import org.springframework.data.repository.query.Param;
 
 import java.util.List;
 
-public interface AssociationAnalysisRepository
+public interface AnalysisStockRepository
         extends JpaRepository<RecordEntry, Long> {
 
     @Query("""
-        select distinct new com.umc.finly.domain.analysis.association.dto.StockRecordResDTO(
+        select distinct new com.umc.finly.domain.analysis.association.dto.AnalysisStockResDTO(
             s.id,
             s.symbol,
             s.name
@@ -23,7 +23,7 @@ public interface AssociationAnalysisRepository
         where r.memberId = :memberId
           and s.id is not null
     """)
-    List<StockRecordResDTO> findRecordedStocks(
+    List<AnalysisStockResDTO> findRecordedStocks(
             @Param("memberId") Long memberId
     );
 }
