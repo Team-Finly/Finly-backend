@@ -2,15 +2,15 @@ package com.umc.finly.domain.record.service;
 
 import com.umc.finly.domain.market.stock.entity.Stock;
 import com.umc.finly.domain.market.stock.repository.StockRepository;
-import com.umc.finly.domain.record.dto.DailyReportRes;
-import com.umc.finly.domain.record.dto.RecentSearchRes;
-import com.umc.finly.domain.record.dto.RecordCreateReq;
-import com.umc.finly.domain.record.dto.RecordCreateRes;
-import com.umc.finly.domain.record.dto.RecordDetailRes;
-import com.umc.finly.domain.record.dto.RecordSearchRes;
-import com.umc.finly.domain.record.dto.RecordUpdateReq;
-import com.umc.finly.domain.record.dto.RecordUpdateRes;
-import com.umc.finly.domain.record.dto.TodayRecordRes;
+import com.umc.finly.domain.record.dto.req.RecordCreateReqDTO;
+import com.umc.finly.domain.record.dto.req.RecordUpdateReqDTO;
+import com.umc.finly.domain.record.dto.res.DailyReportResDTO;
+import com.umc.finly.domain.record.dto.res.RecentSearchResDTO;
+import com.umc.finly.domain.record.dto.res.RecordCreateResDTO;
+import com.umc.finly.domain.record.dto.res.RecordDetailResDTO;
+import com.umc.finly.domain.record.dto.res.RecordSearchResDTO;
+import com.umc.finly.domain.record.dto.res.RecordUpdateResDTO;
+import com.umc.finly.domain.record.dto.res.TodayRecordResDTO;
 import com.umc.finly.domain.record.exception.code.RecordErrorCode;
 import com.umc.finly.domain.record.infra.OpenAiFeedbackClient;
 import com.umc.finly.domain.record.entity.RecordEntry;
@@ -54,7 +54,7 @@ public class RecordServiceImpl implements RecordService {
 
     @Override
     @Transactional
-    public RecordCreateRes createRecord(Long memberId, RecordCreateReq request) {
+    public RecordCreateResDTO createRecord(Long memberId, RecordCreateReqDTO request) {
         // 1. clientRequestId 중복 체크
         if (recordEntryRepository.existsByClientRequestId(request.getClientRequestId())) {
             throw new CustomException(RecordErrorCode.RECORD_DUPLICATE_SUBMISSION);
@@ -104,11 +104,11 @@ public class RecordServiceImpl implements RecordService {
         RecordFeedback feedback = feedbackService.requestFeedbackAsync(memberId, savedEntry);
 
         // 7. 응답 DTO 반환
-        return RecordCreateRes.from(savedEntry, stock, feedback);
+        return RecordCreateResDTO.from(savedEntry, stock, feedback);
     }
 
     @Override
-    public RecordDetailRes getRecord(Long memberId, Long recordId) {
+    public RecordDetailResDTO getRecord(Long memberId, Long recordId) {
         // 1. 기록 조회
         RecordEntry entry = recordEntryRepository.findById(recordId)
                 .orElseThrow(() -> new CustomException(RecordErrorCode.RECORD_NOT_FOUND));
@@ -123,12 +123,12 @@ public class RecordServiceImpl implements RecordService {
                 .orElseThrow(() -> new CustomException(MarketErrorCode.MARKET_STOCK_NOT_FOUND));
 
         // 4. 응답 DTO 반환
-        return RecordDetailRes.from(entry, stock);
+        return RecordDetailResDTO.from(entry, stock);
     }
 
     @Override
     @Transactional
-    public RecordUpdateRes updateRecord(Long memberId, Long recordId, RecordUpdateReq request) {
+    public RecordUpdateResDTO updateRecord(Long memberId, Long recordId, RecordUpdateReqDTO request) {
         // 1. 기록 조회
         RecordEntry entry = recordEntryRepository.findById(recordId)
                 .orElseThrow(() -> new CustomException(RecordErrorCode.RECORD_NOT_FOUND));
@@ -185,12 +185,12 @@ public class RecordServiceImpl implements RecordService {
         }
 
         // 6. 응답 DTO 반환
-        return RecordUpdateRes.from(entry, stock);
+        return RecordUpdateResDTO.from(entry, stock);
     }
 
     @Override
     @Transactional(propagation = Propagation.NOT_SUPPORTED)
-    public DailyReportRes getDailyReport(Long memberId, Long recordId) {
+    public DailyReportResDTO getDailyReport(Long memberId, Long recordId) {
         // 1. 기록 조회
         RecordEntry entry = recordEntryRepository.findById(recordId)
                 .orElseThrow(() -> new CustomException(RecordErrorCode.RECORD_NOT_FOUND));
@@ -217,18 +217,18 @@ public class RecordServiceImpl implements RecordService {
             }
         }
 
-        return DailyReportRes.from(entry, stock, content);
+        return DailyReportResDTO.from(entry, stock, content);
     }
 
     @Override
-    public TodayRecordRes getTodayRecords(Long memberId, LocalDate date) {
+    public TodayRecordResDTO getTodayRecords(Long memberId, LocalDate date) {
         // 1. 해당 날짜의 기록 조회 (createdAt 오름차순)
         List<RecordEntry> entries = recordEntryRepository
                 .findByMemberIdAndRecordDateOrderByCreatedAtAsc(memberId, date);
 
         // 2. PrismFeedback 타이틀 생성
-        String title = TodayRecordRes.generatePrismTitle(entries);
-        TodayRecordRes.PrismFeedback prismFeedback = TodayRecordRes.PrismFeedback.builder()
+        String title = TodayRecordResDTO.generatePrismTitle(entries);
+        TodayRecordResDTO.PrismFeedback prismFeedback = TodayRecordResDTO.PrismFeedback.builder()
                 .title(title)
                 .generatedAt(LocalDateTime.now())
                 .build();
@@ -242,15 +242,15 @@ public class RecordServiceImpl implements RecordService {
                 .collect(Collectors.toMap(Stock::getId, Function.identity()));
 
         // 4. TimelineEntry 변환
-        List<TodayRecordRes.TimelineEntry> timelineSummary = entries.stream()
+        List<TodayRecordResDTO.TimelineEntry> timelineSummary = entries.stream()
                 .map(entry -> {
                     Stock stock = stockMap.get(entry.getStockId());
                     String symbol = stock != null ? stock.getSymbol() : "";
-                    return TodayRecordRes.TimelineEntry.from(entry, symbol);
+                    return TodayRecordResDTO.TimelineEntry.from(entry, symbol);
                 })
                 .toList();
 
-        return TodayRecordRes.builder()
+        return TodayRecordResDTO.builder()
                 .date(date)
                 .prismFeedback(prismFeedback)
                 .timelineSummary(timelineSummary)
@@ -261,7 +261,7 @@ public class RecordServiceImpl implements RecordService {
 
     @Override
     @Transactional
-    public RecordSearchRes searchRecords(Long memberId, String keyword, EmotionCode emotionCode) {
+    public RecordSearchResDTO searchRecords(Long memberId, String keyword, EmotionCode emotionCode) {
         // 1. 키워드 정규화
         String normalizedKeyword = (keyword == null) ? null : keyword.strip();
         if (normalizedKeyword != null && normalizedKeyword.isBlank()) {
@@ -297,25 +297,25 @@ public class RecordServiceImpl implements RecordService {
                 .collect(Collectors.toMap(Stock::getId, Function.identity()));
 
         // 6. 응답 DTO 생성
-        List<RecordSearchRes.SearchEntry> searchEntries = entries.stream()
+        List<RecordSearchResDTO.SearchEntry> searchEntries = entries.stream()
                 .map(entry -> {
                     Stock stock = stockMap.get(entry.getStockId());
                     String symbol = stock != null ? stock.getSymbol() : "";
-                    return RecordSearchRes.SearchEntry.from(entry, symbol);
+                    return RecordSearchResDTO.SearchEntry.from(entry, symbol);
                 })
                 .toList();
 
-        return RecordSearchRes.builder()
+        return RecordSearchResDTO.builder()
                 .records(searchEntries)
                 .totalCount(searchEntries.size())
                 .build();
     }
 
     @Override
-    public RecentSearchRes getRecentSearchKeywords(Long memberId) {
+    public RecentSearchResDTO getRecentSearchKeywords(Long memberId) {
         List<String> recentKeywords = searchHistoryRepository
                 .findRecentKeywordsByMemberId(memberId, PageRequest.of(0, RECENT_SEARCH_LIMIT));
-        return RecentSearchRes.from(recentKeywords);
+        return RecentSearchResDTO.from(recentKeywords);
     }
 
     /**

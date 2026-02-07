@@ -1,4 +1,4 @@
-package com.umc.finly.domain.record.dto;
+package com.umc.finly.domain.record.dto.res;
 
 import com.umc.finly.domain.record.entity.RecordFeedback;
 import com.umc.finly.domain.record.enums.FeedbackStatus;
@@ -9,7 +9,7 @@ import java.time.LocalDateTime;
 
 @Getter
 @Builder
-public class RecordFeedbackRes {
+public class RecordFeedbackResDTO {
 
     private Long feedbackId;
     private Long recordEntryId;
@@ -19,8 +19,8 @@ public class RecordFeedbackRes {
     private LocalDateTime createdAt;
     private LocalDateTime updatedAt;
 
-    public static RecordFeedbackRes from(RecordFeedback feedback) {
-        return RecordFeedbackRes.builder()
+    public static RecordFeedbackResDTO from(RecordFeedback feedback) {
+        return RecordFeedbackResDTO.builder()
                 .feedbackId(feedback.getId())
                 .recordEntryId(feedback.getRecordEntryId())
                 .status(feedback.getStatus())

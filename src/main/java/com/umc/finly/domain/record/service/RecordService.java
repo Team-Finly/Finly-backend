@@ -1,24 +1,24 @@
 package com.umc.finly.domain.record.service;
 
-import com.umc.finly.domain.record.dto.DailyReportRes;
-import com.umc.finly.domain.record.dto.RecentSearchRes;
-import com.umc.finly.domain.record.dto.RecordCreateReq;
-import com.umc.finly.domain.record.dto.RecordCreateRes;
-import com.umc.finly.domain.record.dto.RecordDetailRes;
-import com.umc.finly.domain.record.dto.RecordSearchRes;
-import com.umc.finly.domain.record.dto.RecordUpdateReq;
-import com.umc.finly.domain.record.dto.RecordUpdateRes;
-import com.umc.finly.domain.record.dto.TodayRecordRes;
+import com.umc.finly.domain.record.dto.req.RecordCreateReqDTO;
+import com.umc.finly.domain.record.dto.req.RecordUpdateReqDTO;
+import com.umc.finly.domain.record.dto.res.DailyReportResDTO;
+import com.umc.finly.domain.record.dto.res.RecentSearchResDTO;
+import com.umc.finly.domain.record.dto.res.RecordCreateResDTO;
+import com.umc.finly.domain.record.dto.res.RecordDetailResDTO;
+import com.umc.finly.domain.record.dto.res.RecordSearchResDTO;
+import com.umc.finly.domain.record.dto.res.RecordUpdateResDTO;
+import com.umc.finly.domain.record.dto.res.TodayRecordResDTO;
 import com.umc.finly.domain.record.enums.EmotionCode;
 
 import java.time.LocalDate;
 
 public interface RecordService {
-    RecordCreateRes createRecord(Long memberId, RecordCreateReq request);
-    RecordDetailRes getRecord(Long memberId, Long recordId);
-    RecordUpdateRes updateRecord(Long memberId, Long recordId, RecordUpdateReq request);
-    DailyReportRes getDailyReport(Long memberId, Long recordId);
-    TodayRecordRes getTodayRecords(Long memberId, LocalDate date);
-    RecordSearchRes searchRecords(Long memberId, String keyword, EmotionCode emotionCode);
-    RecentSearchRes getRecentSearchKeywords(Long memberId);
+    RecordCreateResDTO createRecord(Long memberId, RecordCreateReqDTO request);
+    RecordDetailResDTO getRecord(Long memberId, Long recordId);
+    RecordUpdateResDTO updateRecord(Long memberId, Long recordId, RecordUpdateReqDTO request);
+    DailyReportResDTO getDailyReport(Long memberId, Long recordId);
+    TodayRecordResDTO getTodayRecords(Long memberId, LocalDate date);
+    RecordSearchResDTO searchRecords(Long memberId, String keyword, EmotionCode emotionCode);
+    RecentSearchResDTO getRecentSearchKeywords(Long memberId);
 }
