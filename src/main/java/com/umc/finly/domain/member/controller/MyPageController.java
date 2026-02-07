@@ -194,7 +194,7 @@ public class MyPageController {
             
             - JWT 인증이 필요한 API입니다.
             - 프로필 이미지가 있으면 파일 삭제 + DB URL null 처리합니다.
-            - 프로필 이미지가 없어도 성공(멱등) 처리합니다.
+            - 프로필 이미지가 없는 경우 404 에러를 반환합니다.
             """
     )
     @DeleteMapping("/me/profile-image")

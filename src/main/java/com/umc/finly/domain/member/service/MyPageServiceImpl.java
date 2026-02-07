@@ -155,7 +155,7 @@ public class MyPageServiceImpl implements MyPageService{
         String oldImageUrl = member.getProfileImageUrl();
 
         // DB 먼저 지우기
-        member.clearProfileTimage();
+        member.clearProfileImage();
         memberRepository.save(member);
 
         // 파일 삭제
