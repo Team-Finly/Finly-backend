@@ -21,7 +21,10 @@ public enum MemberErrorCode implements BaseCode {
     MEMBER_NOT_FOUND(HttpStatus.NOT_FOUND, "MEMBER404_2", "멤버를 찾을 수 없습니다."),
 
     // 413
-    IMAGE_FILE_TOO_LARGE(HttpStatus.PAYLOAD_TOO_LARGE, "MEMBER413", "이미지 파일 용량이 너무 큽니다.");
+    IMAGE_FILE_TOO_LARGE(HttpStatus.PAYLOAD_TOO_LARGE, "MEMBER413", "이미지 파일 용량이 너무 큽니다."),
+
+    // 500
+    IMAGE_UPLOAD_FAILED(HttpStatus.INTERNAL_SERVER_ERROR, "MEMBER500_1", "이미지 업로드에 실패했습니다.");
 
     private final HttpStatus httpStatus;
     private final String code;

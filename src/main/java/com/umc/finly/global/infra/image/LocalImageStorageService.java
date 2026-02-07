@@ -42,7 +42,7 @@ public class LocalImageStorageService implements ImageStorageService{
             file.transferTo(savedFile);
         } catch (IOException e) {
             log.error("[ImageUpload] failed", e);
-            throw new CustomException(MemberErrorCode.INVALID_IMAGE_FILE);
+            throw new CustomException(MemberErrorCode.IMAGE_UPLOAD_FAILED);
         }
 
         /**
