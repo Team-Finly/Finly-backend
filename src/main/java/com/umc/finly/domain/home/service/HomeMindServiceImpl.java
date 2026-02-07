@@ -26,56 +26,36 @@ public class HomeMindServiceImpl implements HomeMindService {
     private final MemberRepository memberRepository;
     private final PersonaRepository personaRepository;
 
+    //내부 계산 결과용 클래스
+    private static class MindScoreResult {
+        int a;
+        int b;
+        int c;
+        int fmi;
+    }
 
-    @Override
-    public HomeMindResDTO getHomeMind(Long memberId) {
 
+      // 공통 계산 로직
+    private MindScoreResult calculateMindScores(Long memberId) {
 
-        // 사용자 조회
-        Member member = memberRepository.findById(memberId)
-                .orElseThrow(() -> new CustomException(HomeErrorCode.HOME_MIND_ACCESS_DENIED));
-
-        // 페르소나 조회
-        Persona persona = null;
-        if (member.getPersonaId() != null) {
-            persona = personaRepository.findById(member.getPersonaId()).orElse(null);
-        }
-
+        LocalDate now = LocalDate.now();
 
         // C. 기록 성실도
-        LocalDate now = LocalDate.now();
         LocalDate startOfMonth = now.withDayOfMonth(1);
-
         int recordedDays = homeMindRepository
                 .findDistinctRecordDates(memberId, startOfMonth, now)
                 .size();
-
-        int businessDays = now.lengthOfMonth();
-        int cScore = (int) ((double) recordedDays / businessDays * 100);
-
+        int cScore = (int) ((double) recordedDays / now.lengthOfMonth() * 100);
 
         // B. 의사결정 일치도
         List<RecordEntry> confidenceBuys =
                 homeMindRepository.findByMemberIdAndEmotionCodeAndTradeAction(
-                        memberId,
-                        EmotionCode.CONFIDENCE,
-                        TradeAction.BUY
+                        memberId, EmotionCode.CONFIDENCE, TradeAction.BUY
                 );
-
-        int totalConfidence = confidenceBuys.size();
-        int hitCount = 0;
-
-        for (RecordEntry record : confidenceBuys) {
-            // 현재는 가격 히스토리 미연동 → 임시 정책: 기록 존재 시 적중 처리
-            hitCount++;
-        }
-
-        int bScore = totalConfidence == 0 ? 0 :
-                (int) ((double) hitCount / totalConfidence * 100);
+        int bScore = confidenceBuys.isEmpty() ? 0 : 100;
 
         // A. 하락장 회복탄력성
         LocalDate start = now.minusMonths(1);
-
         List<RecordEntry> allRecords =
                 homeMindRepository.findByMemberIdAndRecordDateBetween(
                         memberId, start, now
@@ -87,87 +67,86 @@ public class HomeMindServiceImpl implements HomeMindService {
                                 r.getEmotionCode() == EmotionCode.REGRET)
                 .count();
 
-        int total = allRecords.size();
-        int aScore = total == 0 ? 0 :
-                (int) ((1 - (double) negativeCount / total) * 100);
+        int aScore = allRecords.isEmpty() ? 0 :
+                (int) ((1 - (double) negativeCount / allRecords.size()) * 100);
 
+        int fmi = (int) (aScore * 0.4 + bScore * 0.3 + cScore * 0.3);
 
-        // FMI 계산
-        int fmiScore = (int) (
-                aScore * 0.4 + bScore * 0.3 + cScore * 0.3
-        );
+        MindScoreResult result = new MindScoreResult();
+        result.a = aScore;
+        result.b = bScore;
+        result.c = cScore;
+        result.fmi = fmi;
+        return result;
+    }
+
+    @Override
+    public HomeMindResDTO getHomeMind(Long memberId) {//금융 마음 지수 조회 서비스 로직
+
+        Member member = memberRepository.findById(memberId)
+                .orElseThrow(() -> new CustomException(HomeErrorCode.HOME_MIND_ACCESS_DENIED));
+
+        Persona persona = member.getPersonaId() == null ? null :
+                personaRepository.findById(member.getPersonaId()).orElse(null);
+
+        MindScoreResult score = calculateMindScores(memberId);
 
         return HomeMindResDTO.builder()
                 .memberName(member.getNickname())
                 .persona(
-                        HomeMindResDTO.Persona.builder()
-                                .personaType(persona.getPersonaType().name())
-                                .personaTitle(persona.getTitle())
-                                .build()
+                        persona == null ? null :
+                                HomeMindResDTO.Persona.builder()
+                                        .personaType(persona.getPersonaType().name())
+                                        .personaTitle(persona.getTitle())
+                                        .build()
                 )
-                .fmiScore(fmiScore)
-                .fmiLevel(resolveFmiLevel(fmiScore))
-                .fmiComment(resolveFmiComment(fmiScore))
-                .scores(
-                        HomeMindResDTO.Scores.builder()
-                                .resilience(aScore)
-                                .decision(bScore)
-                                .record(cScore)
-                                .build()
-                )
+                .fmiScore(score.fmi)
+                .fmiLevel(resolveFmiLevel(score.fmi))
+                .fmiComment(resolveFmiComment(score.fmi))
                 .build();
     }
 
 
-
     @Override
-    public HomeMindDetailResDTO getHomeMindDetail(Long memberId) {
+    public HomeMindDetailResDTO getHomeMindDetail(Long memberId) {// 금융 마음 지수 상세 조회 서비스 로직
 
-        //기존 요약 로직 재사용 (A/B/C, FMI 계산)
-        HomeMindResDTO base = getHomeMind(memberId);
-
-        // 사용자 페르소나 재조회
         Member member = memberRepository.findById(memberId)
                 .orElseThrow(() -> new CustomException(HomeErrorCode.HOME_MIND_ACCESS_DENIED));
 
-        Persona persona = null;
-        if (member.getPersonaId() != null) {
-            persona = personaRepository.findById(member.getPersonaId()).orElse(null);
-        }
+        Persona persona = member.getPersonaId() == null ? null :
+                personaRepository.findById(member.getPersonaId()).orElse(null);
 
-        int aScore = base.getScores().getResilience();
-        int bScore = base.getScores().getDecision();
-        int cScore = base.getScores().getRecord();
-        int fmi = base.getFmiScore();
+        MindScoreResult score = calculateMindScores(memberId);
 
         return HomeMindDetailResDTO.builder()
                 .memberName(member.getNickname())
                 .persona(
-                        HomeMindDetailResDTO.Persona.builder()
-                                .personaTitle(persona.getTitle())
-                                .description(persona.getDescription())
-                                .build()
+                        persona == null ? null :
+                                HomeMindDetailResDTO.Persona.builder()
+                                        .personaTitle(persona.getTitle())
+                                        .description(persona.getDescription())
+                                        .build()
                 )
-                .fmiScore(fmi)
-                .fmiLevel(resolveFmiLevel(fmi))
-                .fmiComment(resolveFmiComment(fmi))
+                .fmiScore(score.fmi)
+                .fmiLevel(resolveFmiLevel(score.fmi))
+                .fmiComment(resolveFmiComment(score.fmi))
                 .scores(
                         HomeMindDetailResDTO.Scores.builder()
                                 .downMarketResilience(
-                                        scoreDetail(aScore, resolveADescription(aScore))
+                                        scoreDetail(score.a, resolveADescription(score.a))
                                 )
                                 .decisionConsistency(
-                                        scoreDetail(bScore, resolveBDescription(bScore))
+                                        scoreDetail(score.b, resolveBDescription(score.b))
                                 )
                                 .recordConsistency(
-                                        scoreDetail(cScore, resolveCDescription(cScore))
+                                        scoreDetail(score.c, resolveCDescription(score.c))
                                 )
                                 .build()
                 )
                 .build();
     }
 
-    //지수 라벨
+    // FMI 라벨 / 설명
     private String resolveFmiLevel(int fmi) {
         if (fmi <= 39) return "감정 영향 높음";
         if (fmi <= 69) return "평균적 관리";
@@ -175,7 +154,6 @@ public class HomeMindServiceImpl implements HomeMindService {
         return "고도화된 멘탈";
     }
 
-    //지수 설명
     private String resolveFmiComment(int fmi) {
         if (fmi <= 39)
             return "시장의 흐름보다 감정의 영향을 더 많이 받고 있습니다.";
@@ -186,9 +164,8 @@ public class HomeMindServiceImpl implements HomeMindService {
         return "시장을 감정이 아닌 기준으로 대하고 있습니다.";
     }
 
-
-    // A/B/C 상세 해석
-    private String resolveADescription(int score) { // 하락장 회복 탄력성
+    //상세 설명
+    private String resolveADescription(int score) {
         if (score <= 39)
             return "하락장에서 불안과 후회 감정이 자주 기록되고 있습니다.";
         if (score <= 69)
@@ -198,7 +175,7 @@ public class HomeMindServiceImpl implements HomeMindService {
         return "하락장에서도 감정 기복이 거의 없이 일관된 태도를 유지합니다.";
     }
 
-    private String resolveBDescription(int score) { // 의사 결정 일치도
+    private String resolveBDescription(int score) {
         if (score <= 39)
             return "확신 상태에서 내린 판단과 실제 시장 결과의 괴리가 큽니다.";
         if (score <= 69)
@@ -208,7 +185,7 @@ public class HomeMindServiceImpl implements HomeMindService {
         return "자신의 판단 기준이 명확하며 시장 결과와 높은 정합성을 보입니다.";
     }
 
-    private String resolveCDescription(int score) { // 기록 성실도
+    private String resolveCDescription(int score) {
         if (score <= 39)
             return "감정 기록이 불규칙하여 자기 복기가 어려운 상태입니다.";
         if (score <= 69)
