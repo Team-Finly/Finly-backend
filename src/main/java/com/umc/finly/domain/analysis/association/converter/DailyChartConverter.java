@@ -28,7 +28,7 @@ public class DailyChartConverter {
 
         return DailyChartResDTO.DailyDataDto.builder()
                 .date(date.toString())
-                .day(date != null ? date.getDayOfWeek().getDisplayName(TextStyle.SHORT, Locale.KOREAN) : null)
+                .day(date.getDayOfWeek().getDisplayName(TextStyle.SHORT, Locale.KOREAN))
                 .closePrice(closePrice)
                 .recordCount(recordCount)
                 .emotions(emotions)
