@@ -66,6 +66,13 @@ public class RecordFeedbackAsyncExecutor {
             Stock stock = stockRepository.findById(currentEntry.getStockId())
                     .orElse(null);
 
+            if (stock == null) {
+                log.error("Stock not found for id: {}", currentEntry.getStockId());
+                feedback.markFailed("Stock not found");
+                feedbackRepository.save(feedback);
+                return;
+            }
+
             // 과거 기록 조회 (현재 기록 제외, 최대 20개)
             List<RecordEntry> pastEntries = recordEntryRepository
                     .findByMemberIdOrderByRecordDateDesc(memberId, PageRequest.of(0, PAST_RECORDS_LIMIT));
