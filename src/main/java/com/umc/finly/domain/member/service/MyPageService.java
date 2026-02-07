@@ -16,6 +16,8 @@ public interface MyPageService {
     ProfileImageResDTO addProfileImage(Long memberId, MultipartFile image);
     // 프로필 사진 변경
     ProfileImageResDTO updateProfileImage(Long memberId, MultipartFile image);
+    // 프로필 사진 삭제
+    void deleteProfileImage(Long memberId);
     // 내 비밀번호 변경
     void changePassword(Long memberId, String newPassword, String newPasswordConfirm);
 }
