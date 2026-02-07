@@ -24,12 +24,12 @@ public class RecordUpdateReqDTO {
     // 매매 타입 변경 (null이면 변경 안함)
     private TradeAction tradeAction;
 
-    // 단가 변경 (0보다 커야 함)
-    @DecimalMin(value = "0.0", inclusive = false, message = "unitPrice는 0보다 커야 합니다.")
+    // 단가 변경 (0 이상)
+    @DecimalMin(value = "0.0", inclusive = true, message = "unitPrice는 0 이상이어야 합니다.")
     private BigDecimal unitPrice;
 
-    // 수량 변경 (0보다 커야 함)
-    @DecimalMin(value = "0.0", inclusive = false, message = "quantity는 0보다 커야 합니다.")
+    // 수량 변경 (0 이상)
+    @DecimalMin(value = "0.0", inclusive = true, message = "quantity는 0 이상이어야 합니다.")
     private BigDecimal quantity;
 
     // 감정 코드 변경 (null이면 변경 안함)
