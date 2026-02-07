@@ -42,6 +42,7 @@ public interface RecordEntryRepository extends JpaRepository<RecordEntry, Long> 
 
     /**
      * recordDate을 기준으로 특정 종목에 대해 특정 기간 내의 모든 기록 조회
+     * @param memberId 회원 PK
      * @param stockId 종목 PK
      * @param startDate 조회 시작일
      * @param endDate 조회 종료일
