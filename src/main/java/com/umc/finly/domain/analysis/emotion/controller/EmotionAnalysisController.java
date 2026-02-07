@@ -1,6 +1,7 @@
 package com.umc.finly.domain.analysis.emotion.controller;
 
 import com.umc.finly.domain.analysis.emotion.dto.response.EmotionDistributionResDTO;
+import com.umc.finly.domain.analysis.emotion.dto.response.ShakenKeywordsResDTO;
 import com.umc.finly.domain.analysis.emotion.service.EmotionAnalysisService;
 import com.umc.finly.global.apiPayload.exception.CustomException;
 import com.umc.finly.global.apiPayload.response.ApiResponse;
@@ -36,6 +37,22 @@ public class EmotionAnalysisController {
 
         EmotionDistributionResDTO result =
                 emotionAnalysisService.getEmotionDistribution(principal.getMemberId(), symbol);
+
+        return ApiResponse.onSuccess(result, SuccessCode.OK);
+    }
+
+    @Operation(summary = "나를 흔든 키워드 API", description = "DF 방식의 키워드 추출로 상위 8개 키워드 반환")
+    @GetMapping("/{symbol}/shaken-keywords")
+    public ApiResponse<ShakenKeywordsResDTO> getShakenKeywords(
+            @AuthenticationPrincipal AuthPrincipal principal,
+            @PathVariable String symbol
+    ) {
+        if(principal == null){
+            throw new CustomException(ErrorCode.UNAUTHORIZED);
+        }
+
+        ShakenKeywordsResDTO result =
+                emotionAnalysisService.getShakenKeywords(principal.getMemberId(), symbol);
 
         return ApiResponse.onSuccess(result, SuccessCode.OK);
     }

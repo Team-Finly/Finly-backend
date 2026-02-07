@@ -15,6 +15,7 @@ public class RecordFeedbackRes {
     private Long recordEntryId;
     private FeedbackStatus status;
     private String content;
+    private String suggestion;
     private LocalDateTime createdAt;
     private LocalDateTime updatedAt;
 
@@ -24,6 +25,7 @@ public class RecordFeedbackRes {
                 .recordEntryId(feedback.getRecordEntryId())
                 .status(feedback.getStatus())
                 .content(feedback.getContent())
+                .suggestion(feedback.getSuggestion())
                 .createdAt(feedback.getCreatedAt())
                 .updatedAt(feedback.getUpdatedAt())
                 .build();

@@ -1,6 +1,8 @@
 package com.umc.finly.domain.record.infra;
 
 import com.fasterxml.jackson.annotation.JsonProperty;
+import com.fasterxml.jackson.core.JsonProcessingException;
+import com.fasterxml.jackson.databind.ObjectMapper;
 import com.umc.finly.domain.record.exception.code.RecordErrorCode;
 import com.umc.finly.global.apiPayload.exception.CustomException;
 import lombok.extern.slf4j.Slf4j;
@@ -17,9 +19,12 @@ import java.util.List;
 public class OpenAiFeedbackClient {
 
     private final RestClient openAiRestClient;
+    private final ObjectMapper objectMapper;
 
-    public OpenAiFeedbackClient(@Qualifier("openAiRestClient") RestClient openAiRestClient) {
+    public OpenAiFeedbackClient(@Qualifier("openAiRestClient") RestClient openAiRestClient,
+                                 ObjectMapper objectMapper) {
         this.openAiRestClient = openAiRestClient;
+        this.objectMapper = objectMapper;
     }
 
     @Value("${openai.model:gpt-4o-mini}")
@@ -33,7 +38,7 @@ public class OpenAiFeedbackClient {
                         new Message("user", userPrompt)
                 ),
                 0.7,
-                1000
+                1500
         );
 
         try {
@@ -47,19 +52,71 @@ public class OpenAiFeedbackClient {
                 throw new CustomException(RecordErrorCode.OPENAI_API_FAILED);
             }
 
-            String content = response.choices().get(0).message().content();
+            String rawContent = response.choices().get(0).message().content();
             Integer promptTokens = response.usage() != null ? response.usage().promptTokens() : null;
             Integer completionTokens = response.usage() != null ? response.usage().completionTokens() : null;
 
-            return new FeedbackResponse(content, promptTokens, completionTokens);
+            return parseFeedbackJson(rawContent, promptTokens, completionTokens);
         } catch (RestClientException e) {
             log.error("OpenAI API call failed", e);
             throw new CustomException(RecordErrorCode.OPENAI_API_FAILED);
         }
     }
 
+    private FeedbackResponse parseFeedbackJson(String rawContent, Integer promptTokens, Integer completionTokens) {
+        try {
+            String jsonContent = extractJson(rawContent);
+            FeedbackJsonResponse parsed = objectMapper.readValue(jsonContent, FeedbackJsonResponse.class);
+
+            return new FeedbackResponse(parsed.content(), parsed.suggestion(), promptTokens, completionTokens);
+        } catch (JsonProcessingException e) {
+            log.warn("Failed to parse feedback JSON: {}", e.getMessage());
+            return extractFallbackContent(rawContent, promptTokens, completionTokens);
+        }
+    }
+
+    private FeedbackResponse extractFallbackContent(String rawContent, Integer promptTokens, Integer completionTokens) {
+        // JSON 파싱 실패 시 정규식으로 content 필드 추출 시도
+        java.util.regex.Pattern contentPattern = java.util.regex.Pattern.compile(
+                "\"content\"\\s*:\\s*\"((?:[^\"\\\\]|\\\\.)*)\"",
+                java.util.regex.Pattern.DOTALL
+        );
+        java.util.regex.Matcher matcher = contentPattern.matcher(rawContent);
+
+        if (matcher.find()) {
+            String extractedContent = matcher.group(1)
+                    .replace("\\n", "\n")
+                    .replace("\\\"", "\"");
+            log.info("Extracted content from raw response using regex fallback");
+            return new FeedbackResponse(extractedContent, null, promptTokens, completionTokens);
+        }
+
+        // 정규식 추출도 실패하면 에러 처리
+        log.error("Failed to extract content from OpenAI response");
+        throw new CustomException(RecordErrorCode.OPENAI_API_FAILED);
+    }
+
+    private String extractJson(String rawContent) {
+        String trimmed = rawContent.trim();
+        if (trimmed.toLowerCase().startsWith("```json")) {
+            trimmed = trimmed.substring(7);
+        } else if (trimmed.startsWith("```")) {
+            trimmed = trimmed.substring(3);
+        }
+        if (trimmed.endsWith("```")) {
+            trimmed = trimmed.substring(0, trimmed.length() - 3);
+        }
+        return trimmed.trim();
+    }
+
+    private record FeedbackJsonResponse(
+            String content,
+            String suggestion
+    ) {}
+
     public record FeedbackResponse(
             String content,
+            String suggestion,
             Integer promptTokens,
             Integer completionTokens
     ) {}

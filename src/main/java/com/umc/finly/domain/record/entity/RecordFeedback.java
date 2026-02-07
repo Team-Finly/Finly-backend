@@ -32,6 +32,9 @@ public class RecordFeedback extends CreatedUpdatedDeletedBaseEntity {
     @Column(name = "content", columnDefinition = "TEXT")
     private String content;
 
+    @Column(name = "suggestion", columnDefinition = "TEXT")
+    private String suggestion;
+
     @Column(name = "error_message")
     private String errorMessage;
 
@@ -45,9 +48,10 @@ public class RecordFeedback extends CreatedUpdatedDeletedBaseEntity {
         this.status = FeedbackStatus.GENERATING;
     }
 
-    public void markCompleted(String content, Integer promptTokens, Integer completionTokens) {
+    public void markCompleted(String content, String suggestion, Integer promptTokens, Integer completionTokens) {
         this.status = FeedbackStatus.COMPLETED;
         this.content = content;
+        this.suggestion = suggestion;
         this.promptTokens = promptTokens;
         this.completionTokens = completionTokens;
         this.errorMessage = null;
@@ -61,6 +65,7 @@ public class RecordFeedback extends CreatedUpdatedDeletedBaseEntity {
     public void resetForRegeneration() {
         this.status = FeedbackStatus.PENDING;
         this.content = null;
+        this.suggestion = null;
         this.errorMessage = null;
         this.promptTokens = null;
         this.completionTokens = null;
