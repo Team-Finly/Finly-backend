@@ -32,7 +32,11 @@ public class LocalImageStorageService implements ImageStorageService{
         }
 
         // 파일명 생성 (중복 방지)
-        String originalFilename = StringUtils.cleanPath(file.getOriginalFilename());
+        String originalFilename = file.getOriginalFilename();
+        if (originalFilename == null || originalFilename.isBlank()) {
+            throw new CustomException(MemberErrorCode.INVALID_IMAGE_FILE);
+        }
+        originalFilename = StringUtils.cleanPath(originalFilename);
         String extension = extractExtension(originalFilename);
         String storedFilename = UUID.randomUUID() + "." + extension;
 
