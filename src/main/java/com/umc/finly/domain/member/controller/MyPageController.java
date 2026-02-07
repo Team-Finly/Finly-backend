@@ -130,6 +130,9 @@ public class MyPageController {
             @AuthenticationPrincipal AuthPrincipal principal,
             @RequestPart("image") MultipartFile image
     ) {
+        if (principal == null){
+            throw new CustomException(AuthErrorCode.UNAUTHORIZED);
+        }
         return ApiResponse.onSuccess(
                 myPageService.addProfileImage(principal.getMemberId(), image),
                 SuccessCode.CREATED
