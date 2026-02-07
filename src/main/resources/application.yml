@@ -31,6 +31,11 @@ tradingview:
   symbol-base-url: ${TRADINGVIEW_SYMBOL_URL}
   s3-logo-base-url: ${TRADINGVIEW_S3_LOGO_URL}
 
+korea-invest:
+  base-url: ${KI_BASE_URL}
+  app-key: ${KI_APP_KEY}
+  app-secret: ${KI_APP_SECRET}
+
 openai:
   api-key: ${OPENAI_API_KEY}
   model: gpt-4o-mini

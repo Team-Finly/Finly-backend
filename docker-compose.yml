@@ -26,12 +26,19 @@ services:
       TRADINGVIEW_SYMBOL_URL: ${TRADINGVIEW_SYMBOL_URL}
       TRADINGVIEW_S3_LOGO_URL: ${TRADINGVIEW_S3_LOGO_URL}
       APP_CORS_ALLOWED_ORIGINS: ${APP_CORS_ALLOWED_ORIGINS}
+      KI_BASE_URL: ${KI_BASE_URL}
+      KI_APP_KEY: ${KI_APP_KEY}
+      KI_APP_SECRET: ${KI_APP_SECRET}
       OPENAI_API_KEY: ${OPENAI_API_KEY}
       REDIS_HOST: finly-redis
       REDIS_PORT: 6379
+      IMAGE_UPLOAD_DIR: /data/finly-images
     ports:
       - "8080:8080"
     restart: always
+
+    volumes:
+      - /home/ubuntu/finly-images:/data/finly-images
 
 volumes:
   mysql-data:
