@@ -44,7 +44,7 @@ public class KoreaInvestTokenManager {
         if (accessToken != null && expirationTime != null &&
                 LocalDateTime.now().isBefore(expirationTime.minusMinutes(5))) {
 
-            log.info("ℹ️ 기존 유효 토큰 사용 중 (만료 예정: {})",
+            log.debug("ℹ️ 기존 유효 토큰 사용 중 (만료 예정: {})",
                     expirationTime.format(DateTimeFormatter.ofPattern("yyyy-MM-dd HH:mm:ss")));
             return accessToken;
         }
@@ -64,7 +64,7 @@ public class KoreaInvestTokenManager {
 
         try {
             Map<String, Object> response = authRestClient.post()
-                    .uri(baseUrl + "/oauth2/tokenP")
+                    .uri("/oauth2/tokenP")
                     .contentType(MediaType.APPLICATION_JSON)
                     .body(body)
                     .retrieve()
@@ -79,6 +79,8 @@ public class KoreaInvestTokenManager {
             this.expirationTime = LocalDateTime.parse(expiredStr, DateTimeFormatter.ofPattern("yyyy-MM-dd HH:mm:ss"));
             log.info("✅ 한국투자증권 토큰 갱신 완료! 만료 예정: {}", expiredStr);
 
+        } catch (KoreaInvestException e) {
+                throw e;
         } catch (Exception e) {
                 log.error("❌ 토큰 발급 중 오류 발생: {}", e.getMessage(), e);
                 throw new KoreaInvestException(KoreaInvestErrorCode.TOKEN_GENERATION_FAILED, e.getMessage(), e);

@@ -15,6 +15,7 @@ import org.springframework.stereotype.Service;
 import java.time.LocalDate;
 import java.time.LocalDateTime;
 import java.time.format.DateTimeFormatter;
+import java.time.format.DateTimeParseException;
 import java.util.*;
 import java.util.stream.Collectors;
 
@@ -25,6 +26,15 @@ public class DailyChartServiceImpl implements DailyChartService {
     private final RecordEntryRepository recordEntryRepository;
     private final StockRepository stockRepository;
     private final DailyChartApiCaller dailyChartApiCaller;
+
+    private LocalDate parseDateSafely(Object raw, DateTimeFormatter formatter) {
+        if (raw == null) return null;
+        try {
+            return LocalDate.parse(String.valueOf(raw), formatter);
+        } catch (DateTimeParseException e) {
+            return null;
+        }
+    }
 
     @Override
     public DailyChartResDTO getDailyChart(Long memberId, String symbol) {
@@ -42,7 +52,7 @@ public class DailyChartServiceImpl implements DailyChartService {
         List<Map<String, Object>> rawData = new ArrayList<>();
         int daysOffset = 14; // 기본 14일 전부터 조회 시작
 
-        LocalDateTime today = LocalDateTime.now();
+        LocalDateTime today = LocalDateTime.now(java.time.ZoneId.of("Asia/Seoul"));
         DateTimeFormatter formatter = DateTimeFormatter.ofPattern("yyyyMMdd");
 
         while (daysOffset <= 100) {
@@ -76,10 +86,11 @@ public class DailyChartServiceImpl implements DailyChartService {
                 today.getDayOfWeek().getDisplayName(java.time.format.TextStyle.SHORT, Locale.KOREAN));
 
         // 실제 조회된 기간(확보된 실제 영업일들의 시작일과 종료일) 계산
-        String rawStart = String.valueOf(limitedRaw.get(limitedRaw.size() - 1).get("stck_bsop_date"));
-        String rawEnd = String.valueOf(limitedRaw.get(0).get("stck_bsop_date"));
-        LocalDate actualStartDate = LocalDate.parse(rawStart, formatter);
-        LocalDate actualEndDate = LocalDate.parse(rawEnd, formatter);
+        LocalDate actualStartDate = parseDateSafely(limitedRaw.get(limitedRaw.size() - 1).get("stck_bsop_date"), formatter);
+        LocalDate actualEndDate = parseDateSafely(limitedRaw.get(0).get("stck_bsop_date"), formatter);
+        if (actualStartDate == null || actualEndDate == null) {
+            throw new KoreaInvestException(KoreaInvestErrorCode.API_CALL_ERROR);
+        }
 
         // 해당 기간 동안 사용자 기록 조회 (recordDate 기준)
         List<RecordEntry> records = recordEntryRepository.findAllByMemberIdAndStockIdAndRecordDateBetween(memberId, stock.getId(), actualStartDate, actualEndDate);
@@ -107,15 +118,20 @@ public class DailyChartServiceImpl implements DailyChartService {
                             .collect(Collectors.groupingBy(r -> r.getEmotionCode().name()))
                             .entrySet().stream()
                             .max(Comparator.<Map.Entry<String, List<RecordEntry>>, Integer>comparing(e -> e.getValue().size()) // 1순위: 횟수
-                                    .thenComparing(e -> e.getValue().stream() // 2순위: 최대 강도
-                                            .mapToInt(RecordEntry::getEmotionIntensity).max().orElse(0))
-                                    .thenComparing(e -> e.getValue().stream() // 3순위: 최신 생성순
-                                            .map(RecordEntry::getCreatedAt).max(LocalDateTime::compareTo).orElse(LocalDateTime.MIN))
+                                    .thenComparing(e -> e.getValue().stream()
+                                            .map(RecordEntry::getEmotionIntensity)
+                                            .filter(Objects::nonNull)
+                                            .mapToInt(Integer::intValue)
+                                            .max().orElse(0)) // 2순위: 최대 강도
+                                    .thenComparing(e -> e.getValue().stream()
+                                            .map(RecordEntry::getCreatedAt)
+                                            .filter(Objects::nonNull)
+                                            .max(LocalDateTime::compareTo).orElse(LocalDateTime.MIN)) // 3순위: 최신순
                             )
                             .map(Map.Entry::getKey)
                             .orElse(null);
 
-                    return DailyChartConverter.toDailyDataDto(m, dayRecords.size(), emotions, mainEmotion);
+                    return DailyChartConverter.toDailyDataDto(m, d, dayRecords.size(), emotions, mainEmotion);
                 })
                 .sorted(Comparator.comparing(DailyChartResDTO.DailyDataDto::getDate))
                 .toList();
