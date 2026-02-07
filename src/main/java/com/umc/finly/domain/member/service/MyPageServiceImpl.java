@@ -1,14 +1,13 @@
 package com.umc.finly.domain.member.service;
 
 import com.umc.finly.domain.auth.exception.AuthErrorCode;
-import com.umc.finly.domain.member.dto.response.MyPageMeResDTO;
-import com.umc.finly.domain.member.dto.response.MyPagePersonaResDTO;
-import com.umc.finly.domain.member.dto.response.ProfileImageResDTO;
-import com.umc.finly.domain.member.dto.response.UpdateNicknameResDTO;
+import com.umc.finly.domain.member.dto.response.*;
 import com.umc.finly.domain.member.entity.Member;
+import com.umc.finly.domain.member.entity.mapping.MembersPersonasResult;
 import com.umc.finly.domain.member.exception.MemberErrorCode;
 import com.umc.finly.domain.member.repository.MemberPersonaResultRepository;
 import com.umc.finly.domain.member.repository.MemberRepository;
+import com.umc.finly.domain.record.repository.FragmentRepository;
 import com.umc.finly.global.apiPayload.exception.CustomException;
 import com.umc.finly.global.infra.image.ImageStorageService;
 import com.umc.finly.global.util.PasswordPolicy;
@@ -26,10 +25,27 @@ public class MyPageServiceImpl implements MyPageService{
 
     private final MemberPersonaResultRepository memberPersonaResultRepository;
     private final MemberRepository memberRepository;
+    private final FragmentRepository fragmentRepository;
 
     private final ImageStorageService imageStorageService;
     private final PasswordEncoder passwordEncoder;
 
+    // 마이페이지 조회
+    @Override
+    public MyPageResDTO getMyPage(Long memberId){
+        // 1) Member 조회
+        Member member = memberRepository.findById(memberId)
+                .orElseThrow(()-> new CustomException(MemberErrorCode.MEMBER_NOT_FOUND));
+
+        // 2) 페르소나 결과 조회
+        MembersPersonasResult result = memberPersonaResultRepository.findByMemberIdFetchPersona(memberId)
+                .orElseThrow(() -> new CustomException(MemberErrorCode.PERSONA_RESULT_NOT_FOUND));
+
+        // 3) 조각수 조회
+        long mindPieceCount = fragmentRepository.countByMemberId(memberId);
+
+        return MyPageResDTO.of(member, result, mindPieceCount);
+    }
     // 내 페르소나 조회
     @Override
     public MyPagePersonaResDTO getMyPersona(Long memberId){
