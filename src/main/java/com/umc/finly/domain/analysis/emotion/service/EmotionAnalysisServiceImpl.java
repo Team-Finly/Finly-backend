@@ -10,7 +10,6 @@ import com.umc.finly.domain.market.stock.entity.Stock;
 import com.umc.finly.domain.market.stock.repository.StockRepository;
 import com.umc.finly.domain.record.entity.RecordEntry;
 import com.umc.finly.domain.record.enums.EmotionCode;
-import com.umc.finly.domain.record.repository.RecordEntryRepository;
 import com.umc.finly.global.apiPayload.exception.CustomException;
 import com.umc.finly.global.apiPayload.response.ErrorCode;
 import lombok.RequiredArgsConstructor;
@@ -18,8 +17,6 @@ import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
 import java.util.*;
-import java.util.regex.Matcher;
-import java.util.regex.Pattern;
 
 @Service
 @RequiredArgsConstructor
@@ -29,7 +26,6 @@ public class EmotionAnalysisServiceImpl implements EmotionAnalysisService {
     private final StockRepository stockRepository;
     private final EmotionAnalysisRepository emotionAnalysisRepository;
     private final EmotionAnalysisConverter emotionAnalysisConverter;
-    private final RecordEntryRepository recordEntryRepository;
 
     // 키워드 추출 상위 8개
     private static final int MAX_KEYWORDS = 8;
@@ -136,8 +132,7 @@ public class EmotionAnalysisServiceImpl implements EmotionAnalysisService {
             Set<String> tokens = KeywordExtractor.extractUniqueTokens(r.getMemo());
 
             for (String token : tokens) {
-                Integer old = dfCountMap.get(token);
-                dfCountMap.put(token, old == null ? 1 : old + 1);
+                dfCountMap.merge(token, 1, Integer::sum);
             }
         }
 

@@ -14,6 +14,8 @@ public class KeywordExtractor {
     private static final Pattern TOKEN =
             Pattern.compile("([0-9A-Za-z가-힣]{2,})");
 
+    private static final Pattern DIGITS_ONLY = Pattern.compile("\\d+");
+
     // 의미 없는 단어(불용어) 목록
     private static final Set<String> STOPWORDS = Set.of(
             "오늘","어제","지금","진짜","너무","그냥","근데","그리고",
@@ -91,7 +93,7 @@ public class KeywordExtractor {
     private static boolean isValid(String t) {
         if (t == null) return false;
         if (t.length() < 2) return false;
-        if (t.matches("\\d+")) return false;
+        if (DIGITS_ONLY.matcher(t).matches()) return false;
         return !STOPWORDS.contains(t);
     }
 }
