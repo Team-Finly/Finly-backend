@@ -197,7 +197,7 @@ public class MyPageController {
             - 프로필 이미지가 없어도 성공(멱등) 처리합니다.
             """
     )
-    @DeleteMapping("/profile-image")
+    @DeleteMapping("/me/profile-image")
     public ApiResponse<Object> deleteProfileImage(
             @AuthenticationPrincipal AuthPrincipal principal
     ){
