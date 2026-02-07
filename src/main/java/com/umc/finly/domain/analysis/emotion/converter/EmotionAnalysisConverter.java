@@ -1,8 +1,10 @@
 package com.umc.finly.domain.analysis.emotion.converter;
 
 import com.umc.finly.domain.analysis.emotion.dto.response.EmotionDistributionResDTO;
+import com.umc.finly.domain.analysis.emotion.dto.response.GoldenTimeResDTO;
 import com.umc.finly.domain.analysis.emotion.dto.response.ShakenKeywordsResDTO;
 import com.umc.finly.domain.market.stock.entity.Stock;
+import com.umc.finly.domain.record.enums.Session;
 import org.springframework.stereotype.Component;
 
 import java.util.ArrayList;
@@ -47,6 +49,43 @@ public class EmotionAnalysisConverter {
                         .stockName(stock.getName())
                         .build())
                 .keywords(items)
+                .build();
+    }
+
+    // 감정 골든 타임 응답 DTO 변환
+    public GoldenTimeResDTO toGoldenTimeResDTO(
+            Stock stock,
+            int totalRecords,
+            Session goldenTime,
+            List<GoldenTimeResDTO.Sessions> sessions
+    ) {
+        // stock 영역 생성
+        GoldenTimeResDTO.SelectedStock stockDto = GoldenTimeResDTO.SelectedStock.builder()
+                .symbol(stock.getSymbol())
+                .name(stock.getName())
+                .build();
+
+        // summary 영역 생성
+        GoldenTimeResDTO.Summary summaryDto = GoldenTimeResDTO.Summary.builder()
+                .totalRecords(totalRecords)
+                .goldenTime(goldenTime)
+                .goldenTimeName(goldenTime != null ? goldenTime.getGoldenTimeName() : null)
+                .build();
+
+        return GoldenTimeResDTO.builder()
+                .stock(stockDto)
+                .summary(summaryDto)
+                .session(sessions)
+                .build();
+    }
+
+    // 세션 1개 요약 DTO 생성
+    public GoldenTimeResDTO.Sessions toSessionSummary(Session session, int recordCount, int percent) {
+        return GoldenTimeResDTO.Sessions.builder()
+                .session(session)
+                .sessionName(session.getSessionName())
+                .recordCount(recordCount)
+                .percent(percent)
                 .build();
     }
 }
