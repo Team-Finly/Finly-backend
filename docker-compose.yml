@@ -32,9 +32,13 @@ services:
       OPENAI_API_KEY: ${OPENAI_API_KEY}
       REDIS_HOST: finly-redis
       REDIS_PORT: 6379
+      IMAGE_UPLOAD_DIR: /data/finly-images
     ports:
       - "8080:8080"
     restart: always
+
+    volumes:
+      - /home/ubuntu/finly-images:/data/finly-images
 
 volumes:
   mysql-data:
