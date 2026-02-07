@@ -50,6 +50,10 @@ public class Member extends CreatedDeletedBaseEntity {
         this.profileImageUrl = imageUrl;
     }
 
+    public void updateProfileImage(String imageUrl) {
+        this.profileImageUrl = imageUrl;
+    }
+
     public boolean hasProfileImage(){
         return this.profileImageUrl != null;
     }
