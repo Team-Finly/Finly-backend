@@ -70,15 +70,18 @@ public class KoreaInvestTokenManager {
                     .retrieve()
                     .body(new ParameterizedTypeReference<Map>() {});
 
-            if (response != null && response.containsKey("access_token")) {
-                this.accessToken = (String) response.get("access_token");
-                String expiredStr = (String) response.get("access_token_token_expired");
-                this.expirationTime = LocalDateTime.parse(expiredStr, DateTimeFormatter.ofPattern("yyyy-MM-dd HH:mm:ss"));
-                log.info("✅ 한국투자증권 토큰 갱신 완료! 만료 예정: {}", expiredStr);
-            }
-        } catch (Exception e) {
-                log.error("❌ 토큰 발급 중 오류 발생: {}", e.getMessage());
+            if (response == null || !response.containsKey("access_token")) {
+                log.error("❌ 토큰 발급 API 응답 이상: {}", response);
                 throw new KoreaInvestException(KoreaInvestErrorCode.TOKEN_GENERATION_FAILED);
+            }
+            this.accessToken = (String) response.get("access_token");
+            String expiredStr = (String) response.get("access_token_token_expired");
+            this.expirationTime = LocalDateTime.parse(expiredStr, DateTimeFormatter.ofPattern("yyyy-MM-dd HH:mm:ss"));
+            log.info("✅ 한국투자증권 토큰 갱신 완료! 만료 예정: {}", expiredStr);
+
+        } catch (Exception e) {
+                log.error("❌ 토큰 발급 중 오류 발생: {}", e.getMessage(), e);
+                throw new KoreaInvestException(KoreaInvestErrorCode.TOKEN_GENERATION_FAILED, e.getMessage(), e);
         }
     }
 }
