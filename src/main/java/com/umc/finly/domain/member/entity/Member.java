@@ -46,14 +46,23 @@ public class Member extends CreatedDeletedBaseEntity {
     @Column(name = "profile_image_url", length = 500)
     private String profileImageUrl;
 
+    /** 마이페이지 - 포르필 사진 관련 메서드 **/
+    // 이미지 추가
     public void addProfileImage(String imageUrl){
         this.profileImageUrl = imageUrl;
     }
 
+    // 이미지 삭제
+    public void clearProfileTimage() {
+        this.profileImageUrl = null;
+    }
+
+    // TODO: 코드 리팩토링 예정
     public void updateProfileImage(String imageUrl) {
         this.profileImageUrl = imageUrl;
     }
 
+    // 프로필 이미지 존재 유무
     public boolean hasProfileImage(){
         return this.profileImageUrl != null;
     }
