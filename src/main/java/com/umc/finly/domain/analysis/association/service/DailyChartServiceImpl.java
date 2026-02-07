@@ -62,7 +62,7 @@ public class DailyChartServiceImpl implements DailyChartService {
         }
 
         // 오늘 날짜와 요일 문자열 생성
-        String foramttedToday = String.format("%s (%s)",
+        String formattedToday = String.format("%s (%s)",
                 today.format(DateTimeFormatter.ofPattern("yyyy-MM-dd HH:mm:ss")),
                 today.getDayOfWeek().getDisplayName(java.time.format.TextStyle.SHORT, Locale.KOREAN));
 
@@ -128,7 +128,7 @@ public class DailyChartServiceImpl implements DailyChartService {
                 .stockId(stock.getId())
                 .symbol(symbol)
                 .stockName(stock.getName())
-                .today(foramttedToday)
+                .today(formattedToday)
                 .startDate(actualStartDate.toString())
                 .endDate(acutalEndDate.toString())
                 .dailyData(dailyData)
