@@ -17,7 +17,8 @@ spring:
     redis:
       host: ${REDIS_HOST}
       port: ${REDIS_PORT}
-
+image:
+  upload-dir: ${IMAGE_UPLOAD_DIR:/data/finly-images}
 app:
   cors:
     allowed-origins: ${APP_CORS_ALLOWED_ORIGINS}

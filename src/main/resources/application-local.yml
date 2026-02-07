@@ -30,3 +30,6 @@ spring:
     redis:
       host: localhost
       port: 6379
+
+image:
+  upload-dir: /Users/nayoung/Desktop/umc/finly-images
