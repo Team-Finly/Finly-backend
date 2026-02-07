@@ -43,6 +43,17 @@ public class Member extends CreatedDeletedBaseEntity {
     @Column(name = "refresh_token_expired_at")
     private LocalDateTime refreshTokenExpiredAt;
 
+    @Column(name = "profile_image_url", length = 500)
+    private String profileImageUrl;
+
+    public void addProfileImage(String imageUrl){
+        this.profileImageUrl = imageUrl;
+    }
+
+    public boolean hasProfileImage(){
+        return this.profileImageUrl != null;
+    }
+
     @PrePersist
     protected void onCreate(){
         if(finMindIdx == null){
