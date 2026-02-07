@@ -29,6 +29,7 @@ public interface EmotionAnalysisRepository extends JpaRepository<RecordEntry, Lo
     from RecordEntry r
     where r.memberId = :memberId
         and r.stockId = :stockId
+        and r.deletedAt is null
     group by r.session
 """)
     List<SessionCountProjection> countGroupBySession(

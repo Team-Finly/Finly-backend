@@ -181,12 +181,12 @@ public class EmotionAnalysisServiceImpl implements EmotionAnalysisService {
         // 세션별 count 맵 (없는 세션은 0으로)
         Map<Session, Integer> countMap = new EnumMap<>(Session.class);
         for (Session s : Session.values()) {
-            // // 기본값 0 세팅
+            //기본값 0 세팅
             countMap.put(s, 0);
         }
 
         for (EmotionAnalysisRepository.SessionCountProjection p : projections) {
-            // // group by 결과 반영
+            // group by 결과 반영
             countMap.put(p.getSession(), (int) p.getCount());
         }
 
@@ -200,8 +200,11 @@ public class EmotionAnalysisServiceImpl implements EmotionAnalysisService {
         Map<Session, Integer> percentMap = new EnumMap<>(Session.class);
         int percentSum = 0;
 
+        // 골든타임 선정 (기록 0이면 null)
+        Session goldenTime = (totalRecords == 0) ? null : pickGoldenTime(countMap);
+
         if (totalRecords == 0) {
-            // // 기록이 없으면 모두 0%
+            // 기록이 없으면 모두 0%
             for (Session s : Session.values()) {
                 percentMap.put(s, 0);
             }
@@ -212,15 +215,10 @@ public class EmotionAnalysisServiceImpl implements EmotionAnalysisService {
                 percentSum += percent;
             }
 
-            // // 합이 100이 되도록 보정(diff를 골든타임에 몰아주기)
+            // 합이 100이 되도록 보정(diff를 골든타임에 몰아주기)
             int diff = 100 - percentSum;
-            Session golden = pickGoldenTime(countMap);
-
-            percentMap.put(golden, percentMap.get(golden) + diff);
+            percentMap.put(goldenTime, percentMap.get(goldenTime) + diff);
         }
-
-        // 골든타임 선정(기록 0이면 null)
-        Session goldenTime = (totalRecords == 0) ? null : pickGoldenTime(countMap);
 
         // sessions 리스트 생성(항상 4개 내려줌)
         List<GoldenTimeResDTO.Sessions> sessions = new ArrayList<>();

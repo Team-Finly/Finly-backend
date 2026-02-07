@@ -69,7 +69,7 @@ public class EmotionAnalysisConverter {
         GoldenTimeResDTO.Summary summaryDto = GoldenTimeResDTO.Summary.builder()
                 .totalRecords(totalRecords)
                 .goldenTime(goldenTime)
-                .goldenTimeName(goldenTime.getGoldenTimeName())
+                .goldenTimeName(goldenTime != null ? goldenTime.getGoldenTimeName() : null)
                 .build();
 
         return GoldenTimeResDTO.builder()
