@@ -181,6 +181,6 @@ public class MyPageServiceImpl implements MyPageService{
         member.clearRefreshToken();
 
         // 3) 회원 삭제
-        memberRepository.delete(member);
+        member.softDelete();
     }
 }
