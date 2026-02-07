@@ -1,5 +1,6 @@
 package com.umc.finly.domain.home.service;
 
+import com.umc.finly.domain.home.dto.res.HomeMindDetailResDTO;
 import com.umc.finly.domain.home.dto.res.HomeMindResDTO;
 import com.umc.finly.domain.home.exception.code.HomeErrorCode;
 import com.umc.finly.domain.home.repository.HomeMindRepository;
@@ -85,22 +86,21 @@ public class HomeMindServiceImpl implements HomeMindService {
 
 
         // FMI 계산
-        int fmi = (int) (
-                aScore * 0.4 +
-                        bScore * 0.3 +
-                        cScore * 0.3
+        int fmiScore = (int) (
+                aScore * 0.4 + bScore * 0.3 + cScore * 0.3
         );
 
         return HomeMindResDTO.builder()
-                .nickname(member.getNickname())
+                .memberName(member.getNickname())
                 .persona(
                         HomeMindResDTO.Persona.builder()
                                 .personaType(persona.getPersonaType().name())
-                                .title(persona.getTitle())
+                                .personaTitle(persona.getTitle())
                                 .build()
                 )
-                .fmi(fmi)
-                .levelMessage(resolveMessage(fmi))
+                .fmiScore(fmiScore)
+                .fmiLevel(resolveFmiLevel(fmiScore))
+                .fmiComment(resolveFmiComment(fmiScore))
                 .scores(
                         HomeMindResDTO.Scores.builder()
                                 .resilience(aScore)
@@ -111,10 +111,109 @@ public class HomeMindServiceImpl implements HomeMindService {
                 .build();
     }
 
-    private String resolveMessage(int fmi) {
-        if (fmi < 40) return "시장의 흐름보다 감정의 영향을 더 많이 받고 있습니다.";
-        if (fmi < 70) return "일부 상황에서는 이성적으로 대응하고 있습니다.";
-        if (fmi < 85) return "변동성 속에서도 비교적 안정적인 투자 태도를 유지하고 있습니다.";
+
+
+    @Override
+    public HomeMindDetailResDTO getHomeMindDetail(Long memberId) {
+
+        //기존 요약 로직 재사용 (A/B/C, FMI 계산)
+        HomeMindResDTO base = getHomeMind(memberId);
+
+        // 사용자 페르소나 재조회
+        Object[] result = homeMindRepository.findMemberWithPersona(memberId)
+                .orElseThrow(() ->
+                        new CustomException(HomeErrorCode.HOME_MIND_ACCESS_DENIED));
+
+        Member member = (Member) result[0];
+        Persona persona = (Persona) result[1];
+
+        int aScore = base.getScores().getResilience();
+        int bScore = base.getScores().getDecision();
+        int cScore = base.getScores().getRecord();
+        int fmi = base.getFmiScore();
+
+        return HomeMindDetailResDTO.builder()
+                .memberName(member.getNickname())
+                .persona(
+                        HomeMindDetailResDTO.Persona.builder()
+                                .personaTitle(persona.getTitle())
+                                .description(persona.getDescription())
+                                .build()
+                )
+                .fmiScore(fmi)
+                .fmiLevel(resolveFmiLevel(fmi))
+                .fmiComment(resolveFmiComment(fmi))
+                .scores(
+                        HomeMindDetailResDTO.Scores.builder()
+                                .downMarketResilience(
+                                        scoreDetail(aScore, resolveADescription(aScore))
+                                )
+                                .decisionConsistency(
+                                        scoreDetail(bScore, resolveBDescription(bScore))
+                                )
+                                .recordConsistency(
+                                        scoreDetail(cScore, resolveCDescription(cScore))
+                                )
+                                .build()
+                )
+                .build();
+    }
+
+    //지수 라벨
+    private String resolveFmiLevel(int fmi) {
+        if (fmi <= 39) return "감정 영향 높음";
+        if (fmi <= 69) return "평균적 관리";
+        if (fmi <= 84) return "안정적 멘탈";
+        return "고도화된 멘탈";
+    }
+
+    //지수 설명
+    private String resolveFmiComment(int fmi) {
+        if (fmi <= 39)
+            return "시장의 흐름보다 감정의 영향을 더 많이 받고 있습니다.";
+        if (fmi <= 69)
+            return "일부 상황에서는 이성적으로 대응하고 있습니다.";
+        if (fmi <= 84)
+            return "변동성 속에서도 비교적 안정적인 투자 태도를 유지하고 있습니다.";
         return "시장을 감정이 아닌 기준으로 대하고 있습니다.";
+    }
+
+
+    // A/B/C 상세 해석
+    private String resolveADescription(int score) { // 하락장 회복 탄력성
+        if (score <= 39)
+            return "하락장에서 불안과 후회 감정이 자주 기록되고 있습니다.";
+        if (score <= 69)
+            return "하락장에서는 감정 반응과 이성적 판단이 혼재되어 나타납니다.";
+        if (score <= 84)
+            return "하락장에서도 비교적 안정적인 감정 반응을 보이고 있습니다.";
+        return "하락장에서도 감정 기복이 거의 없이 일관된 태도를 유지합니다.";
+    }
+
+    private String resolveBDescription(int score) { // 의사 결정 일치도
+        if (score <= 39)
+            return "확신 상태에서 내린 판단과 실제 시장 결과의 괴리가 큽니다.";
+        if (score <= 69)
+            return "일부 판단은 시장 결과와 일치하나 편차가 존재합니다.";
+        if (score <= 84)
+            return "판단과 실제 시장 흐름이 비교적 잘 일치합니다.";
+        return "자신의 판단 기준이 명확하며 시장 결과와 높은 정합성을 보입니다.";
+    }
+
+    private String resolveCDescription(int score) { // 기록 성실도
+        if (score <= 39)
+            return "감정 기록이 불규칙하여 자기 복기가 어려운 상태입니다.";
+        if (score <= 69)
+            return "기록은 하고 있으나 일관성은 아직 부족합니다.";
+        if (score <= 84)
+            return "기록 습관이 비교적 잘 형성되어 있습니다.";
+        return "기록을 통해 자신의 감정과 판단을 매우 잘 복기하고 있습니다.";
+    }
+
+    private HomeMindDetailResDTO.ScoreDetail scoreDetail(int score, String description) {
+        return HomeMindDetailResDTO.ScoreDetail.builder()
+                .score(score)
+                .description(description)
+                .build();
     }
 }

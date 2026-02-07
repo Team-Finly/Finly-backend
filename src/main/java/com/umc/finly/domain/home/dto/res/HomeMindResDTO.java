@@ -8,19 +8,20 @@ import lombok.Getter;
 @Builder
 public class HomeMindResDTO {
 
-    private String nickname; // 사용자 닉네임
+    private String memberName; // 사용자 닉네임
 
     private Persona persona; // 페르소나 타이틀
 
-    private int fmi; // FMI 점수
-    private String levelMessage; //해석 문구
-    private Scores scores; //점수
+    private int fmiScore;      // FMI 점수
+    private String fmiLevel;   // 평균적 관리
+    private String fmiComment; // 한 줄 해석
+    private Scores scores;     // A/B/C 숫자
 
     @Getter
     @Builder
     public static class Persona {
         private String personaType;
-        private String title;
+        private String personaTitle;
     }
 
     @Getter
