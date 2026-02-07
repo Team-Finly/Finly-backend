@@ -17,8 +17,15 @@ spring:
     redis:
       host: ${REDIS_HOST}
       port: ${REDIS_PORT}
+
+  servlet:
+    multipart:
+      max-file-size: 5MB
+      max-request-size: 5MB
+
 image:
   upload-dir: ${IMAGE_UPLOAD_DIR:/data/finly-images}
+
 app:
   cors:
     allowed-origins: ${APP_CORS_ALLOWED_ORIGINS}

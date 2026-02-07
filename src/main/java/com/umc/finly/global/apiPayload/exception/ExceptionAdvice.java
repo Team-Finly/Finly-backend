@@ -1,6 +1,7 @@
 package com.umc.finly.global.apiPayload.exception;
 
 import com.fasterxml.jackson.databind.exc.InvalidFormatException;
+import com.umc.finly.domain.member.exception.MemberErrorCode;
 import com.umc.finly.domain.record.enums.EmotionCode;
 import com.umc.finly.domain.record.enums.FragmentPeriodKey;
 import com.umc.finly.domain.record.exception.code.RecordErrorCode;
@@ -10,6 +11,7 @@ import jakarta.servlet.http.HttpServletRequest;
 import jakarta.validation.ConstraintViolationException;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.http.HttpHeaders;
+import org.springframework.http.HttpStatus;
 import org.springframework.http.HttpStatusCode;
 import org.springframework.http.ResponseEntity;
 import org.springframework.http.converter.HttpMessageNotReadableException;
@@ -20,6 +22,7 @@ import org.springframework.web.bind.annotation.RestControllerAdvice;
 import org.springframework.web.context.request.ServletWebRequest;
 import org.springframework.web.context.request.WebRequest;
 import org.springframework.web.method.annotation.MethodArgumentTypeMismatchException;
+import org.springframework.web.multipart.MaxUploadSizeExceededException;
 import org.springframework.web.servlet.mvc.method.annotation.ResponseEntityExceptionHandler;
 
 import java.util.LinkedHashMap;
@@ -129,5 +132,29 @@ public class ExceptionAdvice extends ResponseEntityExceptionHandler {
         throw new CustomException(ErrorCode.INVALID_REQUEST);
     }
 
+    // 이미지 용량 파일 초과
+    @Override
+    protected ResponseEntity<Object> handleExceptionInternal(
+            Exception ex,
+            Object body,
+            HttpHeaders headers,
+            HttpStatusCode statusCode,
+            WebRequest request
+    ) {
+        if (ex instanceof MaxUploadSizeExceededException) {
+            ApiResponse<Object> newBody = ApiResponse.onFailure(
+                    MemberErrorCode.IMAGE_FILE_TOO_LARGE,
+                    MemberErrorCode.IMAGE_FILE_TOO_LARGE.getMessage()
+            );
+            return super.handleExceptionInternal(
+                    ex,
+                    newBody,
+                    headers,
+                    HttpStatus.PAYLOAD_TOO_LARGE,
+                    request
+            );
+        }
 
+        return super.handleExceptionInternal(ex, body, headers, statusCode, request);
+    }
 }

@@ -18,7 +18,10 @@ public enum MemberErrorCode implements BaseCode {
 
     // 404
     PERSONA_RESULT_NOT_FOUND(HttpStatus.NOT_FOUND, "MEMBER404_1", "페르소나 결과를 찾을 수 없습니다."),
-    MEMBER_NOT_FOUND(HttpStatus.NOT_FOUND, "MEMBER404_2", "멤버를 찾을 수 없습니다.");
+    MEMBER_NOT_FOUND(HttpStatus.NOT_FOUND, "MEMBER404_2", "멤버를 찾을 수 없습니다."),
+
+    // 413
+    IMAGE_FILE_TOO_LARGE(HttpStatus.PAYLOAD_TOO_LARGE, "MEMBER413", "이미지 파일 용량이 너무 큽니다.");
 
     private final HttpStatus httpStatus;
     private final String code;
