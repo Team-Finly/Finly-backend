@@ -4,6 +4,7 @@ import com.umc.finly.domain.auth.exception.AuthErrorCode;
 import com.umc.finly.domain.member.dto.request.UpdateNicknameReqDTO;
 import com.umc.finly.domain.member.dto.response.MyPageMeResDTO;
 import com.umc.finly.domain.member.dto.response.MyPagePersonaResDTO;
+import com.umc.finly.domain.member.dto.response.ProfileImageResDTO;
 import com.umc.finly.domain.member.dto.response.UpdateNicknameResDTO;
 import com.umc.finly.domain.member.service.MyPageService;
 import com.umc.finly.global.apiPayload.exception.CustomException;
@@ -16,6 +17,7 @@ import jakarta.validation.Valid;
 import lombok.RequiredArgsConstructor;
 import org.springframework.security.core.annotation.AuthenticationPrincipal;
 import org.springframework.web.bind.annotation.*;
+import org.springframework.web.multipart.MultipartFile;
 
 @RestController
 @RequiredArgsConstructor
@@ -108,6 +110,31 @@ public class MyPageController {
                         request.getNickname()
                 ),
                 SuccessCode.OK
+        );
+    }
+
+    @Operation(
+            summary = "프로필 사진 추가",
+            description = """
+                프로필 사진이 없는 사용자가 새 프로필 이미지를 등록합니다.
+                
+                - JWT 인증이 필요한 API입니다.
+                - multipart/form-data 형식으로 이미지를 업로드합니다.
+                - 이미 프로필 사진이 있는 경우 에러를 반환합니다.
+                """
+    )
+    @PostMapping(value = "/profile-image", consumes = "multipart/form-data")
+    public ApiResponse<ProfileImageResDTO> addProfileImage(
+            @AuthenticationPrincipal AuthPrincipal principal,
+            @RequestPart("image") MultipartFile image
+    ){
+        if (principal == null){
+            throw new CustomException(AuthErrorCode.UNAUTHORIZED);
+        }
+
+        return ApiResponse.onSuccess(
+                myPageService.addProfileImage(principal.getMemberId(), image),
+                SuccessCode.CREATED
         );
     }
 }
