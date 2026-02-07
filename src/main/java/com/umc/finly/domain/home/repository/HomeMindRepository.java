@@ -14,14 +14,6 @@ import java.util.Optional;
 
 public interface HomeMindRepository extends Repository<RecordEntry, Long> {
 
-    // 사용자 + 페르소나
-    @Query("""
-        select m, p
-        from Member m
-        left join Persona p on m.personaId = p.id
-        where m.id = :memberId
-    """)
-    Optional<Object[]> findMemberWithPersona(Long memberId);
 
     // 기간 내 전체 기록
     List<RecordEntry> findByMemberIdAndRecordDateBetween(
@@ -37,7 +29,7 @@ public interface HomeMindRepository extends Repository<RecordEntry, Long> {
             TradeAction tradeAction
     );
 
-    // 월 기록 일자
+    // 월 기록 일자레
     @Query("""
         select distinct r.recordDate
         from RecordEntry r

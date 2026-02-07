@@ -6,6 +6,8 @@ import com.umc.finly.domain.home.exception.code.HomeErrorCode;
 import com.umc.finly.domain.home.repository.HomeMindRepository;
 import com.umc.finly.domain.member.entity.Member;
 import com.umc.finly.domain.member.entity.Persona;
+import com.umc.finly.domain.member.repository.MemberRepository;
+import com.umc.finly.domain.member.repository.PersonaRepository;
 import com.umc.finly.domain.record.entity.RecordEntry;
 import com.umc.finly.domain.record.enums.EmotionCode;
 import com.umc.finly.domain.record.enums.TradeAction;
@@ -21,18 +23,23 @@ import java.util.List;
 public class HomeMindServiceImpl implements HomeMindService {
 
     private final HomeMindRepository homeMindRepository;
+    private final MemberRepository memberRepository;
+    private final PersonaRepository personaRepository;
+
 
     @Override
     public HomeMindResDTO getHomeMind(Long memberId) {
 
 
-        // 사용자 + 페르소나 조회
-        Object[] result = homeMindRepository.findMemberWithPersona(memberId)
-                .orElseThrow(() ->
-                        new CustomException(HomeErrorCode.HOME_MIND_ACCESS_DENIED));
+        // 사용자 조회
+        Member member = memberRepository.findById(memberId)
+                .orElseThrow(() -> new CustomException(HomeErrorCode.HOME_MIND_ACCESS_DENIED));
 
-        Member member = (Member) result[0];
-        Persona persona = (Persona) result[1];
+        // 페르소나 조회
+        Persona persona = null;
+        if (member.getPersonaId() != null) {
+            persona = personaRepository.findById(member.getPersonaId()).orElse(null);
+        }
 
 
         // C. 기록 성실도
@@ -120,12 +127,13 @@ public class HomeMindServiceImpl implements HomeMindService {
         HomeMindResDTO base = getHomeMind(memberId);
 
         // 사용자 페르소나 재조회
-        Object[] result = homeMindRepository.findMemberWithPersona(memberId)
-                .orElseThrow(() ->
-                        new CustomException(HomeErrorCode.HOME_MIND_ACCESS_DENIED));
+        Member member = memberRepository.findById(memberId)
+                .orElseThrow(() -> new CustomException(HomeErrorCode.HOME_MIND_ACCESS_DENIED));
 
-        Member member = (Member) result[0];
-        Persona persona = (Persona) result[1];
+        Persona persona = null;
+        if (member.getPersonaId() != null) {
+            persona = personaRepository.findById(member.getPersonaId()).orElse(null);
+        }
 
         int aScore = base.getScores().getResilience();
         int bScore = base.getScores().getDecision();
