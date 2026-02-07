@@ -3,7 +3,8 @@ package com.umc.finly.domain.member.entity;
 import com.umc.finly.global.entity.CreatedDeletedBaseEntity;
 import jakarta.persistence.*;
 import lombok.*;
-
+import org.hibernate.annotations.SQLDelete;
+import org.hibernate.annotations.SQLRestriction;
 import java.time.LocalDateTime;
 
 @Entity
@@ -17,6 +18,8 @@ import java.time.LocalDateTime;
                 @UniqueConstraint(name = "uk_member_email", columnNames = "email")
         }
 )
+@SQLDelete(sql = "UPDATE member SET deleted_at = NOW() WHERE id = ?")
+@SQLRestriction("deleted_at IS NULL")
 public class Member extends CreatedDeletedBaseEntity {
     @Id
     @GeneratedValue(strategy = GenerationType.IDENTITY)
