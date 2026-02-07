@@ -17,10 +17,6 @@ import java.util.UUID;
 @Service
 public class LocalImageStorageService implements ImageStorageService{
 
-    /**
-     * 예시:
-     * image.upload-dir=/Users/you/uploads
-     */
     @Value("${image.upload-dir}")
     private String uploadRootDir;
 
