@@ -2,6 +2,7 @@ package com.umc.finly.domain.analysis.emotion.service;
 
 import com.umc.finly.domain.analysis.emotion.converter.EmotionAnalysisConverter;
 import com.umc.finly.domain.analysis.emotion.dto.response.EmotionDistributionResDTO;
+import com.umc.finly.domain.analysis.emotion.dto.response.GoldenTimeResDTO;
 import com.umc.finly.domain.analysis.emotion.dto.response.ShakenKeywordsResDTO;
 import com.umc.finly.domain.analysis.emotion.exception.code.EmotionAnalysisErrorCode;
 import com.umc.finly.domain.analysis.emotion.repository.EmotionAnalysisRepository;
@@ -10,6 +11,7 @@ import com.umc.finly.domain.market.stock.entity.Stock;
 import com.umc.finly.domain.market.stock.repository.StockRepository;
 import com.umc.finly.domain.record.entity.RecordEntry;
 import com.umc.finly.domain.record.enums.EmotionCode;
+import com.umc.finly.domain.record.enums.Session;
 import com.umc.finly.global.apiPayload.exception.CustomException;
 import com.umc.finly.global.apiPayload.response.ErrorCode;
 import lombok.RequiredArgsConstructor;
@@ -155,6 +157,90 @@ public class EmotionAnalysisServiceImpl implements EmotionAnalysisService {
         );
     }
 
+    @Override
+    public GoldenTimeResDTO getEmotionGoldenTime(Long memberId, String symbol) {
+
+        // memberId가 없으면 인증 실패
+        if (memberId == null) {
+            throw new CustomException(ErrorCode.UNAUTHORIZED);
+        }
+
+        // symbol 검증
+        if (symbol == null || symbol.isBlank()) {
+            throw new CustomException(ErrorCode.INVALID_REQUEST);
+        }
+
+        // 종목 조회
+        Stock stock = stockRepository.findBySymbol(symbol)
+                .orElseThrow(() -> new CustomException(EmotionAnalysisErrorCode.ANALYSIS_STOCK_NOT_FOUND));
+
+        // 세션별 count 집계
+        List<EmotionAnalysisRepository.SessionCountProjection> projections =
+                emotionAnalysisRepository.countGroupBySession(memberId, stock.getId());
+
+        // 세션별 count 맵 (없는 세션은 0으로)
+        Map<Session, Integer> countMap = new EnumMap<>(Session.class);
+        for (Session s : Session.values()) {
+            // // 기본값 0 세팅
+            countMap.put(s, 0);
+        }
+
+        for (EmotionAnalysisRepository.SessionCountProjection p : projections) {
+            // // group by 결과 반영
+            countMap.put(p.getSession(), (int) p.getCount());
+        }
+
+        // totalRecords 계산
+        int totalRecords = 0;
+        for (Session s : Session.values()) {
+            totalRecords += countMap.get(s);
+        }
+
+        // percent 계산(버림)
+        Map<Session, Integer> percentMap = new EnumMap<>(Session.class);
+        int percentSum = 0;
+
+        if (totalRecords == 0) {
+            // // 기록이 없으면 모두 0%
+            for (Session s : Session.values()) {
+                percentMap.put(s, 0);
+            }
+        } else {
+            for (Session s : Session.values()) {
+                int percent = (countMap.get(s) * 100) / totalRecords;
+                percentMap.put(s, percent);
+                percentSum += percent;
+            }
+
+            // // 합이 100이 되도록 보정(diff를 골든타임에 몰아주기)
+            int diff = 100 - percentSum;
+            Session golden = pickGoldenTime(countMap);
+
+            percentMap.put(golden, percentMap.get(golden) + diff);
+        }
+
+        // 골든타임 선정(기록 0이면 null)
+        Session goldenTime = (totalRecords == 0) ? null : pickGoldenTime(countMap);
+
+        // sessions 리스트 생성(항상 4개 내려줌)
+        List<GoldenTimeResDTO.Sessions> sessions = new ArrayList<>();
+        for (Session s : Session.values()) {
+            sessions.add(emotionAnalysisConverter.toSessionSummary(
+                    s,
+                    countMap.get(s),
+                    percentMap.get(s)
+            ));
+        }
+
+        // Converter로 최종 응답 조립
+        return emotionAnalysisConverter.toGoldenTimeResDTO(
+                stock,
+                totalRecords,
+                goldenTime,
+                sessions
+        );
+    }
+
     private void adjustPercentTo100(long totalCount, List<EmotionDistributionResDTO.TypeSummary> summaries) {
         if (totalCount == 0 || summaries == null || summaries.isEmpty()) return;
 
@@ -194,5 +280,28 @@ public class EmotionAnalysisServiceImpl implements EmotionAnalysisService {
                 guard++;
             }
         }
+    }
+
+    private Session pickGoldenTime(Map<Session, Integer> countMap) {
+        // 동률이면 MORNING > AFTERNOON > PRE_MARKET > POST_MARKET 우선
+        Session[] priority = {
+                Session.MORNING,
+                Session.AFTERNOON,
+                Session.PRE_MARKET,
+                Session.POST_MARKET
+        };
+
+        Session best = priority[0];
+        int bestCount = -1;
+
+        for (Session s : priority) {
+            int count = countMap.getOrDefault(s, 0);
+            if (count > bestCount) {
+                bestCount = count;
+                best = s;
+            }
+        }
+
+        return best;
     }
 }
