@@ -15,6 +15,7 @@ public enum AuthErrorCode implements BaseCode {
     INVALID_NICKNAME(HttpStatus.BAD_REQUEST, "AUTH400_2", "닉네임 형식이 올바르지 않습니다."),
     INVALID_TERM_REQUEST(HttpStatus.BAD_REQUEST, "AUTH400_3", "약관 동의 요청이 올바르지 않습니다."),
     INVALID_PERSONA_ANSWERS(HttpStatus.BAD_REQUEST, "AUTH400_4", "페르소나 답변이 올바르지 않습니다."),
+    PASSWORD_CONFIRM_MISMATCH(HttpStatus.BAD_REQUEST, "AUTH400_5", "비밀번호 확인이 일치하지 않습니다."),
 
     // 401
     INVALID_LOGIN_PASSWORD(HttpStatus.UNAUTHORIZED, "AUTH401_1", "이메일 또는 비밀번호가 올바르지 않습니다."),
@@ -28,6 +29,9 @@ public enum AuthErrorCode implements BaseCode {
 
     //403
     FORBIDDEN(HttpStatus.FORBIDDEN, "AUTH403", "접근 권한이 없습니다."),
+
+    // 404
+    TERM_NOT_FOUND(HttpStatus.NOT_FOUND, "AUTH404", "해당 약관이 없습니다."),
 
     // 422
     REQUIRED_TERM_NOT_AGREED(HttpStatus.UNPROCESSABLE_ENTITY, "AUTH422", "필수 약관에 동의해야 합니다.");

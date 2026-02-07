@@ -69,7 +69,7 @@ public class HomeWeeklyMoodServiceImpl implements HomeWeeklyMoodService {
                             .orElseThrow();
 
             days.add(HomeWeeklyMoodRes.DayMood.builder()
-                    .dayOfWeek(toKoreanDay(day))
+                    .dayOfWeek(day.name().substring(0, 3))
                     .hasRecord(true)
                     .emotion(lastRecord.getEmotionCode())
                     .build());
@@ -78,20 +78,6 @@ public class HomeWeeklyMoodServiceImpl implements HomeWeeklyMoodService {
         return HomeWeeklyMoodRes.builder()
                 .days(days)
                 .build();
-    }
-
-
-    // 한글 요일 변환 유틸 메서드
-    private String toKoreanDay(DayOfWeek day) {
-        return switch (day) {
-            case MONDAY -> "월";
-            case TUESDAY -> "화";
-            case WEDNESDAY -> "수";
-            case THURSDAY -> "목";
-            case FRIDAY -> "금";
-            case SATURDAY -> "토";
-            case SUNDAY -> "일";
-        };
     }
 
 

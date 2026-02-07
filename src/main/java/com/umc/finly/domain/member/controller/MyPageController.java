@@ -1,6 +1,7 @@
 package com.umc.finly.domain.member.controller;
 
 import com.umc.finly.domain.auth.exception.AuthErrorCode;
+import com.umc.finly.domain.member.dto.request.PasswordChangeReqDTO;
 import com.umc.finly.domain.member.dto.request.UpdateNicknameReqDTO;
 import com.umc.finly.domain.member.dto.response.MyPageMeResDTO;
 import com.umc.finly.domain.member.dto.response.MyPagePersonaResDTO;
@@ -11,6 +12,7 @@ import com.umc.finly.global.apiPayload.exception.CustomException;
 import com.umc.finly.global.apiPayload.response.ApiResponse;
 import com.umc.finly.global.apiPayload.response.SuccessCode;
 import com.umc.finly.global.config.security.AuthPrincipal;
+import com.umc.finly.global.util.SecurityUtil;
 import io.swagger.v3.oas.annotations.Operation;
 import io.swagger.v3.oas.annotations.tags.Tag;
 import jakarta.validation.Valid;
@@ -127,14 +129,32 @@ public class MyPageController {
     public ApiResponse<ProfileImageResDTO> addProfileImage(
             @AuthenticationPrincipal AuthPrincipal principal,
             @RequestPart("image") MultipartFile image
-    ){
-        if (principal == null){
-            throw new CustomException(AuthErrorCode.UNAUTHORIZED);
-        }
-
+    ) {
         return ApiResponse.onSuccess(
                 myPageService.addProfileImage(principal.getMemberId(), image),
                 SuccessCode.CREATED
         );
+    }
+
+    @Operation(
+            summary = "비밀번호 변경",
+            description = """
+            로그인한 사용자의 비밀번호를 변경합니다.
+            
+            - Authorization: Bearer {accessToken} 필요
+            - newPassword와 newPasswordConfirm이 일치해야 합니다.
+            - 비밀번호 정책을 만족해야 합니다.
+            """
+    )
+    @PatchMapping("/me/password")
+    public ApiResponse<Object> changePassword(
+            @AuthenticationPrincipal AuthPrincipal principal,
+            @Valid @RequestBody PasswordChangeReqDTO request
+    ){
+        if (principal == null){
+            throw new CustomException(AuthErrorCode.UNAUTHORIZED);
+        }
+        myPageService.changePassword(principal.getMemberId(), request.getNewPassword(), request.getNewPasswordConfirm());
+        return ApiResponse.onSuccess(new Object(), SuccessCode.OK);
     }
 }

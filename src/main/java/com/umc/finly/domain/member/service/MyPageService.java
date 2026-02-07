@@ -15,4 +15,6 @@ public interface MyPageService {
     UpdateNicknameResDTO updateMyNickname(Long memberId, String nickname);
     // 프로필 사진 추가
     ProfileImageResDTO addProfileImage(Long memberId, MultipartFile image);
+    // 내 비밀번호 변경
+    void changePassword(Long memberId, String newPassword, String newPasswordConfirm);
 }

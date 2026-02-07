@@ -1,5 +1,6 @@
 package com.umc.finly.domain.member.service;
 
+import com.umc.finly.domain.auth.exception.AuthErrorCode;
 import com.umc.finly.domain.member.dto.response.MyPageMeResDTO;
 import com.umc.finly.domain.member.dto.response.MyPagePersonaResDTO;
 import com.umc.finly.domain.member.dto.response.ProfileImageResDTO;
@@ -10,7 +11,9 @@ import com.umc.finly.domain.member.repository.MemberPersonaResultRepository;
 import com.umc.finly.domain.member.repository.MemberRepository;
 import com.umc.finly.global.apiPayload.exception.CustomException;
 import com.umc.finly.global.infra.image.ImageStorageService;
+import com.umc.finly.global.util.PasswordPolicy;
 import lombok.RequiredArgsConstructor;
+import org.springframework.security.crypto.password.PasswordEncoder;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 import org.springframework.web.multipart.MultipartFile;
@@ -23,7 +26,9 @@ public class MyPageServiceImpl implements MyPageService{
 
     private final MemberPersonaResultRepository memberPersonaResultRepository;
     private final MemberRepository memberRepository;
+
     private final ImageStorageService imageStorageService;
+    private final PasswordEncoder passwordEncoder;
 
     // 내 페르소나 조회
     @Override
@@ -62,16 +67,16 @@ public class MyPageServiceImpl implements MyPageService{
     // 프로필 사진 추가
     @Override
     @Transactional
-    public ProfileImageResDTO addProfileImage(Long memberId, MultipartFile image){
-        if (image == null || image.isEmpty()){
+    public ProfileImageResDTO addProfileImage(Long memberId, MultipartFile image) {
+        if (image == null || image.isEmpty()) {
             throw new CustomException(MemberErrorCode.INVALID_IMAGE_FILE);
         }
 
         Member member = memberRepository.findById(memberId)
-                .orElseThrow(()-> new CustomException(MemberErrorCode.MEMBER_NOT_FOUND));
+                .orElseThrow(() -> new CustomException(MemberErrorCode.MEMBER_NOT_FOUND));
 
         // 이미 프로필 사진이 있는 경우
-        if (member.hasProfileImage()){
+        if (member.hasProfileImage()) {
             throw new CustomException(MemberErrorCode.PROFILE_IMAGE_ALREADY_EXISTS);
         }
 
@@ -85,5 +90,29 @@ public class MyPageServiceImpl implements MyPageService{
         return ProfileImageResDTO.builder()
                 .profileImageUrl(imageUrl)
                 .build();
+    }
+
+    // 내 비밀번호 변경
+    @Override
+    @Transactional
+    public void changePassword(Long memberId, String newPassword, String newPasswordConfirm){
+
+        // 1) confirm 검증
+        if (newPassword == null || !newPassword.equals(newPasswordConfirm)){
+            throw new CustomException(AuthErrorCode.PASSWORD_CONFIRM_MISMATCH);
+        }
+
+        // 2) 정책 검증
+        if (!PasswordPolicy.isValid(newPassword)){
+            throw new CustomException(AuthErrorCode.INVALID_PASSWORD);
+        }
+
+        // 3) Member 조회
+        Member member = memberRepository.findById(memberId)
+                .orElseThrow(()->new CustomException(MemberErrorCode.MEMBER_NOT_FOUND));
+
+        // 4) 저장
+        member.changePassword(passwordEncoder.encode(newPassword));
+        memberRepository.save(member);
     }
 }
