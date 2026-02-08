@@ -1,5 +1,6 @@
 package com.umc.finly.domain.analysis.association.infra;
 
+import com.umc.finly.domain.analysis.association.dto.HourlyChartResDTO;
 import com.umc.finly.domain.analysis.association.dto.KoreaInvestRawResponse;
 import com.umc.finly.domain.analysis.association.exception.KoreaInvestErrorCode;
 import com.umc.finly.domain.analysis.association.exception.KoreaInvestException;
@@ -10,8 +11,11 @@ import org.springframework.http.HttpStatusCode;
 import org.springframework.stereotype.Component;
 import org.springframework.web.client.RestClient;
 
+import java.math.BigDecimal;
+import java.util.ArrayList;
 import java.util.List;
 import java.util.Map;
+import java.util.stream.Collectors;
 
 /**
  * 한국투자증권 API 실제 구현체
@@ -19,7 +23,7 @@ import java.util.Map;
 @Slf4j
 @Component
 @RequiredArgsConstructor
-public class KoreaInvestApiCallerImpl implements DailyChartApiCaller {
+public class KoreaInvestApiCallerImpl implements DailyChartApiCaller, HourlyChartApiCaller {
 
     private final RestClient koreaInvestRestClient;
 
@@ -54,6 +58,60 @@ public class KoreaInvestApiCallerImpl implements DailyChartApiCaller {
 
     // [매수 확신도]
     // fetchIndexByDate
+
+    // [Hourly Chart] 주식일별분봉조회
+    @Override
+    public List<Map<String, Object>> fetchHourlyChart(String symbol, String targetDate) {
+        List<Map<String, Object>> allRawData = new ArrayList<>();
+        String nextTime = "153000"; // 시작 시간 (장 마감 시각)
+        boolean hasNext = true;
+
+        while (hasNext) {
+            String finalNextTime = nextTime;
+            KoreaInvestRawResponse response = koreaInvestRestClient.get()
+                    .uri(uriBuilder -> uriBuilder
+                            .path("/uapi/domestic-stock/v1/quotations/inquire-time-dailychartprice")
+                            .queryParam("FID_COND_MRKT_DIV_CODE", "J")
+                            .queryParam("FID_INPUT_ISCD", symbol)
+                            .queryParam("FID_INPUT_HOUR_1", finalNextTime) // 이전 응답의 마지막 시간
+                            .queryParam("FID_INPUT_DATE_1", targetDate)
+                            .queryParam("FID_PW_DATA_INCU_YN", "N")
+                            .queryParam("FID_FAKE_TICK_INCU_YN", " ")
+                            .build())
+                    .header("tr_id", "FHKST03010230")
+                    .retrieve()
+                    .body(KoreaInvestRawResponse.class);
+
+            validateResponse(response, symbol);
+
+            if (response == null || response.getOutput2() == null || response.getOutput2().isEmpty()) {
+                break;
+            }
+
+            List<Map<String, Object>> currentBatch = response.getOutput2();
+            allRawData.addAll(currentBatch);
+
+            // 마지막 데이터의 시간을 확인
+            Map<String, Object> lastData = currentBatch.get(currentBatch.size() - 1);
+            String lastTime = lastData.get("stck_cntg_hour").toString().replaceAll("\"", "");
+
+            // 9시 데이터까지 도달했거나, 더 이상 과거 데이터가 없으면 중단
+            // 한투 API는 내림차순으로 주므로 lastTime이 nextTime과 같으면 끝난 것
+            if (lastTime.compareTo("090000") <= 0 || lastTime.equals(nextTime)) {
+                hasNext = false;
+            } else {
+                // 마지막 시각의 1분 전부터 다시 조회 (중복 방지)
+                int lastTimeInt = Integer.parseInt(lastTime);
+                nextTime = String.format("%06d", lastTimeInt);
+            }
+        }
+
+        // 중복 제거 및 반환
+        return allRawData.stream()
+                .distinct()
+                .collect(Collectors.toList());
+    }
+
 
     private void validateResponse(KoreaInvestRawResponse response, String symbol) {
         // response가 null인 경우

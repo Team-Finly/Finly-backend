@@ -20,6 +20,7 @@ public class AssociationAnalysisController implements AssociationAnalysisApiSpec
 
     private final AnalysisEntryService analysisEntryService;
     private final DailyChartService dailyChartService;
+    private final HourlyChartService hourlyChartService;
     private final AnalysisStockService analysisStockService;
     private final FearIndexService fearIndexService;
     private final ConvictionScoreService convictionScoreService;
@@ -60,8 +61,20 @@ public class AssociationAnalysisController implements AssociationAnalysisApiSpec
     }
 
     // 시간별 그래프 조회 API
-    //@GetMapping("/stocks/{symbol}/charts/hourly")
+    @GetMapping("/stocks/{symbol}/charts/hourly")
+    public ApiResponse<HourlyChartResDTO> getHourlyChart(
+            @AuthenticationPrincipal AuthPrincipal principal,
+            @PathVariable("symbol") String symbol,
+            @RequestParam(value = "targetDate", required = false)
+            @DateTimeFormat(pattern = "yyyy-MM-dd") LocalDate targetDate
+    ) {
+        // 날짜가 없으면 오늘 날짜를 기본값으로 설정
+        LocalDate date = (targetDate != null) ? targetDate : LocalDate.now();
 
+        HourlyChartResDTO result = hourlyChartService.getHourlyChart(principal.getMemberId(), symbol, date);
+
+        return ApiResponse.onSuccess(result, SuccessCode.OK);
+    }
     // 하락장 공포지수 조회 API
     @GetMapping("/fear-index")
     public ApiResponse<FearIndexResDTO> getFearIndex(
