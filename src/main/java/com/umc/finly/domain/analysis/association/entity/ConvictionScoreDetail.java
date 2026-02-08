@@ -29,18 +29,18 @@ public class ConvictionScoreDetail extends BaseEntity {
 
     // 기록 감정 (확신 or 탐욕)
     @Enumerated(EnumType.STRING)
-    @Column(name = "emotion_code", nullable = false)
+    @Column(name = "emotion_code")
     private EmotionCode emotionCode;
 
     // 기록일(T)의 시장 지수 값
-    @Column(name = "base_index_value")
+    @Column(name = "base_index_value", nullable = false)
     private Double baseIndexValue;
 
     // 5영업일 뒤(T+5)의 시장 지수 값
-    @Column(name = "target_index_value")
+    @Column(name = "target_index_value", nullable = false)
     private Double targetIndexValue;
 
     // 적중 여부 (targetIndexValue > baseIndexValue)
-    @Column(name = "is_hit")
+    @Column(name = "is_hit", nullable = false)
     private Boolean isHit;
 }

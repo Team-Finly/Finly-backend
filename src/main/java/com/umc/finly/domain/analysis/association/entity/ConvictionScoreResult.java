@@ -5,6 +5,8 @@ import com.umc.finly.global.entity.BaseEntity;
 import jakarta.persistence.*;
 
 import java.time.LocalDate;
+import java.util.ArrayList;
+import java.util.List;
 
 /**
  * [매수 확신도] 매수 확신도 결과
@@ -36,17 +38,27 @@ public class ConvictionScoreResult extends BaseEntity {
 
     /* 확신 매수 통계 */
     // 분석 기간 내 총 확신 매수 기록 횟수
+    @Column(name = "total_confidence_buy_count", nullable = false)
     private Integer totalConfidenceBuyCount = 0;
     // 분석 기간 내 확신 매수 적중 횟수
+    @Column(name = "total_confidence_buy_hit_count", nullable = false)
     private Integer totalConfidenceBuyHitCount = 0;
     // 확신 매수 적중률
+    @Column(name = "confidence_buy_hit_rate", nullable = false)
     private Double confidenceBuyHitRate = 0.0;
 
     /* 탐욕 매수 통계 */
     // 분석 기간 내 총 탐욕 매수 기록 횟수
+    @Column(name = "total_greed_buy_count")
     private Integer totalGreedBuyCount = 0;
     // 분석 기간 내 탐욕 매수 적중 횟수
+    @Column(name = "total_greed_buy_hit_count")
     private Integer totalGreedBuyHitCount = 0;
     // 탐욕 매수 적중률 (확신 매수 변별력 측정용)
+    @Column(name = "greed_buy_hit_rate")
     private Double greedBuyHitRate = 0.0;
+
+    // 매수 확신도 결과 속 포함된 기록별 상세 내역
+    @OneToMany(mappedBy = "convictionScoreResult", cascade = CascadeType.ALL, orphanRemoval = true)
+    private List<ConvictionScoreDetail> details = new ArrayList<>();
 }
