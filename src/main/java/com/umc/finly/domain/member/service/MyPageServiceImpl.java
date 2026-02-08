@@ -184,4 +184,24 @@ public class MyPageServiceImpl implements MyPageService{
         member.changePassword(passwordEncoder.encode(newPassword));
         memberRepository.save(member);
     }
+
+    // 회원 탈퇴
+    @Override
+    @Transactional
+    public void withdraw(Long memberId){
+        Member member = memberRepository.findById(memberId)
+                .orElseThrow(() -> new CustomException(MemberErrorCode.MEMBER_NOT_FOUND));
+
+        // 1) 프로필 이미지 파일 삭제
+        if (member.hasProfileImage()){
+            imageStorageService.delete(member.getProfileImageUrl());
+            member.clearProfileImage();
+        }
+
+        // 2) refresh token 제거
+        member.clearRefreshToken();
+
+        // 3) 회원 삭제
+        member.softDelete();
+    }
 }

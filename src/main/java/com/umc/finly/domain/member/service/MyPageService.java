@@ -20,4 +20,6 @@ public interface MyPageService {
     void deleteProfileImage(Long memberId);
     // 내 비밀번호 변경
     void changePassword(Long memberId, String newPassword, String newPasswordConfirm);
+    // 회원 탈퇴
+    void withdraw(Long memberId);
 }
