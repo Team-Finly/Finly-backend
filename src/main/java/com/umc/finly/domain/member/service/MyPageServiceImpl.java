@@ -140,6 +140,27 @@ public class MyPageServiceImpl implements MyPageService{
                 .build();
     }
 
+    // 프로필 사진 삭제
+    @Override
+    @Transactional
+    public void deleteProfileImage(Long memberId){
+        Member member = memberRepository.findById(memberId)
+                .orElseThrow(() -> new CustomException(MemberErrorCode.MEMBER_NOT_FOUND));
+
+        // 프로필 이미지가 없는 경우
+        if (!member.hasProfileImage()){
+            throw new CustomException(MemberErrorCode.PROFILE_IMAGE_NOT_FOUND);
+        }
+        // 프로필 이미지 있는 경우
+        String oldImageUrl = member.getProfileImageUrl();
+
+        // DB 먼저 지우기
+        member.clearProfileImage();
+        memberRepository.save(member);
+
+        // 파일 삭제
+        imageStorageService.delete(oldImageUrl);
+    }
     // 내 비밀번호 변경
     @Override
     @Transactional
@@ -162,5 +183,25 @@ public class MyPageServiceImpl implements MyPageService{
         // 4) 저장
         member.changePassword(passwordEncoder.encode(newPassword));
         memberRepository.save(member);
+    }
+
+    // 회원 탈퇴
+    @Override
+    @Transactional
+    public void withdraw(Long memberId){
+        Member member = memberRepository.findById(memberId)
+                .orElseThrow(() -> new CustomException(MemberErrorCode.MEMBER_NOT_FOUND));
+
+        // 1) 프로필 이미지 파일 삭제
+        if (member.hasProfileImage()){
+            imageStorageService.delete(member.getProfileImageUrl());
+            member.clearProfileImage();
+        }
+
+        // 2) refresh token 제거
+        member.clearRefreshToken();
+
+        // 3) 회원 삭제
+        member.softDelete();
     }
 }

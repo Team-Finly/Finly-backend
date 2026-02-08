@@ -1,6 +1,6 @@
 package com.umc.finly.domain.home.service;
 
-import com.umc.finly.domain.home.dto.HomeRecordsRes;
+import com.umc.finly.domain.home.dto.res.HomeRecordsResDTO;
 import com.umc.finly.domain.record.dto.res.RecordSearchResDTO;
 import com.umc.finly.domain.record.service.RecordService;
 import lombok.RequiredArgsConstructor;
@@ -17,7 +17,7 @@ public class HomeRecordServiceImpl implements HomeRecordService {
     private final RecordService recordService;
 
     @Override
-    public HomeRecordsRes getRecentMyRecords(Long memberId) {
+    public HomeRecordsResDTO getRecentMyRecords(Long memberId) {
 
         // 기존 기록 검색 API 로직 재사용
         RecordSearchResDTO searchRes =
@@ -26,7 +26,7 @@ public class HomeRecordServiceImpl implements HomeRecordService {
         // Home 정책 적용
         LocalDate threeDaysAgo = LocalDate.now().minusDays(3);
 
-        List<HomeRecordsRes.Record> records =
+        List<HomeRecordsResDTO.Record> records =
                 searchRes.getRecords().stream()
                         // 최근 3일
                         .filter(r -> !r.getRecordDate().isBefore(threeDaysAgo))
@@ -37,7 +37,7 @@ public class HomeRecordServiceImpl implements HomeRecordService {
                         // 상위 5개
                         .limit(5)
                         // DTO 변환
-                        .map(r -> HomeRecordsRes.Record.builder()
+                        .map(r -> HomeRecordsResDTO.Record.builder()
                                 .recordId(r.getRecordId())
                                 .recordDate(r.getRecordDate())
                                 .recordedAt(r.getRecordedAt())
@@ -53,6 +53,6 @@ public class HomeRecordServiceImpl implements HomeRecordService {
                         )
                         .toList();
 
-        return HomeRecordsRes.from(records);
+        return HomeRecordsResDTO.from(records);
     }
 }

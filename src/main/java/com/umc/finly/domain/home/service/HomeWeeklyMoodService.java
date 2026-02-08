@@ -1,8 +1,8 @@
 package com.umc.finly.domain.home.service;
 
-import com.umc.finly.domain.home.dto.HomeWeeklyMoodRes;
+import com.umc.finly.domain.home.dto.res.HomeWeeklyMoodResDTO;
 
 public interface HomeWeeklyMoodService {
 
-    HomeWeeklyMoodRes getWeeklyMood(Long memberId);
+    HomeWeeklyMoodResDTO getWeeklyMood(Long memberId);
 }
