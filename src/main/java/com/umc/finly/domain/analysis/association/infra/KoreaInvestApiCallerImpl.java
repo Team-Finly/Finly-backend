@@ -80,9 +80,10 @@ public class KoreaInvestApiCallerImpl implements DailyChartApiCaller, HourlyChar
                             .build())
                     .header("tr_id", "FHKST03010230")
                     .retrieve()
+                    .onStatus(HttpStatusCode::isError, (request, response1) -> {
+                        throw new KoreaInvestException(KoreaInvestErrorCode.API_CALL_ERROR);
+                    })
                     .body(KoreaInvestRawResponse.class);
-
-            validateResponse(response, symbol);
 
             if (response == null || response.getOutput2() == null || response.getOutput2().isEmpty()) {
                 break;

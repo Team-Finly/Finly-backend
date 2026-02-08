@@ -14,6 +14,7 @@ services:
     image: finly-backend
     container_name: finly-backend
     environment:
+      TZ: Asia/Seoul
       SPRING_PROFILES_ACTIVE: prod
       SPRING_DATASOURCE_URL: ${DB_URL}
       SPRING_DATASOURCE_USERNAME: ${DB_USERNAME}
