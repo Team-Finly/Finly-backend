@@ -38,7 +38,7 @@ import java.util.List;
 
     // 매수 확신도
     @Column(name = "conviction_score", nullable = false)
-    private int convictionScore;
+    private Integer convictionScore;
 
     // 분석 기간
     @Column(name = "start_date", nullable = false)

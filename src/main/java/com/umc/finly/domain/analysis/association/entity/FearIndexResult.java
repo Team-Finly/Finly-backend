@@ -37,7 +37,7 @@ import java.util.List;
 
     // 하락장 공포지수
     @Column(name = "fear_index", nullable = false)
-    private int fearIndex;
+    private Integer fearIndex;
 
     // 분석 기간
     @Column(name = "start_date", nullable = false)
