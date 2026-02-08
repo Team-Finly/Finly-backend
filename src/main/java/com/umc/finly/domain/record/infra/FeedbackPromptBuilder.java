@@ -6,9 +6,14 @@ import org.springframework.stereotype.Component;
 
 import java.util.List;
 
+// AI 피드백 프롬프트 생성기
+// 투자 기록을 OpenAI API에 전달할 프롬프트로 변환함
+// System Prompt (AI 역할 정의) + User Prompt (기록 데이터) 조합
 @Component
 public class FeedbackPromptBuilder {
 
+    // 시스템 프롬프트 - AI의 역할과 응답 형식 정의
+    // 투자 심리 코치 페르소나, 키워드 강조 규칙, JSON 응답 형식 포함
     private static final String SYSTEM_PROMPT = """
             당신은 투자자의 감정과 행동 패턴을 분석하는 따뜻하고 공감적인 투자 심리 코치입니다.
 
@@ -46,10 +51,13 @@ public class FeedbackPromptBuilder {
             - 첫 번째 제안은 ~요 체로, 두 번째 제안은 ~하면 어떨까요? 체로 작성
             """;
 
+    // 시스템 프롬프트 반환
     public String getSystemPrompt() {
         return SYSTEM_PROMPT;
     }
 
+    // 사용자 프롬프트 생성 (오늘 기록 + 과거 기록 요약)
+    // currentEntry: 현재 기록, stock: 종목 정보, pastEntries: 최근 기록들 (통계용)
     public String buildUserPrompt(RecordEntry currentEntry, Stock stock, List<RecordEntry> pastEntries) {
         StringBuilder sb = new StringBuilder();
 
@@ -66,6 +74,7 @@ public class FeedbackPromptBuilder {
         return sb.toString();
     }
 
+    // 오늘 기록을 프롬프트용 텍스트로 변환
     private String formatCurrentEntry(RecordEntry entry, Stock stock) {
         StringBuilder sb = new StringBuilder();
 
@@ -91,10 +100,12 @@ public class FeedbackPromptBuilder {
         return sb.toString();
     }
 
+    // 과거 기록들을 통계 요약으로 변환
+    // 감정 분포, 거래 유형 분포, 평균 감정 강도 포함
     private String formatPastEntries(List<RecordEntry> entries) {
         StringBuilder sb = new StringBuilder();
 
-        // 감정 통계
+        // 감정별 개수 집계
         long calmCount = entries.stream().filter(e -> "CALM".equals(e.getEmotionCode().name())).count();
         long anxietyCount = entries.stream().filter(e -> "ANXIETY".equals(e.getEmotionCode().name())).count();
         long regretCount = entries.stream().filter(e -> "REGRET".equals(e.getEmotionCode().name())).count();
@@ -128,6 +139,7 @@ public class FeedbackPromptBuilder {
         return sb.toString();
     }
 
+    // TradeAction enum → 한글 변환
     private String formatTradeAction(String action) {
         return switch (action) {
             case "BUY" -> "매수";
@@ -137,6 +149,7 @@ public class FeedbackPromptBuilder {
         };
     }
 
+    // EmotionCode enum → 한글 변환
     private String formatEmotion(String emotion) {
         return switch (emotion) {
             case "CALM" -> "평온";
@@ -148,6 +161,7 @@ public class FeedbackPromptBuilder {
         };
     }
 
+    // Session enum → 한글 변환
     private String formatSession(String session) {
         return switch (session) {
             case "PRE_MARKET" -> "장 시작 전";

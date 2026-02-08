@@ -1,7 +1,7 @@
 package com.umc.finly.domain.home.service;
 
 import com.umc.finly.domain.home.dto.res.HomeRecordsResDTO;
-import com.umc.finly.domain.record.dto.RecordSearchRes;
+import com.umc.finly.domain.record.dto.res.RecordSearchResDTO;
 import com.umc.finly.domain.record.service.RecordService;
 import lombok.RequiredArgsConstructor;
 import org.springframework.stereotype.Service;
@@ -20,10 +20,10 @@ public class HomeRecordServiceImpl implements HomeRecordService {
     public HomeRecordsResDTO getRecentMyRecords(Long memberId) {
 
         // 기존 기록 검색 API 로직 재사용
-        RecordSearchRes searchRes =
+        RecordSearchResDTO searchRes =
                 recordService.searchRecords(memberId, null, null);
 
-        // 2️Home 정책 적용
+        // Home 정책 적용
         LocalDate threeDaysAgo = LocalDate.now().minusDays(3);
 
         List<HomeRecordsResDTO.Record> records =
@@ -32,7 +32,7 @@ public class HomeRecordServiceImpl implements HomeRecordService {
                         .filter(r -> !r.getRecordDate().isBefore(threeDaysAgo))
                         // 최신순
                         .sorted(Comparator.comparing(
-                                RecordSearchRes.SearchEntry::getRecordedAt
+                                RecordSearchResDTO.SearchEntry::getRecordedAt
                         ).reversed())
                         // 상위 5개
                         .limit(5)
