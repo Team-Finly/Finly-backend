@@ -34,7 +34,7 @@ public interface HomeMindRepository extends Repository<RecordEntry, Long> {
     @Query("""
         select f
         from FearIndexResult f
-        where f.member.id = :memberId
+        where f.memberId = :memberId
         order by f.endDate desc
     """)
     Optional<FearIndexResult> findLatestFearIndexResult(Long memberId);
@@ -44,7 +44,7 @@ public interface HomeMindRepository extends Repository<RecordEntry, Long> {
     @Query("""
         select c
         from ConvictionScoreResult c
-        where c.member.id = :memberId
+        where c.memberId = :memberId
         order by c.endDate desc
     """)
     Optional<ConvictionScoreResult> findLatestConvictionScoreResult(Long memberId);
