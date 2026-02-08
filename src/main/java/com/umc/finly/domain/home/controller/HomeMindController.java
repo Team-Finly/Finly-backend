@@ -50,9 +50,7 @@ public class HomeMindController {
                                                 "fmiScore": 64,
                                                 "fmiLevelLabel": "평균적 대응",
                                                 "fmiDescription": "일부 상황에서는 이성적으로 대응하고 있어요",
-                                                "resilienceScore": 70,
-                                                "convictionScore": 55,
-                                                "consistencyScore": 62
+                                     
                                               }
                                             }
                                             
