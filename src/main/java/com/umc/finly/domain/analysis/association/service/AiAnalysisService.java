@@ -35,41 +35,63 @@ public class AiAnalysisService {
     /**
      * 사용자의 공포지수, 매수확신도, 최근 7일 감정을 종합하여 AI 패턴 분석 결과를 반환합니다.
      */
-    @Transactional(readOnly = true)
     public AiAnalysisResDTO getAiAnalysis(Long memberId) {
-        log.info("통계-연관분석: AI 분석 시작 - Member ID: {}", memberId);
+        log.info("연관분석 AI: 분석 시작 - Member ID: {}", memberId);
 
+        // 1. 데이터 조회
+        AnalysisData data = getAnalysisData(memberId);
+        log.info("[연관분석 AI] 데이터 로드 완료: 공포지수={}, 확신도={}, 기록수={}",
+                data.fear().getFearIndex(), data.conviction().getConvictionScore(), data.records().size());
+
+        // 데이터 부족 여부 판단 (공포지수나 확신도 중 하나라도 없으면 분석 제한)
+        // 세 가지 데이터가 모두 없는 경우에만 '부족'으로 판단
+        boolean isDataInsufficient = (data.fear() == null && data.conviction() == null && (data.records() == null || data.records().isEmpty()));
+        log.info("[연관분석 AI] 데이터 체크: 부족 여부 = {}", isDataInsufficient);
+
+        // 2. 프롬프트 구성
+        String userPrompt = promptBuilder.buildGeneralAnalysisPrompt(data.fear(), data.conviction(), data.records());
+        String systemPrompt = "당신은 주식 심리 및 투자 패턴 분석 전문가입니다. 반드시 JSON 형식으로만 응답하세요: {\"content\": \"심리/투자 분석\", \"suggestion\": \"행동 조언\"}";
+
+        // 3. 외부 API 호출
+        try {
+            log.info("[연관분석 AI] OpenAI 호출: AI 분석 생성을 요청합니다.");
+            OpenAiFeedbackClient.FeedbackResponse response = openAiFeedbackClient.generateFeedback(systemPrompt, userPrompt);
+
+            String combinedText = response.content() + response.suggestion();
+
+            log.info("[연관분석 AI] AI 분석 성공!: 텍스트 = {}", combinedText);
+
+            return AiAnalysisResDTO.builder()
+                    .text(combinedText)
+                    .build();
+
+        } catch (Exception e) {
+            log.error("[연관분석 AI] AI 분석 중 오류 발생!: {}", e.getMessage());
+            return AiAnalysisResDTO.builder()
+                    .text("🧠 현재 분석 서비스 이용량이 많아 결과 생성이 지연되고 있어요.\n📉 잠시 후 다시 시도해 주시면 분석 결과를 제공해 드릴게요.\n💡 지속적인 감정 기록은 더 정확한 분석에 도움이 됩니다.")
+                    .build();
+        }
+    }
+
+
+    @Transactional(readOnly = true)
+    protected AnalysisData getAnalysisData(Long memberId) {
         FearIndexResult fear = fearIndexResultRepository.findFirstByMemberIdOrderByEndDateDesc(memberId)
-                .orElseThrow(() -> new FearIndexException(FearIndexErrorCode.FEAR_INDEX_NOT_FOUND));
+                .orElse(null);
 
         ConvictionScoreResult conviction = convictionScoreResultRepository.findFirstByMemberIdOrderByEndDateDesc(memberId)
-                .orElseThrow(() -> new ConvictionScoreException(ConvictionScoreErrorCode.CONVICTION_SCORE_NOT_FOUND));
+                .orElse(null);
 
         LocalDate endDate = LocalDate.now();
         LocalDate startDate = endDate.minusDays(7);
         List<RecordEntry> recentRecords = recordEntryRepository.findAllByMemberIdAndRecordDateBetween(memberId, startDate, endDate);
 
-        // 1. 프롬프트 생성
-        String userPrompt = promptBuilder.buildGeneralAnalysisPrompt(fear, conviction, recentRecords);
-
-        // 2. OpenAiFeedbackClient에 맞는 System Prompt 설정
-        // Client가 JSON 파싱을 시도하므로, JSON 형식으로 응답하도록 강제해야 합니다.
-        String systemPrompt = "당신은 주식 심리 및 투자 패턴 분석 전문가입니다. 반드시 다음 JSON 형식으로만 응답하세요: {\"content\": \"분석내용\", \"suggestion\": \"행동조언\"}";
-
-        try {
-            // 3. generateFeedback 호출
-            OpenAiFeedbackClient.FeedbackResponse response = openAiFeedbackClient.generateFeedback(systemPrompt, userPrompt);
-
-            // 4. Client가 파싱해준 content와 suggestion을 합쳐서 우리가 원하는 3줄 형식으로 반환
-            return AiAnalysisResDTO.builder()
-                    .text(response.content())
-                    .build();
-
-        } catch (Exception e) {
-            log.error("통계-연관분석: AI 분석 중 오류 발생: {}", e.getMessage());
-            return AiAnalysisResDTO.builder()
-                    .text("🧠 현재 분석 서비스 이용량이 많아 결과 생성이 지연되고 있습니다.\n📉 잠시 후 다시 시도해 주시면 분석 결과를 제공해 드릴게요.\n💡 지속적인 감정 기록은 더 정확한 분석에 도움이 됩니다.")
-                    .build();
-        }
+        return new AnalysisData(fear, conviction, recentRecords);
     }
+
+    private record AnalysisData(
+            FearIndexResult fear,
+            ConvictionScoreResult conviction,
+            List<RecordEntry> records
+    ) {}
 }
