@@ -237,30 +237,30 @@ Resolves: #12
   </tr>
 
   <!-- 역할 상세 행 -->
-  <tr>
-    <td align="center">
-      감정 통계
-    <img width="162" height="324" alt="image" src="https://github.com/user-attachments/assets/90b68c24-619d-4e0f-9075-6e41fdc20235" />
-    </td>
-    <td align="center">
-      홈
-    <img width="281" height="588" alt="image" src="https://github.com/user-attachments/assets/3ba73c26-ce3c-4520-8459-822c0c32737e" />
-    </td>
-    <td align="center">
-      인증/회원/페르소나
-    <img width="222" height="456" alt="image" src="https://github.com/user-attachments/assets/b45948c7-ee4a-47b4-b049-b4d96adbb79b" />
-    </td>
-    <td align="center">
-      기록/리포트
-    <img width="239" height="500" alt="image" src="https://github.com/user-attachments/assets/884a130d-54f6-4818-93b5-0973c10f6525" />
-    </td>
-    <td align="center">
-      주식 데이터
-        <img width="254" height="506" alt="image" src="https://github.com/user-attachments/assets/184beaf7-020b-49fb-b21a-5f707120523b" />
-    </td>
-    <td align="center">
-      연관 분석
-    <img width="257" height="529" alt="image" src="https://github.com/user-attachments/assets/537f314e-ce72-4f75-b6a5-ef5a7dc924ae" />
-    </td>
-  </tr>
+ <tr>
+  <td align="center" valign="top">
+    <b>감정 통계</b><br/>
+    <img width="200" alt="감정 통계" src="https://github.com/user-attachments/assets/90b68c24-619d-4e0f-9075-6e41fdc20235" />
+  </td>
+  <td align="center" valign="top">
+    <b>홈</b><br/>
+    <img width="200" alt="홈" src="https://github.com/user-attachments/assets/3ba73c26-ce3c-4520-8459-822c0c32737e" />
+  </td>
+  <td align="center" valign="top">
+    <b>인증/회원/페르소나</b><br/>
+    <img width="200" alt="인증/회원" src="https://github.com/user-attachments/assets/b45948c7-ee4a-47b4-b049-b4d96adbb79b" />
+  </td>
+  <td align="center" valign="top">
+    <b>기록/리포트</b><br/>
+    <img width="200" alt="기록/리포트" src="https://github.com/user-attachments/assets/884a130d-54f6-4818-93b5-0973c10f6525" />
+  </td>
+  <td align="center" valign="top">
+    <b>주식 데이터</b><br/>
+    <img width="200" alt="주식 데이터" src="https://github.com/user-attachments/assets/184beaf7-020b-49fb-b21a-5f707120523b" />
+  </td>
+  <td align="center" valign="top">
+    <b>연관 분석</b><br/>
+    <img width="200" alt="연관 분석" src="https://github.com/user-attachments/assets/537f314e-ce72-4f75-b6a5-ef5a7dc924ae" />
+  </td>
+</tr>
 </table>
