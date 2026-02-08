@@ -140,6 +140,27 @@ public class MyPageServiceImpl implements MyPageService{
                 .build();
     }
 
+    // 프로필 사진 삭제
+    @Override
+    @Transactional
+    public void deleteProfileImage(Long memberId){
+        Member member = memberRepository.findById(memberId)
+                .orElseThrow(() -> new CustomException(MemberErrorCode.MEMBER_NOT_FOUND));
+
+        // 프로필 이미지가 없는 경우
+        if (!member.hasProfileImage()){
+            throw new CustomException(MemberErrorCode.PROFILE_IMAGE_NOT_FOUND);
+        }
+        // 프로필 이미지 있는 경우
+        String oldImageUrl = member.getProfileImageUrl();
+
+        // DB 먼저 지우기
+        member.clearProfileImage();
+        memberRepository.save(member);
+
+        // 파일 삭제
+        imageStorageService.delete(oldImageUrl);
+    }
     // 내 비밀번호 변경
     @Override
     @Transactional
