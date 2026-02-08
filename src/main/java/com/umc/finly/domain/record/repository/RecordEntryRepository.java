@@ -52,4 +52,14 @@ public interface RecordEntryRepository extends JpaRepository<RecordEntry, Long> 
         order by count(r.id) desc, max(r.createdAt) desc
         """)
     List<Long> findTopStockByMemberId(@Param("memberId") Long memberId, Pageable pageable);
+
+    /**
+     * recordDate을 기준으로 특정 종목에 대해 특정 기간 내의 모든 기록 조회
+     * @param memberId 회원 PK
+     * @param stockId 종목 PK
+     * @param startDate 조회 시작일
+     * @param endDate 조회 종료일
+     * @return 검색된 기록 리스트
+     */
+    List<RecordEntry> findAllByMemberIdAndStockIdAndRecordDateBetween(Long memberId, Long stockId, LocalDate startDate, LocalDate endDate);
 }

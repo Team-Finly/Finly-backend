@@ -71,7 +71,7 @@ public class TodayRecordResDTO {
     // 기록 1개: 해당 감정 강조
     // 기록 2개+: 첫 감정 → 마지막 감정 흐름 표현
     public static String generatePrismTitle(List<RecordEntry> entries) {
-        if (entries.isEmpty()) {
+        if (entries == null || entries.isEmpty()) {
             return "괜찮아요. 기록이 없는 날도 있을 수 있죠.";
         }
         if (entries.size() == 1) {
