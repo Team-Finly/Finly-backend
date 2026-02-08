@@ -1,4 +1,4 @@
-package com.umc.finly.domain.record.dto;
+package com.umc.finly.domain.record.dto.res;
 
 import com.umc.finly.domain.market.stock.entity.Stock;
 import com.umc.finly.domain.record.entity.RecordEntry;
@@ -14,33 +14,31 @@ import java.time.LocalDateTime;
 
 @Getter
 @Builder
-public class RecordUpdateRes {
+public class DailyReportResDTO {
 
     private Long recordId;
     private LocalDate recordDate;
-    private LocalDateTime updatedAt;
+    private LocalDateTime recordedAt;
     private Session session;
     private TradeAction tradeAction;
-    private String symbol;
     private BigDecimal unitPrice;
     private BigDecimal quantity;
     private EmotionCode emotionCode;
-    private Integer emotionIntensity;
-    private String memo;
+    private String name;
+    private String content;
 
-    public static RecordUpdateRes from(RecordEntry entry, Stock stock) {
-        return RecordUpdateRes.builder()
+    public static DailyReportResDTO from(RecordEntry entry, Stock stock, String content) {
+        return DailyReportResDTO.builder()
                 .recordId(entry.getId())
                 .recordDate(entry.getRecordDate())
-                .updatedAt(entry.getUpdatedAt())
+                .recordedAt(entry.getCreatedAt())
                 .session(entry.getSession())
                 .tradeAction(entry.getTradeAction())
-                .symbol(stock.getSymbol())
                 .unitPrice(entry.getUnitPrice())
                 .quantity(entry.getQuantity())
                 .emotionCode(entry.getEmotionCode())
-                .emotionIntensity(entry.getEmotionIntensity())
-                .memo(entry.getMemo())
+                .name(stock.getName())
+                .content(content)
                 .build();
     }
 }

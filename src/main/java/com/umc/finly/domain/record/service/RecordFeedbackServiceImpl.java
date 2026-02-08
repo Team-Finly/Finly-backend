@@ -1,6 +1,6 @@
 package com.umc.finly.domain.record.service;
 
-import com.umc.finly.domain.record.dto.RecordFeedbackRes;
+import com.umc.finly.domain.record.dto.res.RecordFeedbackResDTO;
 import com.umc.finly.domain.record.entity.RecordEntry;
 import com.umc.finly.domain.record.entity.RecordFeedback;
 import com.umc.finly.domain.record.enums.FeedbackStatus;
@@ -51,16 +51,16 @@ public class RecordFeedbackServiceImpl implements RecordFeedbackService {
 
     @Override
     @Transactional(readOnly = true)
-    public RecordFeedbackRes getFeedback(Long memberId, Long recordEntryId) {
+    public RecordFeedbackResDTO getFeedback(Long memberId, Long recordEntryId) {
         RecordFeedback feedback = feedbackRepository.findByRecordEntryIdAndMemberId(recordEntryId, memberId)
                 .orElseThrow(() -> new CustomException(RecordErrorCode.FEEDBACK_NOT_FOUND));
 
-        return RecordFeedbackRes.from(feedback);
+        return RecordFeedbackResDTO.from(feedback);
     }
 
     @Override
     @Transactional
-    public RecordFeedbackRes regenerateFeedback(Long memberId, Long recordEntryId) {
+    public RecordFeedbackResDTO regenerateFeedback(Long memberId, Long recordEntryId) {
         // 1. 기록이 존재하고 본인 것인지 확인
         RecordEntry recordEntry = recordEntryRepository.findById(recordEntryId)
                 .orElseThrow(() -> new CustomException(RecordErrorCode.RECORD_NOT_FOUND));
@@ -104,6 +104,6 @@ public class RecordFeedbackServiceImpl implements RecordFeedbackService {
             }
         });
 
-        return RecordFeedbackRes.from(feedback);
+        return RecordFeedbackResDTO.from(feedback);
     }
 }

@@ -1,7 +1,7 @@
 package com.umc.finly.domain.record.converter;
 
-import com.umc.finly.domain.record.dto.response.FragmentListResDTO;
-import com.umc.finly.domain.record.dto.response.FragmentSummaryResDTO;
+import com.umc.finly.domain.record.dto.res.FragmentListResDTO;
+import com.umc.finly.domain.record.dto.res.FragmentSummaryResDTO;
 import com.umc.finly.domain.record.enums.EmotionCode;
 import com.umc.finly.domain.record.enums.FragmentPeriodKey;
 import com.umc.finly.domain.record.repository.FragmentRepository;

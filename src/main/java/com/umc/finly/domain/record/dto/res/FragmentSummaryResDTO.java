@@ -1,4 +1,4 @@
-package com.umc.finly.domain.record.dto.response;
+package com.umc.finly.domain.record.dto.res;
 
 import com.umc.finly.domain.record.enums.EmotionCode;
 import lombok.*;

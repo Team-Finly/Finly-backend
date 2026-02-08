@@ -1,4 +1,4 @@
-package com.umc.finly.domain.record.dto;
+package com.umc.finly.domain.record.dto.res;
 
 import com.umc.finly.domain.market.stock.entity.Stock;
 import com.umc.finly.domain.record.entity.RecordEntry;
@@ -14,7 +14,7 @@ import java.time.LocalDateTime;
 
 @Getter
 @Builder
-public class RecordCreateRes {
+public class RecordCreateResDTO {
 
     private Long recordId;
     private LocalDate recordDate;
@@ -34,7 +34,7 @@ public class RecordCreateRes {
         private String status;
     }
 
-    public static RecordCreateRes from(RecordEntry entry, Stock stock, RecordFeedback feedback) {
+    public static RecordCreateResDTO from(RecordEntry entry, Stock stock, RecordFeedback feedback) {
         FeedbackInfo feedbackInfo = null;
         if (feedback != null) {
             feedbackInfo = FeedbackInfo.builder()
@@ -43,7 +43,7 @@ public class RecordCreateRes {
                     .build();
         }
 
-        return RecordCreateRes.builder()
+        return RecordCreateResDTO.builder()
                 .recordId(entry.getId())
                 .recordDate(entry.getRecordDate())
                 .recordedAt(entry.getCreatedAt())

@@ -1,4 +1,4 @@
-package com.umc.finly.domain.record.dto;
+package com.umc.finly.domain.record.dto.res;
 
 import com.umc.finly.domain.record.entity.RecordEntry;
 import com.umc.finly.domain.record.enums.EmotionCode;
@@ -14,7 +14,7 @@ import java.util.List;
 
 @Getter
 @Builder
-public class RecordSearchRes {
+public class RecordSearchResDTO {
 
     private List<SearchEntry> records;
     private int totalCount;
