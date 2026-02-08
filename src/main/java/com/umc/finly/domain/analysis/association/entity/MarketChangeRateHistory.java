@@ -5,6 +5,7 @@ import com.umc.finly.global.entity.CreatedUpdatedDeletedBaseEntity;
 import jakarta.persistence.*;
 import lombok.*;
 
+import java.math.BigDecimal;
 import java.time.LocalDateTime;
 
 /**
@@ -32,8 +33,8 @@ public class MarketChangeRateHistory extends CreatedUpdatedDeletedBaseEntity {
     private MarketType marketType;
 
     // 전일 대비율 (ex. -1.25%)
-    @Column(name = "change_rate", nullable = false)
-    private Double changeRate;
+    @Column(name = "change_rate", nullable = false, precision = 5, scale = 2)
+    private BigDecimal changeRate;
 
     // 데이터 기준일 (ex. 2026-02-07 14:05)
     @Column(name = "base_date_time", nullable = false)

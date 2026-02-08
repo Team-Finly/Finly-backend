@@ -5,6 +5,7 @@ import com.umc.finly.global.entity.BaseEntity;
 import jakarta.persistence.*;
 import lombok.*;
 
+import java.math.BigDecimal;
 import java.time.LocalDate;
 
 /**
@@ -33,8 +34,8 @@ public class MarketIndexHistory extends BaseEntity {
     private MarketType marketType;
 
     // 지수 값
-    @Column(name = "index_value", nullable = false)
-    private Double indexValue;
+    @Column(name = "index_value", nullable = false, precision = 10, scale = 2)
+    private BigDecimal indexValue;
 
     // 데이터 기준일 (ex. 2026-02-12)
     @Column(name = "base_date", nullable = false)

@@ -6,6 +6,8 @@ import com.umc.finly.global.entity.BaseEntity;
 import jakarta.persistence.*;
 import lombok.*;
 
+import java.math.BigDecimal;
+
 
 /**
  * [매수 확신도] 매수 확신도 상세 정보
@@ -38,12 +40,12 @@ public class ConvictionScoreDetail extends BaseEntity {
     private EmotionCode emotionCode;
 
     // 기록일(T)의 시장 지수 값
-    @Column(name = "base_index_value", nullable = false)
-    private Double baseIndexValue;
+    @Column(name = "base_index_value", nullable = false, precision = 10, scale = 2)
+    private BigDecimal baseIndexValue;
 
     // 5영업일 뒤(T+5)의 시장 지수 값
-    @Column(name = "target_index_value", nullable = false)
-    private Double targetIndexValue;
+    @Column(name = "target_index_value", nullable = false, precision = 10, scale = 2)
+    private BigDecimal targetIndexValue;
 
     // 적중 여부 (targetIndexValue > baseIndexValue)
     @Column(name = "is_hit", nullable = false)

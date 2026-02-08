@@ -5,6 +5,7 @@ import com.umc.finly.global.entity.BaseEntity;
 import jakarta.persistence.*;
 import lombok.*;
 
+import java.math.BigDecimal;
 import java.time.LocalDate;
 import java.util.ArrayList;
 import java.util.List;
@@ -31,8 +32,8 @@ public class FearIndexResult extends BaseEntity {
     private Member member;
 
     // 하락장 공포지수
-    @Column(name = "fear_index", nullable = false)
-    private Double fearIndex;
+    @Column(name = "fear_index", nullable = false, precision = 5, scale = 2)
+    private BigDecimal fearIndex;
 
     // 분석 기간
     @Column(name = "start_date", nullable = false)
@@ -49,8 +50,8 @@ public class FearIndexResult extends BaseEntity {
     private Integer reactedSessionCount;
 
     // 평균 반응 시간
-    @Column(name = "average_response_time")
-    private Double averageResponseTime;
+    @Column(name = "average_response_time", precision = 10, scale = 2)
+    private BigDecimal averageResponseTime;
 
     // 평균 시간 민감도 가중치
     @Column(name = "average_time_weight")
