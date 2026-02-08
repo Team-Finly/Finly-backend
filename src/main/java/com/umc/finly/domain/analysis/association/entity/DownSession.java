@@ -18,7 +18,9 @@ import java.time.LocalDateTime;
 @AllArgsConstructor(access = AccessLevel.PRIVATE)
 @NoArgsConstructor(access = AccessLevel.PROTECTED)
 @Entity
-@Table(name = "down_session")
+@Table(name = "down_session", indexes = {
+        @Index(name = "idx_down_session_market_date", columnList = "market_type, session_date")
+})
 public class DownSession extends BaseEntity {
 
     @Id

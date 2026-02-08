@@ -21,8 +21,9 @@ import java.util.List;
 @AllArgsConstructor(access = AccessLevel.PRIVATE)
 @NoArgsConstructor(access = AccessLevel.PROTECTED)
 @Entity
-@Table(name = "conviction_score_result")
-public class ConvictionScoreResult extends BaseEntity {
+@Table(name = "conviction_score_result", indexes = {
+        @Index(name = "idx_conviction_result_member_date", columnList = "member_id, start_date, end_date")
+})public class ConvictionScoreResult extends BaseEntity {
 
     @Id
     @GeneratedValue(strategy = GenerationType.IDENTITY)

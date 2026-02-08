@@ -21,8 +21,9 @@ import java.util.List;
 @AllArgsConstructor(access = AccessLevel.PRIVATE)
 @NoArgsConstructor(access = AccessLevel.PROTECTED)
 @Entity
-@Table(name = "fear_index_result")
-public class FearIndexResult extends BaseEntity {
+@Table(name = "fear_index_result", indexes = {
+        @Index(name = "idx_fear_result_member_date", columnList = "member_id, start_date, end_date")
+})public class FearIndexResult extends BaseEntity {
     @Id
     @GeneratedValue(strategy = GenerationType.IDENTITY)
     private Long id;
