@@ -3,7 +3,8 @@ package com.umc.finly.domain.member.entity;
 import com.umc.finly.global.entity.CreatedDeletedBaseEntity;
 import jakarta.persistence.*;
 import lombok.*;
-
+import org.hibernate.annotations.SQLDelete;
+import org.hibernate.annotations.SQLRestriction;
 import java.time.LocalDateTime;
 
 @Entity
@@ -17,6 +18,8 @@ import java.time.LocalDateTime;
                 @UniqueConstraint(name = "uk_member_email", columnNames = "email")
         }
 )
+@SQLDelete(sql = "UPDATE member SET deleted_at = NOW() WHERE id = ?")
+@SQLRestriction("deleted_at IS NULL")
 public class Member extends CreatedDeletedBaseEntity {
     @Id
     @GeneratedValue(strategy = GenerationType.IDENTITY)
@@ -46,14 +49,23 @@ public class Member extends CreatedDeletedBaseEntity {
     @Column(name = "profile_image_url", length = 500)
     private String profileImageUrl;
 
+    /** 마이페이지 - 프로필 사진 관련 메서드 **/
+    // 이미지 추가
     public void addProfileImage(String imageUrl){
         this.profileImageUrl = imageUrl;
     }
 
+    // 이미지 삭제
+    public void clearProfileImage() {
+        this.profileImageUrl = null;
+    }
+
+    // TODO: 코드 리팩토링 예정
     public void updateProfileImage(String imageUrl) {
         this.profileImageUrl = imageUrl;
     }
 
+    // 프로필 이미지 존재 유무
     public boolean hasProfileImage(){
         return this.profileImageUrl != null;
     }
@@ -80,4 +92,3 @@ public class Member extends CreatedDeletedBaseEntity {
     }
     public void changePassword(String encodedPassword) { this.password = encodedPassword; }
 }
-
