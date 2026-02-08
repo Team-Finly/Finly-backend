@@ -1,21 +1,16 @@
 package com.umc.finly.domain.analysis.association.controller;
 
-import com.umc.finly.domain.analysis.association.dto.AnalysisEntryResDTO;
-import com.umc.finly.domain.analysis.association.dto.DailyChartResDTO;
-import com.umc.finly.domain.analysis.association.dto.AnalysisStockResDTO;
-import com.umc.finly.domain.analysis.association.service.AnalysisEntryService;
-import com.umc.finly.domain.analysis.association.service.AnalysisStockService;
-import com.umc.finly.domain.analysis.association.service.DailyChartService;
+import com.umc.finly.domain.analysis.association.dto.*;
+import com.umc.finly.domain.analysis.association.service.*;
 import com.umc.finly.global.apiPayload.response.ApiResponse;
 import com.umc.finly.global.apiPayload.response.SuccessCode;
 import com.umc.finly.global.config.security.AuthPrincipal;
 import lombok.RequiredArgsConstructor;
+import org.springframework.format.annotation.DateTimeFormat;
 import org.springframework.security.core.annotation.AuthenticationPrincipal;
-import org.springframework.web.bind.annotation.GetMapping;
-import org.springframework.web.bind.annotation.PathVariable;
-import org.springframework.web.bind.annotation.RequestMapping;
-import org.springframework.web.bind.annotation.RestController;
+import org.springframework.web.bind.annotation.*;
 
+import java.time.LocalDate;
 import java.util.List;
 
 @RestController
@@ -26,7 +21,8 @@ public class AssociationAnalysisController implements AssociationAnalysisApiSpec
     private final AnalysisEntryService analysisEntryService;
     private final DailyChartService dailyChartService;
     private final AnalysisStockService analysisStockService;
-
+    private final FearIndexService fearIndexService;
+    private final ConvictionScoreService convictionScoreService;
 
     // 사용자 통계 진입 상태 조회 API
     @GetMapping("/entry")
@@ -61,4 +57,30 @@ public class AssociationAnalysisController implements AssociationAnalysisApiSpec
 
         return ApiResponse.onSuccess(result, SuccessCode.OK);
     }
+
+    // 시간별 그래프 조회 API
+    //@GetMapping("/stocks/{symbol}/charts/hourly")
+
+    // 하락장 공포지수 조회 API
+    @GetMapping("/fear-index")
+    public ApiResponse<FearIndexResDTO> getFearIndex(
+            @AuthenticationPrincipal AuthPrincipal principal) {
+
+        FearIndexResDTO result = fearIndexService.getFearIndex(principal.getMemberId());
+
+        return ApiResponse.onSuccess(result, SuccessCode.OK);
+    }
+
+    // 매수 확신도 조회 API
+    @GetMapping("/conviction-score")
+    public ApiResponse<ConvictionScoreResDTO> getConvictionScore(
+            @AuthenticationPrincipal AuthPrincipal principal) {
+
+        ConvictionScoreResDTO result = convictionScoreService.getConvictionScore(principal.getMemberId());
+
+        return ApiResponse.onSuccess(result, SuccessCode.OK);
+    }
+
+    // AI 패턴분석 조회 API
+    //@GetMapping("/association/pattern")
 }

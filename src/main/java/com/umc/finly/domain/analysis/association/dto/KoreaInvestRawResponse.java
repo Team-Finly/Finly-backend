@@ -27,6 +27,10 @@ public class KoreaInvestRawResponse {
     @JsonProperty("msg1")
     private String msg1;
 
+    // 응답 상세 (output)
+    @JsonProperty("output")
+    private List<Map<String, Object>> output;
+
     // 응답 상세 (output2)
     @JsonProperty("output2")
     private List<Map<String, Object>> output2;

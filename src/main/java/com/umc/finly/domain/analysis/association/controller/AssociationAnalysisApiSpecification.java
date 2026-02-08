@@ -1,8 +1,6 @@
 package com.umc.finly.domain.analysis.association.controller;
 
-import com.umc.finly.domain.analysis.association.dto.AnalysisEntryResDTO;
-import com.umc.finly.domain.analysis.association.dto.AnalysisStockResDTO;
-import com.umc.finly.domain.analysis.association.dto.DailyChartResDTO;
+import com.umc.finly.domain.analysis.association.dto.*;
 import com.umc.finly.global.apiPayload.response.ApiResponse;
 import com.umc.finly.global.config.security.AuthPrincipal;
 import io.swagger.v3.oas.annotations.Operation;
@@ -155,4 +153,11 @@ public interface AssociationAnalysisApiSpecification {
             )
     })
     public ApiResponse<DailyChartResDTO> getDailyChart(AuthPrincipal principal, String symbol);
+
+    @Operation(summary = "하락장 공포지수 조회", description = "가장 최근 하락장 공포지수를 조회합니다.")
+    public ApiResponse<FearIndexResDTO> getFearIndex(AuthPrincipal principal);
+
+
+    @Operation(summary = "매수 확신도 조회", description = "가장 최근 매수 확신도를 조회합니다.")
+    public ApiResponse<ConvictionScoreResDTO> getConvictionScore(AuthPrincipal principal);
 }
