@@ -23,7 +23,6 @@ public class AssociationAnalysisController implements AssociationAnalysisApiSpec
     private final AnalysisStockService analysisStockService;
     private final FearIndexService fearIndexService;
     private final ConvictionScoreService convictionScoreService;
-    private final AiAnalysisService aiAnalysisService;
 
     // 사용자 통계 진입 상태 조회 API
     @GetMapping("/entry")
@@ -83,12 +82,5 @@ public class AssociationAnalysisController implements AssociationAnalysisApiSpec
     }
 
     // AI 패턴분석 조회 API
-    @GetMapping("/ai")
-    public ApiResponse<AiAnalysisResDTO> getAiAnalysis(
-            @AuthenticationPrincipal AuthPrincipal principal) {
-
-        AiAnalysisResDTO result = aiAnalysisService.getAiAnalysis(principal.getMemberId());
-
-        return ApiResponse.onSuccess(result, SuccessCode.OK);
-    }
+    //@GetMapping("/association/pattern")
 }

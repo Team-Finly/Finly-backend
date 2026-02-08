@@ -8,7 +8,6 @@ import io.swagger.v3.oas.annotations.media.Content;
 import io.swagger.v3.oas.annotations.media.ExampleObject;
 import io.swagger.v3.oas.annotations.responses.ApiResponses;
 import io.swagger.v3.oas.annotations.tags.Tag;
-import org.springframework.security.core.annotation.AuthenticationPrincipal;
 
 import java.util.List;
 
@@ -161,7 +160,4 @@ public interface AssociationAnalysisApiSpecification {
 
     @Operation(summary = "매수 확신도 조회", description = "가장 최근 매수 확신도를 조회합니다.")
     public ApiResponse<ConvictionScoreResDTO> getConvictionScore(AuthPrincipal principal);
-
-    @Operation(summary = "AI 분석 조회", description = "연관분석 데이터를 기반으로 한 AI 분석 결과를 조회합니다.")
-    public ApiResponse<AiAnalysisResDTO> getAiAnalysis(AuthPrincipal principal);
 }

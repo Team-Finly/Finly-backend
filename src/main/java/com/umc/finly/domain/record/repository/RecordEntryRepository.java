@@ -62,6 +62,4 @@ public interface RecordEntryRepository extends JpaRepository<RecordEntry, Long> 
      * @return 검색된 기록 리스트
      */
     List<RecordEntry> findAllByMemberIdAndStockIdAndRecordDateBetween(Long memberId, Long stockId, LocalDate startDate, LocalDate endDate);
-
-    List<RecordEntry> findAllByMemberIdAndRecordDateBetween(Long memberId, LocalDate startDate, LocalDate endDate);
 }
