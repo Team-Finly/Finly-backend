@@ -36,49 +36,45 @@ public class HomeMindServiceImpl implements HomeMindService {
 
 
       // 공통 계산 로직
-    private MindScoreResult calculateMindScores(Long memberId) {
+      private MindScoreResult calculateMindScores(Long memberId) {
 
-        LocalDate now = LocalDate.now();
+          LocalDate now = LocalDate.now();
 
-        // C. 기록 성실도
-        LocalDate startOfMonth = now.withDayOfMonth(1);
-        int recordedDays = homeMindRepository
-                .findDistinctRecordDates(memberId, startOfMonth, now)
-                .size();
-        int cScore = (int) ((double) recordedDays / now.lengthOfMonth() * 100);
+          /* ========= C. 기록 성실도 ========= */
+          LocalDate startOfMonth = now.withDayOfMonth(1);
+          int recordedDays =
+                  homeMindRepository
+                          .findDistinctRecordDates(memberId, startOfMonth, now)
+                          .size();
 
-        // B. 의사결정 일치도
-        List<RecordEntry> confidenceBuys =
-                homeMindRepository.findByMemberIdAndEmotionCodeAndTradeAction(
-                        memberId, EmotionCode.CONFIDENCE, TradeAction.BUY
-                );
-        int bScore = confidenceBuys.isEmpty() ? 0 : 100;
+          int cScore = (int) ((double) recordedDays / now.lengthOfMonth() * 100);
 
-        // A. 하락장 회복탄력성
-        LocalDate start = now.minusMonths(1);
-        List<RecordEntry> allRecords =
-                homeMindRepository.findByMemberIdAndRecordDateBetween(
-                        memberId, start, now
-                );
+          /* ========= A. 하락장 회복탄력성 ========= */
+          int aScore = homeMindRepository
+                  .findLatestFearIndexResult(memberId)
+                  // 공포지수 ↑ = 회복탄력성 ↓
+                  .map(r -> Math.max(0, 100 - r.getFearIndex().intValue()))
+                  .orElse(0);
 
-        long negativeCount = allRecords.stream()
-                .filter(r ->
-                        r.getEmotionCode() == EmotionCode.ANXIETY ||
-                                r.getEmotionCode() == EmotionCode.REGRET)
-                .count();
+          /* ========= B. 매수 확신도 ========= */
+          int bScore = homeMindRepository
+                  .findLatestConvictionScoreResult(memberId)
+                  .map(r -> r.getConvictionScore().intValue())
+                  .orElse(0);
 
-        int aScore = allRecords.isEmpty() ? 0 :
-                (int) ((1 - (double) negativeCount / allRecords.size()) * 100);
+          int fmi = (int) (
+                  aScore * 0.4 +
+                          bScore * 0.3 +
+                          cScore * 0.3
+          );
 
-        int fmi = (int) (aScore * 0.4 + bScore * 0.3 + cScore * 0.3);
-
-        MindScoreResult result = new MindScoreResult();
-        result.a = aScore;
-        result.b = bScore;
-        result.c = cScore;
-        result.fmi = fmi;
-        return result;
-    }
+          MindScoreResult result = new MindScoreResult();
+          result.a = aScore;
+          result.b = bScore;
+          result.c = cScore;
+          result.fmi = fmi;
+          return result;
+      }
 
     @Override
     public HomeMindResDTO getHomeMind(Long memberId) {//금융 마음 지수 조회 서비스 로직
