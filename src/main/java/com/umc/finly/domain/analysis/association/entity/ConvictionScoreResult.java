@@ -46,26 +46,33 @@ import java.util.List;
     /* 확신 매수 통계 */
     // 분석 기간 내 총 확신 매수 기록 횟수
     @Column(name = "total_confidence_buy_count", nullable = false)
+    @Builder.Default
     private Integer totalConfidenceBuyCount = 0;
     // 분석 기간 내 확신 매수 적중 횟수
     @Column(name = "total_confidence_buy_hit_count", nullable = false)
+    @Builder.Default
     private Integer totalConfidenceBuyHitCount = 0;
     // 확신 매수 적중률
     @Column(name = "confidence_buy_hit_rate", nullable = false, precision = 5, scale = 2)
+    @Builder.Default
     private BigDecimal confidenceBuyHitRate = BigDecimal.ZERO;
 
     /* 탐욕 매수 통계 */
     // 분석 기간 내 총 탐욕 매수 기록 횟수
     @Column(name = "total_greed_buy_count")
+    @Builder.Default
     private Integer totalGreedBuyCount = 0;
     // 분석 기간 내 탐욕 매수 적중 횟수
     @Column(name = "total_greed_buy_hit_count")
+    @Builder.Default
     private Integer totalGreedBuyHitCount = 0;
     // 탐욕 매수 적중률 (확신 매수 변별력 측정용)
+    @Builder.Default
     @Column(name = "greed_buy_hit_rate", precision = 5, scale = 2)
     private BigDecimal greedBuyHitRate = BigDecimal.ZERO;
 
     // 매수 확신도 결과 속 포함된 기록별 상세 내역
+    @Builder.Default
     @OneToMany(mappedBy = "convictionScoreResult", cascade = CascadeType.ALL, orphanRemoval = true)
     private List<ConvictionScoreDetail> details = new ArrayList<>();
 }
