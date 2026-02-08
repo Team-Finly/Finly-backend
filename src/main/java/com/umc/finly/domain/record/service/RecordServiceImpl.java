@@ -2,15 +2,15 @@ package com.umc.finly.domain.record.service;
 
 import com.umc.finly.domain.market.stock.entity.Stock;
 import com.umc.finly.domain.market.stock.repository.StockRepository;
-import com.umc.finly.domain.record.dto.DailyReportRes;
-import com.umc.finly.domain.record.dto.RecentSearchRes;
-import com.umc.finly.domain.record.dto.RecordCreateReq;
-import com.umc.finly.domain.record.dto.RecordCreateRes;
-import com.umc.finly.domain.record.dto.RecordDetailRes;
-import com.umc.finly.domain.record.dto.RecordSearchRes;
-import com.umc.finly.domain.record.dto.RecordUpdateReq;
-import com.umc.finly.domain.record.dto.RecordUpdateRes;
-import com.umc.finly.domain.record.dto.TodayRecordRes;
+import com.umc.finly.domain.record.dto.req.RecordCreateReqDTO;
+import com.umc.finly.domain.record.dto.req.RecordUpdateReqDTO;
+import com.umc.finly.domain.record.dto.res.DailyReportResDTO;
+import com.umc.finly.domain.record.dto.res.RecentSearchResDTO;
+import com.umc.finly.domain.record.dto.res.RecordCreateResDTO;
+import com.umc.finly.domain.record.dto.res.RecordDetailResDTO;
+import com.umc.finly.domain.record.dto.res.RecordSearchResDTO;
+import com.umc.finly.domain.record.dto.res.RecordUpdateResDTO;
+import com.umc.finly.domain.record.dto.res.TodayRecordResDTO;
 import com.umc.finly.domain.record.exception.code.RecordErrorCode;
 import com.umc.finly.domain.record.infra.OpenAiFeedbackClient;
 import com.umc.finly.domain.record.entity.RecordEntry;
@@ -39,28 +39,30 @@ import java.util.Map;
 import java.util.function.Function;
 import java.util.stream.Collectors;
 
+// 투자 기록(Record) 비즈니스 로직 구현체
+// 기록 CRUD, 검색, AI 피드백 요청, 데일리 리포트 등을 처리함
 @Service
 @RequiredArgsConstructor
-@Transactional(readOnly = true)
+@Transactional(readOnly = true) // 기본적으로 읽기 전용 트랜잭션 사용
 public class RecordServiceImpl implements RecordService {
 
     private final RecordEntryRepository recordEntryRepository;
-    private final RecordFeedbackService feedbackService;
+    private final RecordFeedbackService feedbackService; // AI 피드백 서비스
     private final StockRepository stockRepository;
-    private final OpenAiFeedbackClient openAiFeedbackClient;
+    private final OpenAiFeedbackClient openAiFeedbackClient; // OpenAI API 클라이언트
     private final SearchHistoryRepository searchHistoryRepository;
 
-    private static final int RECENT_SEARCH_LIMIT = 3;
+    private static final int RECENT_SEARCH_LIMIT = 3; // 최근 검색어 최대 개수
 
     @Override
     @Transactional
-    public RecordCreateRes createRecord(Long memberId, RecordCreateReq request) {
-        // 1. clientRequestId 중복 체크
+    public RecordCreateResDTO createRecord(Long memberId, RecordCreateReqDTO request) {
+        // 1. clientRequestId 중복 체크 (멱등성 보장용)
         if (recordEntryRepository.existsByClientRequestId(request.getClientRequestId())) {
             throw new CustomException(RecordErrorCode.RECORD_DUPLICATE_SUBMISSION);
         }
 
-        // 2. tradeAction이 BUY/SELL이면 unitPrice, quantity 필수 및 0보다 커야 함
+        // 2. 매수/매도 시 가격과 수량 필수 검증
         if (request.getTradeAction() == TradeAction.BUY || request.getTradeAction() == TradeAction.SELL) {
             if (request.getUnitPrice() == null || request.getQuantity() == null) {
                 throw new CustomException(RecordErrorCode.RECORD_INVALID_REQUEST);
@@ -71,11 +73,11 @@ public class RecordServiceImpl implements RecordService {
             }
         }
 
-        // 3. symbol로 Stock 조회
+        // 3. symbol로 종목(Stock) 조회
         Stock stock = stockRepository.findBySymbol(request.getSymbol())
                 .orElseThrow(() -> new CustomException(MarketErrorCode.MARKET_STOCK_NOT_FOUND));
 
-        // 4. Session 자동 계산 (현재 시간 기반)
+        // 4. 현재 시간 기반으로 세션(장전/오전 등) 자동 계산
         Session session = Session.fromTime(LocalTime.now());
 
         // 5. RecordEntry 엔티티 생성 및 저장
@@ -97,43 +99,44 @@ public class RecordServiceImpl implements RecordService {
         try {
             savedEntry = recordEntryRepository.save(entry);
         } catch (DataIntegrityViolationException e) {
+            // DB 레벨 유니크 제약 위반 시 (동시 요청 대응)
             throw new CustomException(RecordErrorCode.RECORD_DUPLICATE_SUBMISSION);
         }
 
-        // 6. AI 피드백 비동기 생성 요청
+        // 6. AI 피드백 비동기 생성 요청 (트랜잭션 커밋 후 실행됨)
         RecordFeedback feedback = feedbackService.requestFeedbackAsync(memberId, savedEntry);
 
         // 7. 응답 DTO 반환
-        return RecordCreateRes.from(savedEntry, stock, feedback);
+        return RecordCreateResDTO.from(savedEntry, stock, feedback);
     }
 
     @Override
-    public RecordDetailRes getRecord(Long memberId, Long recordId) {
+    public RecordDetailResDTO getRecord(Long memberId, Long recordId) {
         // 1. 기록 조회
         RecordEntry entry = recordEntryRepository.findById(recordId)
                 .orElseThrow(() -> new CustomException(RecordErrorCode.RECORD_NOT_FOUND));
 
-        // 2. 본인 기록인지 확인
+        // 2. 본인 기록인지 권한 확인
         if (!entry.getMemberId().equals(memberId)) {
             throw new CustomException(RecordErrorCode.RECORD_FORBIDDEN);
         }
 
-        // 3. Stock 조회
+        // 3. 종목 정보 조회
         Stock stock = stockRepository.findById(entry.getStockId())
                 .orElseThrow(() -> new CustomException(MarketErrorCode.MARKET_STOCK_NOT_FOUND));
 
         // 4. 응답 DTO 반환
-        return RecordDetailRes.from(entry, stock);
+        return RecordDetailResDTO.from(entry, stock);
     }
 
     @Override
     @Transactional
-    public RecordUpdateRes updateRecord(Long memberId, Long recordId, RecordUpdateReq request) {
+    public RecordUpdateResDTO updateRecord(Long memberId, Long recordId, RecordUpdateReqDTO request) {
         // 1. 기록 조회
         RecordEntry entry = recordEntryRepository.findById(recordId)
                 .orElseThrow(() -> new CustomException(RecordErrorCode.RECORD_NOT_FOUND));
 
-        // 2. 본인 기록인지 확인
+        // 2. 본인 기록인지 권한 확인
         if (!entry.getMemberId().equals(memberId)) {
             throw new CustomException(RecordErrorCode.RECORD_FORBIDDEN);
         }
@@ -167,7 +170,7 @@ public class RecordServiceImpl implements RecordService {
             entry.setMemo(request.getMemo());
         }
 
-        // 4. tradeAction이 BUY/SELL이면 unitPrice, quantity 필수 및 0보다 커야 함
+        // 4. 수정 후에도 매수/매도 유효성 검증
         if (entry.getTradeAction() == TradeAction.BUY || entry.getTradeAction() == TradeAction.SELL) {
             if (entry.getUnitPrice() == null || entry.getQuantity() == null) {
                 throw new CustomException(RecordErrorCode.RECORD_INVALID_REQUEST);
@@ -178,33 +181,33 @@ public class RecordServiceImpl implements RecordService {
             }
         }
 
-        // 5. symbol이 변경되지 않은 경우 기존 Stock 조회
+        // 5. symbol 변경 없으면 기존 Stock 조회
         if (stock == null) {
             stock = stockRepository.findById(entry.getStockId())
                     .orElseThrow(() -> new CustomException(MarketErrorCode.MARKET_STOCK_NOT_FOUND));
         }
 
-        // 6. 응답 DTO 반환
-        return RecordUpdateRes.from(entry, stock);
+        // 6. 응답 DTO 반환 (Dirty Checking으로 자동 저장)
+        return RecordUpdateResDTO.from(entry, stock);
     }
 
     @Override
-    @Transactional(propagation = Propagation.NOT_SUPPORTED)
-    public DailyReportRes getDailyReport(Long memberId, Long recordId) {
+    @Transactional(propagation = Propagation.NOT_SUPPORTED) // 외부 API 호출이라 트랜잭션 제외
+    public DailyReportResDTO getDailyReport(Long memberId, Long recordId) {
         // 1. 기록 조회
         RecordEntry entry = recordEntryRepository.findById(recordId)
                 .orElseThrow(() -> new CustomException(RecordErrorCode.RECORD_NOT_FOUND));
 
-        // 2. 본인 기록인지 확인
+        // 2. 본인 기록인지 권한 확인
         if (!entry.getMemberId().equals(memberId)) {
             throw new CustomException(RecordErrorCode.RECORD_FORBIDDEN);
         }
 
-        // 3. Stock 조회
+        // 3. 종목 정보 조회
         Stock stock = stockRepository.findById(entry.getStockId())
                 .orElseThrow(() -> new CustomException(MarketErrorCode.MARKET_STOCK_NOT_FOUND));
 
-        // 4. memo 요약 (빈 값이면 OpenAI 호출 스킵)
+        // 4. 메모가 있으면 OpenAI로 요약, 없으면 빈 문자열
         String content = "";
         if (entry.getMemo() != null && !entry.getMemo().isBlank()) {
             String systemPrompt = "당신은 투자 기록 메모를 간결하게 요약하는 도우미입니다. 주어진 메모를 한 줄로 요약해 주세요.";
@@ -213,27 +216,28 @@ public class RecordServiceImpl implements RecordService {
                         openAiFeedbackClient.generateFeedback(systemPrompt, entry.getMemo());
                 content = response.content();
             } catch (Exception e) {
+                // API 호출 실패 시 원본 메모 그대로 반환
                 content = entry.getMemo();
             }
         }
 
-        return DailyReportRes.from(entry, stock, content);
+        return DailyReportResDTO.from(entry, stock, content);
     }
 
     @Override
-    public TodayRecordRes getTodayRecords(Long memberId, LocalDate date) {
-        // 1. 해당 날짜의 기록 조회 (createdAt 오름차순)
+    public TodayRecordResDTO getTodayRecords(Long memberId, LocalDate date) {
+        // 1. 해당 날짜의 기록 조회 (생성 시간 오름차순)
         List<RecordEntry> entries = recordEntryRepository
                 .findByMemberIdAndRecordDateOrderByCreatedAtAsc(memberId, date);
 
-        // 2. PrismFeedback 타이틀 생성
-        String title = TodayRecordRes.generatePrismTitle(entries);
-        TodayRecordRes.PrismFeedback prismFeedback = TodayRecordRes.PrismFeedback.builder()
+        // 2. 프리즘 피드백 타이틀 자동 생성 (감정 기반 문구)
+        String title = TodayRecordResDTO.generatePrismTitle(entries);
+        TodayRecordResDTO.PrismFeedback prismFeedback = TodayRecordResDTO.PrismFeedback.builder()
                 .title(title)
                 .generatedAt(LocalDateTime.now())
                 .build();
 
-        // 3. 기록에 포함된 stockId 일괄 조회
+        // 3. N+1 방지: 기록에 포함된 stockId 일괄 조회
         List<Long> stockIds = entries.stream()
                 .map(RecordEntry::getStockId)
                 .distinct()
@@ -241,16 +245,16 @@ public class RecordServiceImpl implements RecordService {
         Map<Long, Stock> stockMap = stockRepository.findAllById(stockIds).stream()
                 .collect(Collectors.toMap(Stock::getId, Function.identity()));
 
-        // 4. TimelineEntry 변환
-        List<TodayRecordRes.TimelineEntry> timelineSummary = entries.stream()
+        // 4. 타임라인 엔트리 변환
+        List<TodayRecordResDTO.TimelineEntry> timelineSummary = entries.stream()
                 .map(entry -> {
                     Stock stock = stockMap.get(entry.getStockId());
                     String symbol = stock != null ? stock.getSymbol() : "";
-                    return TodayRecordRes.TimelineEntry.from(entry, symbol);
+                    return TodayRecordResDTO.TimelineEntry.from(entry, symbol);
                 })
                 .toList();
 
-        return TodayRecordRes.builder()
+        return TodayRecordResDTO.builder()
                 .date(date)
                 .prismFeedback(prismFeedback)
                 .timelineSummary(timelineSummary)
@@ -260,20 +264,20 @@ public class RecordServiceImpl implements RecordService {
     }
 
     @Override
-    @Transactional
-    public RecordSearchRes searchRecords(Long memberId, String keyword, EmotionCode emotionCode) {
-        // 1. 키워드 정규화
+    @Transactional // 검색 기록 저장 때문에 쓰기 트랜잭션 필요
+    public RecordSearchResDTO searchRecords(Long memberId, String keyword, EmotionCode emotionCode) {
+        // 1. 키워드 정규화 (앞뒤 공백 제거, 빈 문자열은 null 처리)
         String normalizedKeyword = (keyword == null) ? null : keyword.strip();
         if (normalizedKeyword != null && normalizedKeyword.isBlank()) {
             normalizedKeyword = null;
         }
 
-        // 2. keyword가 있으면 검색 기록 저장 (중복 시 시간 업데이트)
+        // 2. 키워드가 있으면 검색 기록 저장 (중복 시 시간만 갱신)
         if (normalizedKeyword != null) {
             saveSearchHistory(memberId, normalizedKeyword);
         }
 
-        // 3. keyword가 있으면 종목명 매칭 stockId 목록 조회
+        // 3. 키워드로 종목명 매칭되는 stockId 목록 조회
         List<Long> stockIds = null;
         if (normalizedKeyword != null) {
             stockIds = stockRepository.findByNameContaining(normalizedKeyword).stream()
@@ -284,11 +288,11 @@ public class RecordServiceImpl implements RecordService {
             }
         }
 
-        // 4. RecordEntry 검색
+        // 4. 메모 + 종목명 검색 (OR 조건)
         List<RecordEntry> entries = recordEntryRepository.searchRecords(
                 memberId, emotionCode, normalizedKeyword, stockIds);
 
-        // 5. 결과의 stockId 일괄 조회 → Stock Map 생성
+        // 5. N+1 방지: 결과의 stockId 일괄 조회
         List<Long> resultStockIds = entries.stream()
                 .map(RecordEntry::getStockId)
                 .distinct()
@@ -297,36 +301,35 @@ public class RecordServiceImpl implements RecordService {
                 .collect(Collectors.toMap(Stock::getId, Function.identity()));
 
         // 6. 응답 DTO 생성
-        List<RecordSearchRes.SearchEntry> searchEntries = entries.stream()
+        List<RecordSearchResDTO.SearchEntry> searchEntries = entries.stream()
                 .map(entry -> {
                     Stock stock = stockMap.get(entry.getStockId());
                     String symbol = stock != null ? stock.getSymbol() : "";
-                    return RecordSearchRes.SearchEntry.from(entry, symbol);
+                    return RecordSearchResDTO.SearchEntry.from(entry, symbol);
                 })
                 .toList();
 
-        return RecordSearchRes.builder()
+        return RecordSearchResDTO.builder()
                 .records(searchEntries)
                 .totalCount(searchEntries.size())
                 .build();
     }
 
     @Override
-    public RecentSearchRes getRecentSearchKeywords(Long memberId) {
+    public RecentSearchResDTO getRecentSearchKeywords(Long memberId) {
+        // 최근 검색 키워드 조회 (최신순, 상위 N개)
         List<String> recentKeywords = searchHistoryRepository
                 .findRecentKeywordsByMemberId(memberId, PageRequest.of(0, RECENT_SEARCH_LIMIT));
-        return RecentSearchRes.from(recentKeywords);
+        return RecentSearchResDTO.from(recentKeywords);
     }
 
-    /**
-     * 검색 키워드 저장 (중복 키워드는 updatedAt 갱신)
-     */
+    // 검색 키워드 저장 (중복 키워드는 updatedAt만 갱신)
     private void saveSearchHistory(Long memberId, String keyword) {
         searchHistoryRepository.findByMemberIdAndKeyword(memberId, keyword)
                 .ifPresentOrElse(
-                        // 기존 기록이 있으면 updatedAt 갱신 (touch)
+                        // 기존 기록 있으면 updatedAt만 갱신 (touch)
                         existing -> searchHistoryRepository.touchUpdatedAt(existing.getId()),
-                        // 기존 기록이 없으면 새로 저장
+                        // 기존 기록 없으면 새로 저장
                         () -> {
                             try {
                                 SearchHistory history = SearchHistory.builder()
@@ -335,9 +338,9 @@ public class RecordServiceImpl implements RecordService {
                                         .build();
                                 searchHistoryRepository.save(history);
                             } catch (DataIntegrityViolationException e) {
-                                // 동시 요청으로 이미 저장된 경우 updatedAt 갱신
+                                // 동시 요청으로 이미 저장된 경우 updatedAt만 갱신
                                 searchHistoryRepository.findByMemberIdAndKeyword(memberId, keyword)
-                                .ifPresent(existing -> searchHistoryRepository.touchUpdatedAt(existing.getId()));
+                                        .ifPresent(existing -> searchHistoryRepository.touchUpdatedAt(existing.getId()));
                             }
                         }
                 );

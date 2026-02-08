@@ -1,24 +1,40 @@
 package com.umc.finly.domain.record.service;
 
-import com.umc.finly.domain.record.dto.DailyReportRes;
-import com.umc.finly.domain.record.dto.RecentSearchRes;
-import com.umc.finly.domain.record.dto.RecordCreateReq;
-import com.umc.finly.domain.record.dto.RecordCreateRes;
-import com.umc.finly.domain.record.dto.RecordDetailRes;
-import com.umc.finly.domain.record.dto.RecordSearchRes;
-import com.umc.finly.domain.record.dto.RecordUpdateReq;
-import com.umc.finly.domain.record.dto.RecordUpdateRes;
-import com.umc.finly.domain.record.dto.TodayRecordRes;
+import com.umc.finly.domain.record.dto.req.RecordCreateReqDTO;
+import com.umc.finly.domain.record.dto.req.RecordUpdateReqDTO;
+import com.umc.finly.domain.record.dto.res.DailyReportResDTO;
+import com.umc.finly.domain.record.dto.res.RecentSearchResDTO;
+import com.umc.finly.domain.record.dto.res.RecordCreateResDTO;
+import com.umc.finly.domain.record.dto.res.RecordDetailResDTO;
+import com.umc.finly.domain.record.dto.res.RecordSearchResDTO;
+import com.umc.finly.domain.record.dto.res.RecordUpdateResDTO;
+import com.umc.finly.domain.record.dto.res.TodayRecordResDTO;
 import com.umc.finly.domain.record.enums.EmotionCode;
 
 import java.time.LocalDate;
 
+// 기록(Record) 관련 비즈니스 로직 인터페이스
+// 구현체: RecordServiceImpl
 public interface RecordService {
-    RecordCreateRes createRecord(Long memberId, RecordCreateReq request);
-    RecordDetailRes getRecord(Long memberId, Long recordId);
-    RecordUpdateRes updateRecord(Long memberId, Long recordId, RecordUpdateReq request);
-    DailyReportRes getDailyReport(Long memberId, Long recordId);
-    TodayRecordRes getTodayRecords(Long memberId, LocalDate date);
-    RecordSearchRes searchRecords(Long memberId, String keyword, EmotionCode emotionCode);
-    RecentSearchRes getRecentSearchKeywords(Long memberId);
+
+    // 기록 생성 (AI 피드백 비동기 요청 포함)
+    RecordCreateResDTO createRecord(Long memberId, RecordCreateReqDTO request);
+
+    // 단일 기록 상세 조회
+    RecordDetailResDTO getRecord(Long memberId, Long recordId);
+
+    // 기록 부분 수정 (null 아닌 필드만 업데이트)
+    RecordUpdateResDTO updateRecord(Long memberId, Long recordId, RecordUpdateReqDTO request);
+
+    // 데일리 리포트 조회 (메모 AI 요약)
+    DailyReportResDTO getDailyReport(Long memberId, Long recordId);
+
+    // 특정 날짜의 기록 목록 + 프리즘 피드백 조회
+    TodayRecordResDTO getTodayRecords(Long memberId, LocalDate date);
+
+    // 키워드/감정 코드로 기록 검색
+    RecordSearchResDTO searchRecords(Long memberId, String keyword, EmotionCode emotionCode);
+
+    // 최근 검색 키워드 조회 (최대 3개)
+    RecentSearchResDTO getRecentSearchKeywords(Long memberId);
 }

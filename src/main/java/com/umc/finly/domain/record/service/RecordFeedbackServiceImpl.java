@@ -1,6 +1,6 @@
 package com.umc.finly.domain.record.service;
 
-import com.umc.finly.domain.record.dto.RecordFeedbackRes;
+import com.umc.finly.domain.record.dto.res.RecordFeedbackResDTO;
 import com.umc.finly.domain.record.entity.RecordEntry;
 import com.umc.finly.domain.record.entity.RecordFeedback;
 import com.umc.finly.domain.record.enums.FeedbackStatus;
@@ -16,6 +16,8 @@ import org.springframework.transaction.annotation.Transactional;
 import org.springframework.transaction.support.TransactionSynchronization;
 import org.springframework.transaction.support.TransactionSynchronizationManager;
 
+// AI 피드백 비즈니스 로직 구현체
+// 피드백 생성/조회/재생성과 비동기 실행을 관리함
 @Slf4j
 @Service
 @RequiredArgsConstructor
@@ -23,11 +25,12 @@ public class RecordFeedbackServiceImpl implements RecordFeedbackService {
 
     private final RecordFeedbackRepository feedbackRepository;
     private final RecordEntryRepository recordEntryRepository;
-    private final RecordFeedbackAsyncExecutor asyncExecutor;
+    private final RecordFeedbackAsyncExecutor asyncExecutor; // 비동기 실행 담당
 
     @Override
     @Transactional
     public RecordFeedback requestFeedbackAsync(Long memberId, RecordEntry recordEntry) {
+        // PENDING 상태의 피드백 엔티티 생성
         RecordFeedback feedback = RecordFeedback.builder()
                 .recordEntryId(recordEntry.getId())
                 .memberId(memberId)
@@ -36,7 +39,8 @@ public class RecordFeedbackServiceImpl implements RecordFeedbackService {
 
         RecordFeedback savedFeedback = feedbackRepository.save(feedback);
 
-        // 트랜잭션 커밋 후 비동기 작업 시작 (커밋 전에는 다른 트랜잭션에서 데이터 조회 불가)
+        // 트랜잭션 커밋 후 비동기 작업 시작
+        // (커밋 전에는 다른 트랜잭션에서 데이터 조회 불가하므로 afterCommit 사용)
         Long feedbackId = savedFeedback.getId();
         Long recordEntryId = recordEntry.getId();
         TransactionSynchronizationManager.registerSynchronization(new TransactionSynchronization() {
@@ -51,16 +55,17 @@ public class RecordFeedbackServiceImpl implements RecordFeedbackService {
 
     @Override
     @Transactional(readOnly = true)
-    public RecordFeedbackRes getFeedback(Long memberId, Long recordEntryId) {
+    public RecordFeedbackResDTO getFeedback(Long memberId, Long recordEntryId) {
+        // 본인 피드백만 조회 가능
         RecordFeedback feedback = feedbackRepository.findByRecordEntryIdAndMemberId(recordEntryId, memberId)
                 .orElseThrow(() -> new CustomException(RecordErrorCode.FEEDBACK_NOT_FOUND));
 
-        return RecordFeedbackRes.from(feedback);
+        return RecordFeedbackResDTO.from(feedback);
     }
 
     @Override
     @Transactional
-    public RecordFeedbackRes regenerateFeedback(Long memberId, Long recordEntryId) {
+    public RecordFeedbackResDTO regenerateFeedback(Long memberId, Long recordEntryId) {
         // 1. 기록이 존재하고 본인 것인지 확인
         RecordEntry recordEntry = recordEntryRepository.findById(recordEntryId)
                 .orElseThrow(() -> new CustomException(RecordErrorCode.RECORD_NOT_FOUND));
@@ -69,7 +74,7 @@ public class RecordFeedbackServiceImpl implements RecordFeedbackService {
             throw new CustomException(RecordErrorCode.RECORD_FORBIDDEN);
         }
 
-        // 2. 피드백 조회 (행 잠금으로 동시 재생성 요청 경쟁 조건 방지)
+        // 2. 비관적 락으로 피드백 조회 (동시 재생성 요청 경쟁 조건 방지)
         RecordFeedback feedback = feedbackRepository.findByRecordEntryIdForUpdate(recordEntryId)
                 .orElse(null);
 
@@ -86,11 +91,12 @@ public class RecordFeedbackServiceImpl implements RecordFeedbackService {
                 throw new CustomException(RecordErrorCode.FEEDBACK_GENERATION_IN_PROGRESS);
             }
         } else {
-            // 피드백이 대기 중이거나 생성 중이면 에러
+            // 이미 생성 중이면 에러 (중복 요청 방지)
             if (feedback.getStatus() == FeedbackStatus.PENDING
                     || feedback.getStatus() == FeedbackStatus.GENERATING) {
                 throw new CustomException(RecordErrorCode.FEEDBACK_GENERATION_IN_PROGRESS);
             }
+            // 기존 피드백 초기화 후 재생성
             feedback.resetForRegeneration();
             feedback = feedbackRepository.save(feedback);
         }
@@ -104,6 +110,6 @@ public class RecordFeedbackServiceImpl implements RecordFeedbackService {
             }
         });
 
-        return RecordFeedbackRes.from(feedback);
+        return RecordFeedbackResDTO.from(feedback);
     }
 }

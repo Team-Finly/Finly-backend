@@ -1,14 +1,12 @@
 package com.umc.finly.domain.record.service;
 
 import com.umc.finly.domain.record.converter.FragmentConverter;
-import com.umc.finly.domain.record.dto.response.FragmentListResDTO;
-import com.umc.finly.domain.record.dto.response.FragmentSummaryResDTO;
+import com.umc.finly.domain.record.dto.res.FragmentListResDTO;
+import com.umc.finly.domain.record.dto.res.FragmentSummaryResDTO;
 import com.umc.finly.domain.record.enums.EmotionCode;
 import com.umc.finly.domain.record.enums.FragmentPeriodKey;
-import com.umc.finly.domain.record.exception.RecordException;
 import com.umc.finly.domain.record.exception.code.RecordErrorCode;
 import com.umc.finly.domain.record.repository.FragmentRepository;
-import com.umc.finly.domain.record.repository.RecordEntryRepository;
 import com.umc.finly.global.apiPayload.exception.CustomException;
 import lombok.RequiredArgsConstructor;
 import org.springframework.stereotype.Service;
@@ -19,18 +17,18 @@ import java.util.ArrayList;
 import java.util.Collections;
 import java.util.List;
 
-
+// 조각 모음함(Fragment) 비즈니스 로직 구현체
+// 감정별 기록 통계 및 리스트 조회를 처리함
 @Service
 @RequiredArgsConstructor
 @Transactional(readOnly = true)
 public class FragmentServiceImpl implements FragmentService {
 
     private final FragmentRepository fragmentRepository;
-    private final FragmentConverter fragmentConverter;
+    private final FragmentConverter fragmentConverter; // DTO 변환 담당
 
     @Override
     public FragmentSummaryResDTO getFragmentSummary(Long memberId) {
-        // memberId가 없으면 잘못된 요청으로 처리
         if (memberId == null) {
             throw new CustomException(RecordErrorCode.RECORD_INVALID_REQUEST);
         }
@@ -38,7 +36,7 @@ public class FragmentServiceImpl implements FragmentService {
         // 전체 기록 개수 조회
         long total = fragmentRepository.countByMemberId(memberId);
 
-        // 기록이 0개면 정상 케이스로 빈 응답 반환 (0으로 나누기 방지)
+        // 기록이 0개면 빈 응답 반환 (0으로 나누기 방지)
         if (total == 0) {
             return fragmentConverter.toFragmentSummaryRes(
                     0L,
@@ -51,29 +49,27 @@ public class FragmentServiceImpl implements FragmentService {
         List<FragmentRepository.EmotionCountProjection> projections =
                 fragmentRepository.countGroupByEmotionCode(memberId);
 
-        // dominantType(현재까지 1등 감정) 계산
+        // 가장 많은 감정(dominantType) 계산
         EmotionCode dominantType = null;
         long maxCount = -1;
 
-        // TypeSummary 리스트 생성
         List<FragmentSummaryResDTO.TypeSummary> summaries = new ArrayList<>();
 
         for (FragmentRepository.EmotionCountProjection p : projections) {
-            // count 값 null 방어 + 0이면 스킵
             long count = p.getCount() == null ? 0L : p.getCount();
 
-            // count 0이면 목록에서 제외
+            // count가 0이면 목록에서 제외
             if (count == 0) {
                 continue;
             }
 
-            // dominantType 최신화 (가장 많은 감정 찾기)
+            // 가장 많은 감정 갱신
             if (dominantType == null || count > maxCount) {
                 dominantType = p.getEmotionCode();
                 maxCount = count;
             }
 
-            // percent 계산
+            // 퍼센트 계산 (반올림)
             int percent = (int) Math.round(count * 100.0 / total);
 
             summaries.add(FragmentSummaryResDTO.TypeSummary.builder()
@@ -83,38 +79,35 @@ public class FragmentServiceImpl implements FragmentService {
                     .build());
         }
 
-        // percent 합이 100이 되도록 보정
+        // 퍼센트 합이 100이 되도록 보정 (반올림 오차 수정)
         adjustPercentTo100(summaries);
 
-        // 최종 응답은 count 기준 내림차순 정렬
+        // count 기준 내림차순 정렬
         summaries.sort((a, b) -> Long.compare(b.getCount(), a.getCount()));
 
-        // DTO 조립은 Converter에 위임
         return fragmentConverter.toFragmentSummaryRes(total, dominantType, summaries);
     }
 
     @Override
     public FragmentListResDTO getFragmentList(Long memberId, EmotionCode boxType, FragmentPeriodKey periodKey) {
-        // memberId가 없으면 잘못된 요청으로 처리
         if (memberId == null) {
             throw new CustomException(RecordErrorCode.RECORD_INVALID_REQUEST);
         }
 
-        // periodKey가 null이면 ALL로 처리
+        // periodKey null이면 ALL로 처리
         FragmentPeriodKey key = (periodKey == null) ? FragmentPeriodKey.ALL : periodKey;
 
-        // 기간 조건 계산(ALL이면 null로 보내 where 조건을 타지 않게 함)
+        // 기간 조건 계산 (ALL이면 null로 보내 where 조건 무시)
         LocalDate today = LocalDate.now();
         LocalDate from = null;
         LocalDate to = null;
 
         if (key != FragmentPeriodKey.ALL) {
-            // 최근 n개월 범위를 계산
             from = today.minusMonths(key.getMonths());
             to = today;
         }
 
-        // 리스트 조회
+        // 조각 리스트 조회 (Stock 조인 포함)
         List<FragmentRepository.FragmentListRowView> rows =
                 fragmentRepository.findFragmentList(memberId, boxType, from, to);
 
@@ -122,15 +115,15 @@ public class FragmentServiceImpl implements FragmentService {
         long totalCount =
                 fragmentRepository.countFragmentList(memberId, boxType, from, to);
 
-        // DTO 조립은 Converter로 위임
+        // DTO 조립은 Converter에 위임
         return fragmentConverter.toFragmentListRes(
                 boxType, key, from, to, totalCount, rows
         );
     }
 
-    // percent 합이 100이 되도록 보정하는 메서드
+    // 퍼센트 합이 100이 되도록 보정하는 메서드
+    // 반올림 오차로 인해 99% 또는 101%가 될 수 있어서 보정 필요
     private void adjustPercentTo100(List<FragmentSummaryResDTO.TypeSummary> summaries) {
-        // percent 총합 계산
         int sum = 0;
         for (FragmentSummaryResDTO.TypeSummary s : summaries) {
             sum += s.getPercent();
@@ -138,13 +131,12 @@ public class FragmentServiceImpl implements FragmentService {
 
         int diff = 100 - sum;
 
-        // 보정할 필요가 없으면 종료
         if (diff == 0 || summaries.isEmpty()) {
             return;
         }
 
         if (diff > 0) {
-            // 퍼센트가 부족한 경우: count 큰 순서대로 +1
+            // 퍼센트 부족: count 큰 순서대로 +1
             summaries.sort((a, b) -> Long.compare(b.getCount(), a.getCount()));
 
             for (int i = 0; i < diff; i++) {
@@ -152,7 +144,7 @@ public class FragmentServiceImpl implements FragmentService {
                 target.setPercent(target.getPercent() + 1);
             }
         } else {
-            // 퍼센트가 초과한 경우: count 작은 순서대로 -1
+            // 퍼센트 초과: count 작은 순서대로 -1
             summaries.sort((a, b) -> Long.compare(a.getCount(), b.getCount()));
 
             int remaining = -diff;
@@ -161,8 +153,8 @@ public class FragmentServiceImpl implements FragmentService {
 
             while (remaining > 0 && attempts < maxAttempts) {
                 FragmentSummaryResDTO.TypeSummary target = summaries.get(attempts % summaries.size());
-                if(target.getPercent()>0){
-                    target.setPercent(target.getPercent()-1);
+                if (target.getPercent() > 0) {
+                    target.setPercent(target.getPercent() - 1);
                     remaining--;
                 }
                 attempts++;
