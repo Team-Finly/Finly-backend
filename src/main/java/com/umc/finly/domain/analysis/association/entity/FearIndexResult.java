@@ -3,6 +3,7 @@ package com.umc.finly.domain.analysis.association.entity;
 import com.umc.finly.domain.member.entity.Member;
 import com.umc.finly.global.entity.BaseEntity;
 import jakarta.persistence.*;
+import lombok.*;
 
 import java.time.LocalDate;
 import java.util.ArrayList;
@@ -14,6 +15,10 @@ import java.util.List;
  * fear index = (f(t)/1.5) * 100
  * f(t) = (반응 세션 수 / 전체 세션 수) * 평균 시간 민감도 가중치
  */
+@Getter
+@Builder
+@AllArgsConstructor(access = AccessLevel.PRIVATE)
+@NoArgsConstructor(access = AccessLevel.PROTECTED)
 @Entity
 @Table(name = "fear_index_result")
 public class FearIndexResult extends BaseEntity {

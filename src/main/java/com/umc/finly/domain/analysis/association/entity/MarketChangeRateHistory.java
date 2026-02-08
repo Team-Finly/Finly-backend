@@ -3,6 +3,7 @@ package com.umc.finly.domain.analysis.association.entity;
 import com.umc.finly.domain.market.stock.enums.MarketType;
 import com.umc.finly.global.entity.CreatedUpdatedDeletedBaseEntity;
 import jakarta.persistence.*;
+import lombok.*;
 
 import java.time.LocalDateTime;
 
@@ -10,6 +11,10 @@ import java.time.LocalDateTime;
  * [하락장 공포지수] 코스피/코스닥 전일 대비율 히스토리
  * 1분마다 수집되는 코스피/코스닥 전일 대비율을 저장 -> 하락 세션 식별
  */
+@Getter
+@Builder
+@AllArgsConstructor(access = AccessLevel.PRIVATE)
+@NoArgsConstructor(access = AccessLevel.PROTECTED)
 @Entity
 @Table(name = "market_change_rate_history", indexes = {
         @Index(name = "idx_market_datetime", columnList = "market_type, base_date_time")

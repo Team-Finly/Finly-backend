@@ -3,6 +3,7 @@ package com.umc.finly.domain.analysis.association.entity;
 import com.umc.finly.domain.market.stock.enums.MarketType;
 import com.umc.finly.global.entity.BaseEntity;
 import jakarta.persistence.*;
+import lombok.*;
 
 import java.time.LocalDate;
 import java.time.LocalDateTime;
@@ -12,6 +13,10 @@ import java.time.LocalDateTime;
  * 하락 세션 판별해서 저장
  * (전일 대비율이 -1.0% 이하로 떨어진 시점) ~ (-1.0% 이상으로 오른 시점)까지의 구간을 하나의 하락 세션으로 정의
  */
+@Getter
+@Builder
+@AllArgsConstructor(access = AccessLevel.PRIVATE)
+@NoArgsConstructor(access = AccessLevel.PROTECTED)
 @Entity
 @Table(name = "down_session")
 public class DownSession extends BaseEntity {

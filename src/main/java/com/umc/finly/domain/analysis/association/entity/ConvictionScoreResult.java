@@ -3,6 +3,7 @@ package com.umc.finly.domain.analysis.association.entity;
 import com.umc.finly.domain.member.entity.Member;
 import com.umc.finly.global.entity.BaseEntity;
 import jakarta.persistence.*;
+import lombok.*;
 
 import java.time.LocalDate;
 import java.util.ArrayList;
@@ -14,6 +15,10 @@ import java.util.List;
  * conviction score = (확신 적중 횟수 / 전체 확신 매수 횟수) × 100
  * 확신 적중 = T+5 주가 > 확신 매수 시점 가격
  */
+@Getter
+@Builder
+@AllArgsConstructor(access = AccessLevel.PRIVATE)
+@NoArgsConstructor(access = AccessLevel.PROTECTED)
 @Entity
 @Table(name = "conviction_score_result")
 public class ConvictionScoreResult extends BaseEntity {

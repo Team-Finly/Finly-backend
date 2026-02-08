@@ -4,6 +4,7 @@ import com.umc.finly.domain.record.entity.RecordEntry;
 import com.umc.finly.domain.record.enums.EmotionCode;
 import com.umc.finly.global.entity.BaseEntity;
 import jakarta.persistence.*;
+import lombok.*;
 
 
 /**
@@ -11,6 +12,10 @@ import jakarta.persistence.*;
  * 분석 기간 내 포함된 여러 확신 매수 기록에 대해,
  * 각 기록의 정보
  */
+@Getter
+@Builder
+@AllArgsConstructor(access = AccessLevel.PRIVATE)
+@NoArgsConstructor(access = AccessLevel.PROTECTED)
 @Entity
 @Table(name = "conviction_score_detail")
 public class ConvictionScoreDetail extends BaseEntity {
