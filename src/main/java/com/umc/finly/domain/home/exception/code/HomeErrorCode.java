@@ -32,7 +32,32 @@ public enum HomeErrorCode implements BaseCode {
             HttpStatus.INTERNAL_SERVER_ERROR,
             "HOME_WEEKLY_MOOD_INTERNAL_ERROR",
             "위클리 무드 조회 중 서버 오류가 발생했습니다."
+    ),
+
+    HOME_MIND_MEMBER_NOT_FOUND(
+            HttpStatus.NOT_FOUND,
+            "HOME_MIND_MEMBER_NOT_FOUND",
+                    "사용자 정보를 찾을 수 없습니다."
+    ),
+
+    HOME_MIND_PERSONA_NOT_FOUND(
+            HttpStatus.NOT_FOUND,
+            "HOME_MIND_PERSONA_NOT_FOUND",
+                    "사용자의 페르소나 정보를 찾을 수 없습니다."
+    ),
+
+    HOME_MIND_CALCULATION_FAILED(
+            HttpStatus.INTERNAL_SERVER_ERROR,
+            "HOME_MIND_CALCULATION_FAILED",
+                    "금융 마음 지수 계산 중 오류가 발생했습니다."
+    ),
+
+    HOME_MIND_ACCESS_DENIED(
+            HttpStatus.FORBIDDEN,
+            "HOME_MIND_ACCESS_DENIED",
+                    "금융 마음 지수 조회 권한이 없습니다."
     );
+
 
 
     private final HttpStatus httpStatus;

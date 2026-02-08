@@ -1,4 +1,4 @@
-package com.umc.finly.domain.home.dto;
+package com.umc.finly.domain.home.dto.res;
 
 import com.umc.finly.domain.record.enums.EmotionCode;
 import lombok.Builder;
@@ -8,7 +8,7 @@ import java.util.List;
 
 @Getter
 @Builder
-public class HomeWeeklyMoodRes {
+public class HomeWeeklyMoodResDTO {
 
     private List<DayMood> days;
 
