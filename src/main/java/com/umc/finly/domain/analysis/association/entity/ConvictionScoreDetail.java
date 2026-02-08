@@ -49,5 +49,5 @@ public class ConvictionScoreDetail extends BaseEntity {
 
     // 적중 여부 (targetIndexValue > baseIndexValue)
     @Column(name = "is_hit", nullable = false)
-    private Boolean isHit;
+    private boolean hit;
 }

@@ -24,7 +24,6 @@ public class MarketChangeRateHistory extends CreatedUpdatedDeletedBaseEntity {
 
     @Id
     @GeneratedValue(strategy = GenerationType.IDENTITY)
-    @Column(name = "id")
     private Long id;
 
     // 시장 타입 (KOSPI/KOSDAQ)
