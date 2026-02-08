@@ -22,19 +22,19 @@ public class FearIndexDetail extends BaseEntity {
     private Long id;
 
     @ManyToOne(fetch = FetchType.LAZY)
-    @JoinColumn(name = "fear_index_result_id")
+    @JoinColumn(name = "fear_index_result_id", nullable = false)
     private FearIndexResult fearIndexResult;
 
     @ManyToOne(fetch = FetchType.LAZY)
-    @JoinColumn(name = "down_session_id")
+    @JoinColumn(name = "down_session_id", nullable = false)
     private DownSession downSession;
 
     // 해당 세션 내 불안 기록 횟수
-    @Column(name = "anxiety_count")
+    @Column(name = "anxiety_count", nullable = false)
     private Integer anxietyCount;
 
     // 해당 세션 내 후회 기록 횟수
-    @Column(name = "regret_count")
+    @Column(name = "regret_count", nullable = false)
     private Integer regretCount;
 
     // 해당 세션 내 기록들 중 가장 빨랐던 대표 반응 시간 1개

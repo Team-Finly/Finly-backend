@@ -25,16 +25,16 @@ public class ConvictionScoreDetail extends BaseEntity {
     private Long id;
 
     @ManyToOne(fetch = FetchType.LAZY)
-    @JoinColumn(name = "conviction_score_result_id")
+    @JoinColumn(name = "conviction_score_result_id", nullable = false)
     private ConvictionScoreResult convictionScoreResult;
 
     @ManyToOne(fetch = FetchType.LAZY)
-    @JoinColumn(name = "record_entry_id")
+    @JoinColumn(name = "record_entry_id", nullable = false)
     private RecordEntry recordEntry;
 
     // 기록 감정 (확신 or 탐욕)
     @Enumerated(EnumType.STRING)
-    @Column(name = "emotion_code")
+    @Column(name = "emotion_code", nullable = false)
     private EmotionCode emotionCode;
 
     // 기록일(T)의 시장 지수 값
