@@ -19,6 +19,8 @@ import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RequestParam;
 import org.springframework.web.bind.annotation.RestController;
 
+// 조각 모음함(Fragment) 관련 API 컨트롤러
+// 감정별 기록 통계 및 리스트 조회를 담당함
 @RequiredArgsConstructor
 @RestController
 @Tag(name = "Fragments", description = "조각 모음함 관련 API")
@@ -27,12 +29,15 @@ public class FragmentController {
 
     private final FragmentService fragmentService;
 
+    // 조각 모음함 요약 조회
+    // 전체 기록 수, 가장 많은 감정(dominantType), 감정별 개수/비율 반환
     @Operation(summary = "조각 모음함 요약 조회 API", description = "로그인한 본인(member)의 조각 모음함 요약을 조회")
     @GetMapping("/summary")
     public ApiResponse<FragmentSummaryResDTO> getFragmentSummary(
             @AuthenticationPrincipal AuthPrincipal principal
     ) {
-        if(principal == null){
+        // principal null 체크 (인증 실패 시)
+        if (principal == null) {
             throw new CustomException(ErrorCode.UNAUTHORIZED);
         }
 
@@ -40,14 +45,16 @@ public class FragmentController {
         return ApiResponse.onSuccess(result, SuccessCode.OK);
     }
 
+    // 조각 모음함 리스트 조회
+    // 감정(boxType)과 기간(periodKey)으로 필터링 가능
     @Operation(summary = "조각 모음함 리스트 조회 API", description = "각 감정의 조각 모음함 전체 조회")
     @GetMapping
     public ApiResponse<FragmentListResDTO> getFragmentList(
             @AuthenticationPrincipal AuthPrincipal principal,
-            @RequestParam(required = false) EmotionCode boxType,
-            @RequestParam(defaultValue = "ALL") FragmentPeriodKey periodKey
+            @RequestParam(required = false) EmotionCode boxType, // null이면 전체 감정 조회
+            @RequestParam(defaultValue = "ALL") FragmentPeriodKey periodKey // ALL, ONE_MONTH, THREE_MONTHS 등
     ) {
-        if(principal == null){
+        if (principal == null) {
             throw new CustomException(ErrorCode.UNAUTHORIZED);
         }
 

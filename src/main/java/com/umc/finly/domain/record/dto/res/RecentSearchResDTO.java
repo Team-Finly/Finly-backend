@@ -5,12 +5,15 @@ import lombok.Getter;
 
 import java.util.List;
 
+// 최근 검색어 응답 DTO
+// 사용자의 최근 검색 키워드 리스트 반환 (최대 3개)
 @Getter
 @Builder
 public class RecentSearchResDTO {
 
-    private List<String> recentKeywords;
+    private List<String> recentKeywords; // 최근 검색 키워드 리스트 (최신순)
 
+    // 키워드 리스트 → DTO 변환
     public static RecentSearchResDTO from(List<String> keywords) {
         return RecentSearchResDTO.builder()
                 .recentKeywords(keywords)

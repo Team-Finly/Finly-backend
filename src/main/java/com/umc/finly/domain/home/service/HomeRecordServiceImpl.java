@@ -23,7 +23,7 @@ public class HomeRecordServiceImpl implements HomeRecordService {
         RecordSearchResDTO searchRes =
                 recordService.searchRecords(memberId, null, null);
 
-        // 2️Home 정책 적용
+        // Home 정책 적용
         LocalDate threeDaysAgo = LocalDate.now().minusDays(3);
 
         List<HomeRecordsRes.Record> records =

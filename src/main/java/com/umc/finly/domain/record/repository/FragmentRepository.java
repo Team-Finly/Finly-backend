@@ -11,10 +11,15 @@ import java.math.BigDecimal;
 import java.time.LocalDate;
 import java.util.List;
 
+// 조각 모음함(Fragment) 조회용 Repository
+// RecordEntry를 감정별로 그룹핑하여 통계 및 리스트 조회를 담당함
+// 참고: RecordEntry 테이블을 사용하지만 조각 모음함 전용 쿼리만 정의함
 public interface FragmentRepository extends JpaRepository<RecordEntry, Long> {
-    long countByMemberId(Long memberId); // 해당 회원이 기록한 전체 기록 개수
 
-    // 회원의 기록을 감정 타입(emotionCode) 기준으로 그룹핑하여 개수 집계
+    // 회원의 전체 기록 개수 조회
+    long countByMemberId(Long memberId);
+
+    // 감정 타입별 기록 개수 집계 (조각 모음함 요약용)
     @Query("""
         select r.emotionCode as emotionCode, count(r) as count
         from RecordEntry r
@@ -23,9 +28,10 @@ public interface FragmentRepository extends JpaRepository<RecordEntry, Long> {
     """)
     List<EmotionCountProjection> countGroupByEmotionCode(@Param("memberId") Long memberId);
 
-    // 감정/기간 필터 적용 + 최신순 정렬로 조각 리스트 조회
+    // 조각 리스트 조회 (감정/기간 필터 + 최신순 정렬)
+    // Stock 조인하여 종목 정보도 함께 조회
     @Query("""
-        select 
+        select
             r.recordDate as recordDate,
             r.id as fragmentId,
             s.id as stockId,
@@ -50,7 +56,7 @@ public interface FragmentRepository extends JpaRepository<RecordEntry, Long> {
             @Param("toDate") LocalDate toDate
     );
 
-    // 리스트와 동일 조건으로 총 개수 카운트
+    // 조각 리스트 개수 조회 (findFragmentList와 동일 조건)
     @Query("""
         select count(r)
         from RecordEntry r
@@ -66,24 +72,24 @@ public interface FragmentRepository extends JpaRepository<RecordEntry, Long> {
             @Param("toDate") LocalDate toDate
     );
 
-    // ===== Projection interfaces =====
+    // ===== Projection Interfaces =====
 
-    // 감정 타입별 개수 조회 결과를 받기 위한 Projection
+    // 감정별 개수 집계 결과를 받기 위한 Projection
     interface EmotionCountProjection {
-        EmotionCode getEmotionCode();
-        Long getCount();
+        EmotionCode getEmotionCode(); // 감정 코드
+        Long getCount();              // 해당 감정의 기록 개수
     }
 
-    // 조각 리스트 조회 결과를 담는 Projection(Stock 조인 포함)
+    // 조각 리스트 조회 결과를 담는 Projection (Stock 조인 포함)
     interface FragmentListRowView {
-        LocalDate getRecordDate();
-        Long getFragmentId();
-        Long getStockId();
-        String getStockName();
-        TradeAction getTradeAction();
-        BigDecimal getUnitPrice();
-        BigDecimal getQuantity();
-        String getMemo();
-        EmotionCode getEmotionCode();
+        LocalDate getRecordDate();    // 기록 날짜
+        Long getFragmentId();         // 조각(기록) ID
+        Long getStockId();            // 종목 ID
+        String getStockName();        // 종목명
+        TradeAction getTradeAction(); // 매매 타입 (BUY/SELL/WATCH)
+        BigDecimal getUnitPrice();    // 단가
+        BigDecimal getQuantity();     // 수량
+        String getMemo();             // 메모
+        EmotionCode getEmotionCode(); // 감정 코드
     }
 }
