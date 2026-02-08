@@ -23,7 +23,7 @@ public class KoreaInvestApiCallerImpl implements DailyChartApiCaller {
 
     private final RestClient koreaInvestRestClient;
 
-    // Daily Chart: 국내주식기간별시세(일/주/월/년)[v1_국내주식-016] -> 일봉 조회
+    // [Daily Chart] 국내주식기간별시세(일/주/월/년)[v1_국내주식-016] -> 일봉 조회
     @Override
     public List<Map<String, Object>> fetchDailyCandles(String symbol, String startDate, String endDate) {
         // API 호출
@@ -48,6 +48,12 @@ public class KoreaInvestApiCallerImpl implements DailyChartApiCaller {
 
         return response.getOutput2();
     }
+
+    // [하락장 공포지수]
+    // fetchIndexByMinute
+
+    // [매수 확신도]
+    // fetchIndexByDate
 
     private void validateResponse(KoreaInvestRawResponse response, String symbol) {
         // response가 null인 경우

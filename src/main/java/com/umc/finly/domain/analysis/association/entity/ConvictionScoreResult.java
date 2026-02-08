@@ -29,13 +29,16 @@ import java.util.List;
     @GeneratedValue(strategy = GenerationType.IDENTITY)
     private Long id;
 
-    @ManyToOne(fetch = FetchType.LAZY)
-    @JoinColumn(name = "member_id", nullable = false)
-    private Member member;
+//    @ManyToOne(fetch = FetchType.LAZY)
+//    @JoinColumn(name = "member_id", nullable = false)
+//    private Member member;
+
+    @Column(name = "member_id", nullable = false)
+    private Long memberId;
 
     // 매수 확신도
-    @Column(name = "conviction_score", nullable = false, precision = 5, scale = 2)
-    private BigDecimal convictionScore;
+    @Column(name = "conviction_score", nullable = false)
+    private int convictionScore;
 
     // 분석 기간
     @Column(name = "start_date", nullable = false)
@@ -57,22 +60,22 @@ import java.util.List;
     @Builder.Default
     private BigDecimal confidenceBuyHitRate = BigDecimal.ZERO;
 
-    /* 탐욕 매수 통계 */
-    // 분석 기간 내 총 탐욕 매수 기록 횟수
-    @Column(name = "total_greed_buy_count")
-    @Builder.Default
-    private Integer totalGreedBuyCount = 0;
-    // 분석 기간 내 탐욕 매수 적중 횟수
-    @Column(name = "total_greed_buy_hit_count")
-    @Builder.Default
-    private Integer totalGreedBuyHitCount = 0;
-    // 탐욕 매수 적중률 (확신 매수 변별력 측정용)
-    @Builder.Default
-    @Column(name = "greed_buy_hit_rate", precision = 5, scale = 2)
-    private BigDecimal greedBuyHitRate = BigDecimal.ZERO;
+//    /* 탐욕 매수 통계 */
+//    // 분석 기간 내 총 탐욕 매수 기록 횟수
+//    @Column(name = "total_greed_buy_count")
+//    @Builder.Default
+//    private Integer totalGreedBuyCount = 0;
+//    // 분석 기간 내 탐욕 매수 적중 횟수
+//    @Column(name = "total_greed_buy_hit_count")
+//    @Builder.Default
+//    private Integer totalGreedBuyHitCount = 0;
+//    // 탐욕 매수 적중률 (확신 매수 변별력 측정용)
+//    @Builder.Default
+//    @Column(name = "greed_buy_hit_rate", precision = 5, scale = 2)
+//    private BigDecimal greedBuyHitRate = BigDecimal.ZERO;
 
-    // 매수 확신도 결과 속 포함된 기록별 상세 내역
-    @Builder.Default
-    @OneToMany(mappedBy = "convictionScoreResult", cascade = CascadeType.ALL, orphanRemoval = true)
-    private List<ConvictionScoreDetail> details = new ArrayList<>();
+//    // 매수 확신도 결과 속 포함된 기록별 상세 내역
+//    @Builder.Default
+//    @OneToMany(mappedBy = "convictionScoreResult", cascade = CascadeType.ALL, orphanRemoval = true)
+//    private List<ConvictionScoreDetail> details = new ArrayList<>();
 }

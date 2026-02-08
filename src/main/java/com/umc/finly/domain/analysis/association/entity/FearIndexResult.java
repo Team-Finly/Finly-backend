@@ -28,13 +28,16 @@ import java.util.List;
     @GeneratedValue(strategy = GenerationType.IDENTITY)
     private Long id;
 
-    @ManyToOne(fetch = FetchType.LAZY)
-    @JoinColumn(name = "member_id", nullable = false)
-    private Member member;
+//    @ManyToOne(fetch = FetchType.LAZY)
+//    @JoinColumn(name = "member_id", nullable = false)
+//    private Member member;
+
+    @Column(name = "member_id", nullable = false)
+    private Long memberId;
 
     // 하락장 공포지수
-    @Column(name = "fear_index", nullable = false, precision = 5, scale = 2)
-    private BigDecimal fearIndex;
+    @Column(name = "fear_index", nullable = false)
+    private int fearIndex;
 
     // 분석 기간
     @Column(name = "start_date", nullable = false)
@@ -58,7 +61,7 @@ import java.util.List;
     @Column(name = "average_time_weight")
     private Double averageTimeWeight;
 
-    // 하락장 공포지수 결과 속 포함된 세션별 상세 내역
-    @OneToMany(mappedBy = "fearIndexResult", cascade = CascadeType.ALL, orphanRemoval = true)
-    private List<FearIndexDetail> details = new ArrayList<>();
+//    // 하락장 공포지수 결과 속 포함된 세션별 상세 내역
+//    @OneToMany(mappedBy = "fearIndexResult", cascade = CascadeType.ALL, orphanRemoval = true)
+//    private List<FearIndexDetail> details = new ArrayList<>();
 }
