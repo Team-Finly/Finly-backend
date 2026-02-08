@@ -10,6 +10,7 @@ import io.swagger.v3.oas.annotations.responses.ApiResponses;
 import io.swagger.v3.oas.annotations.tags.Tag;
 import org.springframework.security.core.annotation.AuthenticationPrincipal;
 
+import java.time.LocalDate;
 import java.util.List;
 
 @Tag(name = "AssociationAnalysis", description = "통계 - 연관분석 관련 API")
@@ -155,9 +156,15 @@ public interface AssociationAnalysisApiSpecification {
     })
     public ApiResponse<DailyChartResDTO> getDailyChart(AuthPrincipal principal, String symbol);
 
+    @Operation(summary = "시간별 그래프 조회", description = """
+    선택한 날짜에 대한 시간별 주가 감정 그래프를 조회합니다.
+    - targetDate 넣지 않을 경우 자동으로 당일 날짜 지정됩니다.
+    - targetDate가 휴장일일 때는 prices가 빈 배열로 반환됩니다.
+    """)
+    public ApiResponse<HourlyChartResDTO> getHourlyChart(AuthPrincipal principal, String symbol, LocalDate targetDate);
+
     @Operation(summary = "하락장 공포지수 조회", description = "가장 최근 하락장 공포지수를 조회합니다.")
     public ApiResponse<FearIndexResDTO> getFearIndex(AuthPrincipal principal);
-
 
     @Operation(summary = "매수 확신도 조회", description = "가장 최근 매수 확신도를 조회합니다.")
     public ApiResponse<ConvictionScoreResDTO> getConvictionScore(AuthPrincipal principal);

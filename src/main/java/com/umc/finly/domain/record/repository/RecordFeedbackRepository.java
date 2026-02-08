@@ -7,6 +7,7 @@ import org.springframework.data.jpa.repository.Lock;
 import org.springframework.data.jpa.repository.Query;
 import org.springframework.data.repository.query.Param;
 
+import java.util.List;
 import java.util.Optional;
 
 // AI 피드백(RecordFeedback) 엔티티의 데이터 접근 레이어
@@ -24,4 +25,7 @@ public interface RecordFeedbackRepository extends JpaRepository<RecordFeedback, 
     @Lock(LockModeType.PESSIMISTIC_WRITE)
     @Query("SELECT f FROM RecordFeedback f WHERE f.recordEntryId = :recordEntryId")
     Optional<RecordFeedback> findByRecordEntryIdForUpdate(@Param("recordEntryId") Long recordEntryId);
+
+    // recordEntryId 리스트와 memberId로 피드백 리스트 조회
+    List<RecordFeedback> findAllByRecordEntryIdInAndMemberId(List<Long> recordEntryIds, Long memberId);
 }
