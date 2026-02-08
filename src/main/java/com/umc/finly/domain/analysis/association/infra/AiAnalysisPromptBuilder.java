@@ -22,13 +22,13 @@ public class AiAnalysisPromptBuilder {
         sb.append("- 공포지수: ").append(fear != null ? fear.getFearIndex() + "/100" : "데이터 없음").append("\n");
         sb.append("- 매수확신도: ").append(conviction != null ? conviction.getConvictionScore() + "/100" : "데이터 없음").append("\n");
         sb.append("- 최근 감정: ").append(
-                recentRecords.isEmpty() ? "기록 없음" :
+                (recentRecords == null || recentRecords.isEmpty()) ? "기록 없음" :
                         recentRecords.stream()
-                                .map(RecordEntry::getEmotionCode)
-                                .filter(Objects::nonNull)
-                                .map(Enum::name)
-                                .distinct()
-                                .collect(Collectors.joining(", "))
+                        .map(RecordEntry::getEmotionCode)
+                        .filter(Objects::nonNull)
+                        .map(Enum::name)
+                        .distinct()
+                        .collect(Collectors.joining(", "))
         ).append("\n\n");
 
         sb.append("요구사항:\n");

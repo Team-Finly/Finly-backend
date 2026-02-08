@@ -41,12 +41,9 @@ public class AiAnalysisService {
         // 1. 데이터 조회
         AnalysisData data = getAnalysisData(memberId);
         log.info("[연관분석 AI] 데이터 로드 완료: 공포지수={}, 확신도={}, 기록수={}",
-                data.fear().getFearIndex(), data.conviction().getConvictionScore(), data.records().size());
-
-        // 데이터 부족 여부 판단 (공포지수나 확신도 중 하나라도 없으면 분석 제한)
-        // 세 가지 데이터가 모두 없는 경우에만 '부족'으로 판단
-        boolean isDataInsufficient = (data.fear() == null && data.conviction() == null && (data.records() == null || data.records().isEmpty()));
-        log.info("[연관분석 AI] 데이터 체크: 부족 여부 = {}", isDataInsufficient);
+                data.fear() != null ? data.fear().getFearIndex() : "없음",
+                data.conviction() != null ? data.conviction().getConvictionScore() : "없음",
+                data.records() != null ? data.records().size() : 0);
 
         // 2. 프롬프트 구성
         String userPrompt = promptBuilder.buildGeneralAnalysisPrompt(data.fear(), data.conviction(), data.records());
@@ -57,7 +54,9 @@ public class AiAnalysisService {
             log.info("[연관분석 AI] OpenAI 호출: AI 분석 생성을 요청합니다.");
             OpenAiFeedbackClient.FeedbackResponse response = openAiFeedbackClient.generateFeedback(systemPrompt, userPrompt);
 
-            String combinedText = response.content() + response.suggestion();
+            String content = response.content() != null ? response.content() : "";
+            String suggestion = response.suggestion() != null ? response.suggestion() : "";
+            String combinedText = content + suggestion;
 
             log.info("[연관분석 AI] AI 분석 성공!: 텍스트 = {}", combinedText);
 
