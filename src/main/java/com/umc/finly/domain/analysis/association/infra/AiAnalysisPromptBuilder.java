@@ -35,7 +35,7 @@ public class AiAnalysisPromptBuilder {
         sb.append("반드시 다음 JSON 형식을 지키세요: {\"content\": \"...\", \"suggestion\": \"...\"}\n");
         sb.append("'심리 패턴', '투자 행동 패턴', '조언'이라는 단어를 절대 쓰지 말고 바로 본론만 작성할 것.\n");
         sb.append("content 필드 구성:\n");
-        sb.append("   - 현재 심리 상태 분석 한 문장과 투자 행동 및 패턴 분석 한 문장을 이어서 작성하세요.\n");
+        sb.append("   - 심리 상태 분석 한 문장과 투자 행동 및 패턴 분석 한 문장을 작성하세요.\n");
         sb.append("suggestion 필드 구성:\n");
         sb.append("   - 개선을 위한 핵심 조언 한 문장을 작성하세요.\n");
         sb.append("금지: 줄바꿈(\\n)은 절대 넣지 말고, 모든 문장은 공백 한 칸으로만 구분하세요.");
