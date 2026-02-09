@@ -91,4 +91,9 @@ public class Member extends CreatedDeletedBaseEntity {
         this.nickname = nickname;
     }
     public void changePassword(String encodedPassword) { this.password = encodedPassword; }
+
+    public void updateFinMindIdx(int finMindIdx) {
+        this.finMindIdx = finMindIdx;
+    }//금융 마음 지수 저장
+
 }
