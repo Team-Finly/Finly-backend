@@ -81,5 +81,4 @@ public class FragmentController {
         FragmentCalendarResDTO result = fragmentService.getFragmentCalendar(principal.getMemberId(), yearMonth);
         return ApiResponse.onSuccess(result, SuccessCode.OK);
     }
-
 }
