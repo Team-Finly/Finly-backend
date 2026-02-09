@@ -17,6 +17,7 @@ public class MyPageResDTO {
     private PersonaUiType personaType;
     private Integer finMindIdx;
     private Long mindPieceCount;
+    private String profileImageUrl;
 
     public static MyPageResDTO of(
             Member member,
@@ -29,6 +30,7 @@ public class MyPageResDTO {
                 .personaType(result.getPersona().getPersonaType().toUiType())
                 .finMindIdx(member.getFinMindIdx())
                 .mindPieceCount(mindPieceCount)
+                .profileImageUrl(member.getProfileImageUrl())
                 .build();
     }
 }
