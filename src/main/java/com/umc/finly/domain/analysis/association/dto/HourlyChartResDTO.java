@@ -6,6 +6,7 @@ import lombok.Builder;
 
 import java.math.BigDecimal;
 import java.time.LocalDate;
+import java.time.LocalDateTime;
 import java.util.List;
 
 @Builder
@@ -28,7 +29,7 @@ public record HourlyChartResDTO(
     @Builder
     public record RecordData(
             Long recordId,
-            LocalDate recordDate,
+            String recordDateTime,
             EmotionCode emotionCode,
             Integer emotionIntensity,
             TradeAction tradeAction,

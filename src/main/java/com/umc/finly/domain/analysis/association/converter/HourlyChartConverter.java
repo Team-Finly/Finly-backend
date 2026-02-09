@@ -8,6 +8,7 @@ import com.umc.finly.domain.record.entity.RecordFeedback;
 import java.math.BigDecimal;
 import java.time.LocalDate;
 import java.time.LocalDateTime;
+import java.time.LocalTime;
 import java.time.format.DateTimeFormatter;
 import java.util.Collections;
 import java.util.List;
@@ -33,18 +34,53 @@ public class HourlyChartConverter {
     }
 
     private static HourlyChartResDTO.RecordData toRecordData(RecordEntry record, RecordFeedback feedback) {
-        BigDecimal qty = record.getQuantity() != null ? record.getQuantity() : BigDecimal.ZERO;
-        BigDecimal unitPrice = record.getUnitPrice() != null ? record.getUnitPrice() : BigDecimal.ZERO;
+        BigDecimal qty = record.getQuantity();
+        BigDecimal unitPrice = record.getUnitPrice();
+        BigDecimal totalPrice = (qty != null && unitPrice != null)
+                ? unitPrice.multiply(qty)
+                : null;
+
+        // --- recordDateTime 결정 로직 ---
+        LocalDateTime calculatedDateTime;
+        LocalDate recordDate = record.getRecordDate();
+        LocalDateTime createdAt = record.getCreatedAt();
+
+        if (createdAt != null && recordDate.equals(createdAt.toLocalDate())) {
+            // 날짜가 같은 경우: createdAt의 시간 유지 or 09:00 ~ 15:30 사이로 보정
+            LocalTime createdTime = createdAt.toLocalTime();
+            LocalTime marketOpen = LocalTime.of(9, 0);
+            LocalTime marketClose = LocalTime.of(15, 30);
+
+            if (createdTime.isBefore(marketOpen)) {
+                calculatedDateTime = recordDate.atTime(marketOpen);
+            } else if (createdTime.isAfter(marketClose)) {
+                calculatedDateTime = recordDate.atTime(marketClose);
+            } else {
+                calculatedDateTime = createdAt;
+            }
+        } else {
+            // 날짜가 다른 경우: session에 따라 시간 매핑
+            calculatedDateTime = switch (record.getSession()) {
+                case PRE_MARKET -> recordDate.atTime(9, 0);
+                case MORNING -> recordDate.atTime(10, 30);
+                case AFTERNOON -> recordDate.atTime(13, 30);
+                case POST_MARKET -> recordDate.atTime(15, 30);
+                default -> recordDate.atTime(9, 0); // 예외 처리
+            };
+        }
+
+        // "yyyy-MM-dd HH:mm" 형식으로 포맷팅
+        String formattedDateTime = calculatedDateTime.format(DateTimeFormatter.ofPattern("yyyy-MM-dd HH:mm"));
 
         return HourlyChartResDTO.RecordData.builder()
                 .recordId(record.getId())
-                .recordDate(record.getRecordDate())
+                .recordDateTime(formattedDateTime)
                 .emotionCode(record.getEmotionCode())
                 .emotionIntensity(record.getEmotionIntensity())
                 .tradeAction(record.getTradeAction())
                 .quantity(qty)
                 .unitPrice(unitPrice)
-                .totalPrice(unitPrice.multiply(qty))
+                .totalPrice(totalPrice)
                 .memo(record.getMemo())
                 .finlyTalk(feedback != null ? feedback.getContent() : null)
                 .build();
