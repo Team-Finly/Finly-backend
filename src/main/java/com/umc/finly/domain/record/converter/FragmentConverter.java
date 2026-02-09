@@ -1,5 +1,6 @@
 package com.umc.finly.domain.record.converter;
 
+import com.umc.finly.domain.record.dto.res.FragmentCalendarResDTO;
 import com.umc.finly.domain.record.dto.res.FragmentListResDTO;
 import com.umc.finly.domain.record.dto.res.FragmentSummaryResDTO;
 import com.umc.finly.domain.record.enums.EmotionCode;
@@ -65,6 +66,26 @@ public class FragmentConverter {
                 .fragments(rows.stream()
                         .map(this::toFragment)
                         .collect(Collectors.toList()))
+                .build();
+    }
+
+    // 캘린더용 응답 DTO 변환
+    // yearMonth: yyyy-MM / from~to: 해당 월 범위 / days: 날짜별 집계 결과
+    public FragmentCalendarResDTO toCalendarFragment(
+            String yearMonth,
+            LocalDate from,
+            LocalDate to,
+            long totalRecords,
+            List<FragmentCalendarResDTO.Day> days
+    ){
+        return FragmentCalendarResDTO.builder()
+                .yearMonth(yearMonth)
+                .range(FragmentCalendarResDTO.Range.builder()
+                        .from(from)
+                        .to(to)
+                        .build())
+                .totalRecords(totalRecords)
+                .days(days)
                 .build();
     }
 

@@ -72,6 +72,39 @@ public interface FragmentRepository extends JpaRepository<RecordEntry, Long> {
             @Param("toDate") LocalDate toDate
     );
 
+    // 캘린더용 날짜별/감정별 조각 개수 집계
+    // 특정 기간(from~to) 내 recordDate + emotionCode 기준으로 그룹핑하여 count를 반환
+    @Query("""
+    select r.recordDate as recordDate, r.emotionCode as emotionCode, count(r) as count
+    from RecordEntry r
+    where r.memberId = :memberId
+      and r.recordDate >= :fromDate
+      and r.recordDate <= :toDate
+    group by r.recordDate, r.emotionCode
+    order by r.recordDate asc
+    """)
+    List<CalendarCountProjection> countCalendarByDateAndEmotion(
+            @Param("memberId") Long memberId,
+            @Param("fromDate") LocalDate fromDate,
+            @Param("toDate") LocalDate toDate
+    );
+
+    // 캘린더 범위(from~to) 내 전체 기록 수 조회
+    @Query("""
+    select count(r)
+    from RecordEntry r
+    where r.memberId = :memberId
+      and r.recordDate >= :fromDate
+      and r.recordDate <= :toDate
+      and r.deletedAt is null
+    """)
+    long countByMemberIdAndRecordDateBetween(
+            @Param("memberId") Long memberId,
+            @Param("fromDate") LocalDate fromDate,
+            @Param("toDate") LocalDate toDate
+    );
+
+
     // ===== Projection Interfaces =====
 
     // 감정별 개수 집계 결과를 받기 위한 Projection
@@ -91,5 +124,12 @@ public interface FragmentRepository extends JpaRepository<RecordEntry, Long> {
         BigDecimal getQuantity();     // 수량
         String getMemo();             // 메모
         EmotionCode getEmotionCode(); // 감정 코드
+    }
+
+    // 캘린더 집계 결과를 받기 위한 Projection
+    interface CalendarCountProjection {
+        LocalDate getRecordDate();    // 기록 날짜
+        EmotionCode getEmotionCode(); // 감정 코드
+        Long getCount();              // 해당 날짜/감정의 기록 개수
     }
 }
