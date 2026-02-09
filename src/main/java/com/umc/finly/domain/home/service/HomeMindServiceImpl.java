@@ -14,6 +14,7 @@ import com.umc.finly.domain.record.enums.TradeAction;
 import com.umc.finly.global.apiPayload.exception.CustomException;
 import lombok.RequiredArgsConstructor;
 import org.springframework.stereotype.Service;
+import org.springframework.transaction.annotation.Transactional;
 
 import java.time.LocalDate;
 import java.util.List;
@@ -76,6 +77,8 @@ public class HomeMindServiceImpl implements HomeMindService {
           return result;
       }
 
+      //Home 진입 시 → FMI 계산 → Member에 저장
+    @Transactional
     @Override
     public HomeMindResDTO getHomeMind(Long memberId) {//금융 마음 지수 조회 서비스 로직
 
@@ -86,6 +89,8 @@ public class HomeMindServiceImpl implements HomeMindService {
                 personaRepository.findById(member.getPersonaId()).orElse(null);
 
         MindScoreResult score = calculateMindScores(memberId);
+
+        member.updateFinMindIdx(score.fmi);//
 
         return HomeMindResDTO.builder()
                 .memberName(member.getNickname())
