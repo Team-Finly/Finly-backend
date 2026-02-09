@@ -158,8 +158,9 @@ public interface AssociationAnalysisApiSpecification {
 
     @Operation(summary = "시간별 그래프 조회", description = """
     선택한 날짜에 대한 시간별 주가 감정 그래프를 조회합니다.
-    - targetDate 넣지 않을 경우 자동으로 당일 날짜 지정됩니다.
-    - targetDate가 휴장일일 때는 prices가 빈 배열로 반환됩니다.
+    - targetDate 넣지 않을 경우 자동으로 오늘 날짜 지정됩니다.
+    - targetDate가 휴장일이거나 장 시작 전일 경우 prices가 빈 배열로 반환됩니다.
+    - 장 진행 중일 때 요청할 경우 요청한 현재 시각으로부터 1분 전 price까지 받아옵니다.
     """)
     public ApiResponse<HourlyChartResDTO> getHourlyChart(AuthPrincipal principal, String symbol, LocalDate targetDate);
 
