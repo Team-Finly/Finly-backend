@@ -4,9 +4,9 @@ import com.umc.finly.domain.auth.exception.AuthErrorCode;
 import com.umc.finly.domain.member.converter.MyPageConverter;
 import com.umc.finly.domain.member.dto.response.*;
 import com.umc.finly.domain.member.entity.Member;
-import com.umc.finly.domain.member.entity.mapping.MembersPersonasResult;
+import com.umc.finly.domain.member.entity.mapping.MemberPersonaResults;
 import com.umc.finly.domain.member.exception.MemberErrorCode;
-import com.umc.finly.domain.member.repository.MemberPersonaResultRepository;
+import com.umc.finly.domain.member.repository.MemberPersonaResultsRepository;
 import com.umc.finly.domain.member.repository.MemberRepository;
 import com.umc.finly.domain.record.repository.FragmentRepository;
 import com.umc.finly.global.apiPayload.exception.CustomException;
@@ -25,7 +25,7 @@ import org.springframework.web.multipart.MultipartFile;
 @Transactional(readOnly = true)
 public class MyPageServiceImpl implements MyPageService {
 
-    private final MemberPersonaResultRepository memberPersonaResultRepository;
+    private final MemberPersonaResultsRepository memberPersonaResultsRepository;
     private final MemberRepository memberRepository;
     private final FragmentRepository fragmentRepository;
 
@@ -38,7 +38,7 @@ public class MyPageServiceImpl implements MyPageService {
         Member member = memberRepository.findById(memberId)
                 .orElseThrow(() -> new CustomException(MemberErrorCode.MEMBER_NOT_FOUND));
 
-        MembersPersonasResult result = memberPersonaResultRepository.findByMemberIdFetchPersona(memberId)
+        MemberPersonaResults result = memberPersonaResultsRepository.findByMemberIdFetchPersona(memberId)
                 .orElseThrow(() -> new CustomException(MemberErrorCode.PERSONA_RESULT_NOT_FOUND));
 
         long mindPieceCount = fragmentRepository.countByMemberId(memberId);
@@ -49,7 +49,7 @@ public class MyPageServiceImpl implements MyPageService {
     /** 내 페르소나 조회 */
     @Override
     public MyPagePersonaResDTO getMyPersona(Long memberId) {
-        MembersPersonasResult result = memberPersonaResultRepository.findByMemberIdFetchPersona(memberId)
+        MemberPersonaResults result = memberPersonaResultsRepository.findByMemberIdFetchPersona(memberId)
                 .orElseThrow(() -> new CustomException(MemberErrorCode.PERSONA_RESULT_NOT_FOUND));
 
         return MyPageConverter.toMyPagePersonaResDTO(result);

@@ -25,7 +25,7 @@ import java.util.List;
 @RestController
 @RequestMapping("/api/persona-test")
 @Tag(name = "PersonaTest", description = "페르소나 테스트")
-public class PersonasTestController {
+public class PersonaTestController {
 
     private final PersonaTestService personasTestService;
     private final PersonaTestSubmitService submitService;

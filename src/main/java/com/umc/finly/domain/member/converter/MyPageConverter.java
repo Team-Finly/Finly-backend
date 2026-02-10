@@ -2,7 +2,7 @@ package com.umc.finly.domain.member.converter;
 
 import com.umc.finly.domain.member.dto.response.*;
 import com.umc.finly.domain.member.entity.Member;
-import com.umc.finly.domain.member.entity.mapping.MembersPersonasResult;
+import com.umc.finly.domain.member.entity.mapping.MemberPersonaResults;
 import lombok.AccessLevel;
 import lombok.NoArgsConstructor;
 
@@ -11,7 +11,7 @@ public class MyPageConverter {
 
     public static MyPageResDTO toMyPageResDTO(
             Member member,
-            MembersPersonasResult result,
+            MemberPersonaResults result,
             long mindPieceCount
     ) {
         return new MyPageResDTO(
@@ -25,7 +25,7 @@ public class MyPageConverter {
     }
 
     public static MyPagePersonaResDTO toMyPagePersonaResDTO(
-            MembersPersonasResult result
+            MemberPersonaResults result
     ) {
         return new MyPagePersonaResDTO(
                 result.getPersona().getPersonaType().toUiType(),

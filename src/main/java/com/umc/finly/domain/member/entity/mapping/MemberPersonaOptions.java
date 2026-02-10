@@ -20,7 +20,7 @@ import lombok.*;
                 )
         }
 )
-public class MembersPersonasOption {
+public class MemberPersonaOptions {
 
     @Id
     @GeneratedValue(strategy = GenerationType.IDENTITY)
