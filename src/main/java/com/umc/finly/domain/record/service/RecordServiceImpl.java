@@ -2,15 +2,16 @@ package com.umc.finly.domain.record.service;
 
 import com.umc.finly.domain.market.stock.entity.Stock;
 import com.umc.finly.domain.market.stock.repository.StockRepository;
-import com.umc.finly.domain.record.dto.req.RecordCreateReqDTO;
-import com.umc.finly.domain.record.dto.req.RecordUpdateReqDTO;
-import com.umc.finly.domain.record.dto.res.DailyReportResDTO;
-import com.umc.finly.domain.record.dto.res.RecentSearchResDTO;
-import com.umc.finly.domain.record.dto.res.RecordCreateResDTO;
-import com.umc.finly.domain.record.dto.res.RecordDetailResDTO;
-import com.umc.finly.domain.record.dto.res.RecordSearchResDTO;
-import com.umc.finly.domain.record.dto.res.RecordUpdateResDTO;
-import com.umc.finly.domain.record.dto.res.TodayRecordResDTO;
+import com.umc.finly.domain.record.converter.RecordConverter;
+import com.umc.finly.domain.record.dto.request.RecordCreateReqDTO;
+import com.umc.finly.domain.record.dto.request.RecordUpdateReqDTO;
+import com.umc.finly.domain.record.dto.response.DailyReportResDTO;
+import com.umc.finly.domain.record.dto.response.RecentSearchResDTO;
+import com.umc.finly.domain.record.dto.response.RecordCreateResDTO;
+import com.umc.finly.domain.record.dto.response.RecordDetailResDTO;
+import com.umc.finly.domain.record.dto.response.RecordSearchResDTO;
+import com.umc.finly.domain.record.dto.response.RecordUpdateResDTO;
+import com.umc.finly.domain.record.dto.response.TodayRecordResDTO;
 import com.umc.finly.domain.record.exception.code.RecordErrorCode;
 import com.umc.finly.domain.record.infra.OpenAiFeedbackClient;
 import com.umc.finly.domain.record.entity.RecordEntry;
@@ -46,6 +47,7 @@ import java.util.stream.Collectors;
 @Transactional(readOnly = true) // 기본적으로 읽기 전용 트랜잭션 사용
 public class RecordServiceImpl implements RecordService {
 
+    private final RecordConverter recordConverter;
     private final RecordEntryRepository recordEntryRepository;
     private final RecordFeedbackService feedbackService; // AI 피드백 서비스
     private final StockRepository stockRepository;
@@ -81,19 +83,7 @@ public class RecordServiceImpl implements RecordService {
         Session session = Session.fromTime(LocalTime.now());
 
         // 5. RecordEntry 엔티티 생성 및 저장
-        RecordEntry entry = RecordEntry.builder()
-                .memberId(memberId)
-                .clientRequestId(request.getClientRequestId())
-                .recordDate(request.getRecordDate())
-                .stockId(stock.getId())
-                .tradeAction(request.getTradeAction())
-                .unitPrice(request.getUnitPrice())
-                .quantity(request.getQuantity())
-                .emotionCode(request.getEmotionCode())
-                .emotionIntensity(request.getEmotionIntensity())
-                .memo(request.getMemo())
-                .session(session)
-                .build();
+        RecordEntry entry = recordConverter.toEntity(memberId, request, stock, session);
 
         RecordEntry savedEntry;
         try {
@@ -107,7 +97,7 @@ public class RecordServiceImpl implements RecordService {
         RecordFeedback feedback = feedbackService.requestFeedbackAsync(memberId, savedEntry);
 
         // 7. 응답 DTO 반환
-        return RecordCreateResDTO.from(savedEntry, stock, feedback);
+        return recordConverter.toCreateRes(savedEntry, stock, feedback);
     }
 
     @Override
@@ -126,7 +116,7 @@ public class RecordServiceImpl implements RecordService {
                 .orElseThrow(() -> new CustomException(MarketErrorCode.MARKET_STOCK_NOT_FOUND));
 
         // 4. 응답 DTO 반환
-        return RecordDetailResDTO.from(entry, stock);
+        return recordConverter.toDetailRes(entry, stock);
     }
 
     @Override
@@ -141,34 +131,15 @@ public class RecordServiceImpl implements RecordService {
             throw new CustomException(RecordErrorCode.RECORD_FORBIDDEN);
         }
 
-        // 3. 부분 업데이트 (null이 아닌 필드만 수정)
-        Stock stock = null;
-        if (request.getRecordDate() != null) {
-            entry.setRecordDate(request.getRecordDate());
-        }
+        // 3. 부분 업데이트 (symbol 변경 시 stock 조회)
+        Stock changedStock = null;
         if (request.getSymbol() != null) {
-            stock = stockRepository.findBySymbol(request.getSymbol())
+            changedStock = stockRepository.findBySymbol(request.getSymbol())
                     .orElseThrow(() -> new CustomException(MarketErrorCode.MARKET_STOCK_NOT_FOUND));
-            entry.setStockId(stock.getId());
         }
-        if (request.getTradeAction() != null) {
-            entry.setTradeAction(request.getTradeAction());
-        }
-        if (request.getUnitPrice() != null) {
-            entry.setUnitPrice(request.getUnitPrice());
-        }
-        if (request.getQuantity() != null) {
-            entry.setQuantity(request.getQuantity());
-        }
-        if (request.getEmotionCode() != null) {
-            entry.setEmotionCode(request.getEmotionCode());
-        }
-        if (request.getEmotionIntensity() != null) {
-            entry.setEmotionIntensity(request.getEmotionIntensity());
-        }
-        if (request.getMemo() != null) {
-            entry.setMemo(request.getMemo());
-        }
+
+        // 3-1. 수정 내용 반영 (변환 책임은 컨버터로)
+        recordConverter.applyUpdate(entry, request, changedStock);
 
         // 4. 수정 후에도 매수/매도 유효성 검증
         if (entry.getTradeAction() == TradeAction.BUY || entry.getTradeAction() == TradeAction.SELL) {
@@ -182,13 +153,14 @@ public class RecordServiceImpl implements RecordService {
         }
 
         // 5. symbol 변경 없으면 기존 Stock 조회
+        Stock stock = changedStock;
         if (stock == null) {
             stock = stockRepository.findById(entry.getStockId())
                     .orElseThrow(() -> new CustomException(MarketErrorCode.MARKET_STOCK_NOT_FOUND));
         }
 
-        // 6. 응답 DTO 반환 (Dirty Checking으로 자동 저장)
-        return RecordUpdateResDTO.from(entry, stock);
+        // 6. 응답 DTO 반환
+        return recordConverter.toUpdateRes(entry, stock);
     }
 
     @Override

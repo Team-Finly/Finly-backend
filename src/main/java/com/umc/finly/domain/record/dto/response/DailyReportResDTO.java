@@ -1,4 +1,4 @@
-package com.umc.finly.domain.record.dto.res;
+package com.umc.finly.domain.record.dto.response;
 
 import com.umc.finly.domain.market.stock.entity.Stock;
 import com.umc.finly.domain.record.entity.RecordEntry;
@@ -12,38 +12,36 @@ import java.math.BigDecimal;
 import java.time.LocalDate;
 import java.time.LocalDateTime;
 
-// 투자 기록 수정 응답 DTO
-// 수정 완료 후 변경된 기록 정보를 반환함
+// 일일 리포트 응답 DTO
+// 특정 기록에 대한 AI 피드백 내용 포함
 @Getter
 @Builder
-public class RecordUpdateResDTO {
+public class DailyReportResDTO {
 
     private Long recordId;           // 기록 ID
     private LocalDate recordDate;    // 기록 날짜
-    private LocalDateTime updatedAt; // 수정 시각
+    private LocalDateTime recordedAt; // 생성 시각
     private Session session;         // 기록 시간대
     private TradeAction tradeAction; // 매매 타입
-    private String symbol;           // 종목 심볼
     private BigDecimal unitPrice;    // 단가
     private BigDecimal quantity;     // 수량
     private EmotionCode emotionCode; // 감정 코드
-    private Integer emotionIntensity; // 감정 강도
-    private String memo;             // 메모
+    private String name;             // 종목명 (symbol 아닌 name)
+    private String content;          // AI 피드백 내용
 
     // Entity → DTO 변환
-    public static RecordUpdateResDTO from(RecordEntry entry, Stock stock) {
-        return RecordUpdateResDTO.builder()
+    public static DailyReportResDTO from(RecordEntry entry, Stock stock, String content) {
+        return DailyReportResDTO.builder()
                 .recordId(entry.getId())
                 .recordDate(entry.getRecordDate())
-                .updatedAt(entry.getUpdatedAt())
+                .recordedAt(entry.getCreatedAt())
                 .session(entry.getSession())
                 .tradeAction(entry.getTradeAction())
-                .symbol(stock.getSymbol())
                 .unitPrice(entry.getUnitPrice())
                 .quantity(entry.getQuantity())
                 .emotionCode(entry.getEmotionCode())
-                .emotionIntensity(entry.getEmotionIntensity())
-                .memo(entry.getMemo())
+                .name(stock.getName())
+                .content(content)
                 .build();
     }
 }

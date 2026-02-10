@@ -1,4 +1,4 @@
-package com.umc.finly.domain.record.dto.req;
+package com.umc.finly.domain.record.dto.request;
 
 import com.umc.finly.domain.record.enums.EmotionCode;
 import com.umc.finly.domain.record.enums.TradeAction;
