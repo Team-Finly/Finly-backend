@@ -4,7 +4,7 @@ import com.umc.finly.domain.analysis.stock.dto.res.PriceDistributionResDTO;
 import com.umc.finly.domain.analysis.stock.dto.res.RecentDecisionResDTO;
 import com.umc.finly.domain.analysis.stock.dto.res.StockSummaryResDTO;
 import com.umc.finly.domain.analysis.stock.enums.PriceRangeType;
-import com.umc.finly.domain.market.exception.code.MarketErrorCode;
+import com.umc.finly.domain.market.exception.MarketErrorCode;
 import com.umc.finly.domain.market.stock.entity.Stock;
 import com.umc.finly.domain.market.stock.repository.StockRepository;
 import com.umc.finly.domain.record.entity.RecordEntry;

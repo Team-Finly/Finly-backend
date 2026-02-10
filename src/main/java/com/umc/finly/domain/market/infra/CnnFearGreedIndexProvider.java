@@ -4,7 +4,7 @@ import com.fasterxml.jackson.databind.JsonNode;
 import com.fasterxml.jackson.databind.ObjectMapper;
 import com.umc.finly.domain.market.dto.res.FearGreedResDTO;
 import com.umc.finly.domain.market.enums.FearGreedStatus;
-import com.umc.finly.domain.market.exception.code.MarketErrorCode;
+import com.umc.finly.domain.market.exception.MarketErrorCode;
 import com.umc.finly.global.apiPayload.exception.CustomException;
 import org.springframework.beans.factory.annotation.Qualifier;
 import org.springframework.stereotype.Component;
