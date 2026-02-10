@@ -24,10 +24,16 @@ public class FragmentConverter {
     public FragmentSummaryResDTO toFragmentSummaryRes(
             long totalCount,
             EmotionCode dominantType,
+            boolean isMultipleDominant,
+            EmotionCode recessiveType,
+            boolean isMultipleRecessive,
             List<FragmentSummaryResDTO.TypeSummary> summaries) {
         return FragmentSummaryResDTO.builder()
                 .totalCount((int) totalCount)
                 .dominantType(dominantType)
+                .isMultipleDominant(isMultipleDominant)
+                .recessiveType(recessiveType)
+                .isMultipleRecessive(isMultipleRecessive)
                 .typeSummary(summaries)
                 .build();
     }
