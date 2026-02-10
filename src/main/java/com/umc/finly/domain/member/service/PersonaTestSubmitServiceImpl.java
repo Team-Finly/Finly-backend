@@ -5,9 +5,9 @@ import com.umc.finly.domain.member.converter.PersonaTestConverter;
 import com.umc.finly.domain.member.dto.request.PersonaTestSubmitReqDTO;
 import com.umc.finly.domain.member.dto.response.PersonaTestSubmitResDTO;
 import com.umc.finly.domain.member.entity.Persona;
-import com.umc.finly.domain.member.entity.mapping.MembersPersonasResult;
+import com.umc.finly.domain.member.entity.mapping.MemberPersonaResults;
 import com.umc.finly.domain.member.exception.MemberErrorCode;
-import com.umc.finly.domain.member.repository.MemberPersonaResultRepository;
+import com.umc.finly.domain.member.repository.MemberPersonaResultsRepository;
 import com.umc.finly.global.apiPayload.exception.CustomException;
 import lombok.RequiredArgsConstructor;
 import org.springframework.stereotype.Service;
@@ -18,7 +18,7 @@ import org.springframework.transaction.annotation.Transactional;
 @Transactional
 public class PersonaTestSubmitServiceImpl implements PersonaTestSubmitService{
     private final PersonaScoringService personaScoringService;
-    private final MemberPersonaResultRepository memberPersonaResultRepository;
+    private final MemberPersonaResultsRepository memberPersonaResultsRepository;
 
     @Override
     public PersonaTestSubmitResDTO submit(String mode, Long memberId, PersonaTestSubmitReqDTO request){
@@ -38,13 +38,13 @@ public class PersonaTestSubmitServiceImpl implements PersonaTestSubmitService{
                 throw new CustomException(AuthErrorCode.UNAUTHORIZED);
             }
 
-            MembersPersonasResult result =
-                    memberPersonaResultRepository.findByMemberId(memberId)
+            MemberPersonaResults result =
+                    memberPersonaResultsRepository.findByMemberId(memberId)
                             .map(existing -> existing.updatePersona(persona))
-                            .orElseGet(() -> MembersPersonasResult.create(memberId, persona));
+                            .orElseGet(() -> MemberPersonaResults.create(memberId, persona));
 
-            MembersPersonasResult saved =
-                    memberPersonaResultRepository.saveAndFlush(result);
+            MemberPersonaResults saved =
+                    memberPersonaResultsRepository.saveAndFlush(result);
 
             return PersonaTestConverter.toSubmitResDTO(
                     persona,

@@ -13,8 +13,8 @@ import com.umc.finly.domain.auth.repository.TermRepository;
 import com.umc.finly.domain.member.dto.request.PersonaAnswerReqDTO;
 import com.umc.finly.domain.member.entity.Member;
 import com.umc.finly.domain.member.entity.Persona;
-import com.umc.finly.domain.member.entity.mapping.MembersPersonasResult;
-import com.umc.finly.domain.member.repository.MemberPersonaResultRepository;
+import com.umc.finly.domain.member.entity.mapping.MemberPersonaResults;
+import com.umc.finly.domain.member.repository.MemberPersonaResultsRepository;
 import com.umc.finly.domain.member.repository.MemberRepository;
 import com.umc.finly.domain.member.repository.MemberTermRepository;
 import com.umc.finly.domain.member.service.PersonaScoringService;
@@ -49,7 +49,7 @@ public class AuthServiceImpl implements AuthService {
     private final TermRepository termRepository;
     private final MemberTermRepository memberTermRepository;
     private final PersonaScoringService personaScoringService;
-    private final MemberPersonaResultRepository memberPersonaResultRepository;
+    private final MemberPersonaResultsRepository memberPersonaResultsRepository;
 
     private final PasswordEncoder passwordEncoder;
     private final JwtProvider jwtProvider;
@@ -107,8 +107,8 @@ public class AuthServiceImpl implements AuthService {
         Member savedMember = memberRepository.save(member);
 
         // 7. 페르소나 결과 member_persona_results 에 저장
-        MembersPersonasResult personaResult = MembersPersonasResult.create(savedMember.getId(), persona);
-        memberPersonaResultRepository.save(personaResult);
+        MemberPersonaResults personaResult = MemberPersonaResults.create(savedMember.getId(), persona);
+        memberPersonaResultsRepository.save(personaResult);
 
         // 8. 약관 동의 저장
         saveTermAgreements(savedMember, agreedMap);
