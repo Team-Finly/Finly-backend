@@ -100,7 +100,7 @@ public class MyPageServiceImpl implements MyPageService{
         String imageUrl = imageStorageService.upload(image, "profile");
 
         // URL 저장
-        member.addProfileImage(imageUrl);
+        member.setProfileImage(imageUrl);
         memberRepository.save(member);
 
         return ProfileImageResDTO.builder()
@@ -127,7 +127,7 @@ public class MyPageServiceImpl implements MyPageService{
 
         // DB에 새 URL 저장
         // (member.addProfileImage가 "없을 때만" 동작하는 메서드면, 교체용 setter/update 메서드가 필요)
-        member.updateProfileImage(newImageUrl);
+        member.setProfileImage(newImageUrl);
         memberRepository.save(member);
 
         // 기존 파일 삭제 (새 업로드/DB 저장 성공 후)
