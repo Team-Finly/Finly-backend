@@ -21,7 +21,7 @@ public interface EmotionAnalysisRepository extends JpaRepository<RecordEntry, Lo
     """)
     List<EmotionCountProjection> countGroupByEmotionCode(@Param("memberId") Long memberId, @Param("stockId") Long stockId);
 
-    List<RecordEntry> findAllByMemberIdAndStockIdAndDeletedAtIsNull(Long memberId, Long stockId);
+    List<RecordEntry> findAllByMemberIdAndStockId(Long memberId, Long stockId);
 
     // 회원의 기록을 세션(PRE_MARKET/MORNING/AFTERNOON/POST_MARKET) 기준으로 그룹핑하여 개수 집계
     @Query("""
@@ -29,7 +29,6 @@ public interface EmotionAnalysisRepository extends JpaRepository<RecordEntry, Lo
     from RecordEntry r
     where r.memberId = :memberId
         and r.stockId = :stockId
-        and r.deletedAt is null
     group by r.session
 """)
     List<SessionCountProjection> countGroupBySession(

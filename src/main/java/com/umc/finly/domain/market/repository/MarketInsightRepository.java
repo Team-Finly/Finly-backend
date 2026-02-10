@@ -22,7 +22,6 @@ public interface MarketInsightRepository extends JpaRepository<RecordEntry, Long
             JOIN stock s ON r.stock_id = s.id
             WHERE r.trade_action = 'BUY'
               AND r.record_date >= :fromDate
-              AND r.deleted_at IS NULL
               AND s.is_active = true
             GROUP BY r.stock_id, s.name, r.emotion_code
         """,

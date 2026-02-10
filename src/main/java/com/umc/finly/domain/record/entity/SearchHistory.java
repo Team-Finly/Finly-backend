@@ -1,14 +1,12 @@
 package com.umc.finly.domain.record.entity;
 
-import com.umc.finly.global.entity.CreatedUpdatedDeletedBaseEntity;
+import com.umc.finly.global.entity.BaseEntity;
 import jakarta.persistence.*;
 import lombok.*;
-import org.hibernate.annotations.SQLRestriction;
 
 // 검색 기록 엔티티
 // 사용자의 최근 검색 키워드를 저장함 (최대 3개까지 표시)
 @Entity
-@SQLRestriction("deleted_at IS NULL") // Soft Delete 조건 (삭제된 레코드 제외)
 @Table(name = "search_history",
         uniqueConstraints = {
                 // 회원 + 키워드 조합 유니크 (중복 키워드 방지)
@@ -27,7 +25,7 @@ import org.hibernate.annotations.SQLRestriction;
 @NoArgsConstructor(access = AccessLevel.PROTECTED)
 @AllArgsConstructor
 @Builder
-public class SearchHistory extends CreatedUpdatedDeletedBaseEntity {
+public class SearchHistory extends BaseEntity {
 
     @Id
     @GeneratedValue(strategy = GenerationType.IDENTITY)
