@@ -1,5 +1,6 @@
 package com.umc.finly.domain.member.enums;
 
+// 페르소나 타입
 public enum PersonaType {
 
     WORRIED_DEER("걱정 많은 사슴"),
