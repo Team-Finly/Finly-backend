@@ -15,7 +15,7 @@ import java.util.List;
 @Service
 @RequiredArgsConstructor
 @Transactional(readOnly = true)
-public class PersonasTestServiceImpl implements PersonaTestService {
+public class PersonaTestServiceImpl implements PersonaTestService {
 
     private final PersonaTestQuestionsRepository questionRepository;
     private final PersonaTestOptionsRepository optionRepository;
