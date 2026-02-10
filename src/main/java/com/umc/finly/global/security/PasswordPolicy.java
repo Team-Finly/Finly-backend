@@ -1,4 +1,4 @@
-package com.umc.finly.global.util;
+package com.umc.finly.global.security;
 
 public final class PasswordPolicy {
     private PasswordPolicy(){}

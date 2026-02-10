@@ -1,4 +1,4 @@
-package com.umc.finly.global.config.security;
+package com.umc.finly.global.security;
 
 import lombok.AllArgsConstructor;
 import lombok.Getter;

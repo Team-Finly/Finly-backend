@@ -4,7 +4,7 @@ import com.umc.finly.domain.analysis.stock.dto.response.PriceDistributionResDTO;
 import com.umc.finly.domain.analysis.stock.dto.response.RecentDecisionResDTO;
 import com.umc.finly.domain.analysis.stock.dto.response.StockSummaryResDTO;
 import com.umc.finly.global.apiPayload.response.ApiResponse;
-import com.umc.finly.global.config.security.AuthPrincipal;
+import com.umc.finly.global.security.AuthPrincipal;
 import io.swagger.v3.oas.annotations.Operation;
 import io.swagger.v3.oas.annotations.responses.ApiResponses;
 import org.springframework.security.core.annotation.AuthenticationPrincipal;

@@ -2,7 +2,7 @@ package com.umc.finly.domain.home.controller;
 
 import com.umc.finly.domain.home.dto.response.HomeRecordsResDTO;
 import com.umc.finly.global.apiPayload.response.ApiResponse;
-import com.umc.finly.global.config.security.AuthPrincipal;
+import com.umc.finly.global.security.AuthPrincipal;
 import io.swagger.v3.oas.annotations.Operation;
 import io.swagger.v3.oas.annotations.responses.ApiResponses;
 import org.springframework.security.core.annotation.AuthenticationPrincipal;

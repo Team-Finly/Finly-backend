@@ -1,6 +1,6 @@
-package com.umc.finly.global.config.security;
+package com.umc.finly.global.security.jwt;
 
-import com.umc.finly.global.infra.jwt.JwtProvider;
+import com.umc.finly.global.security.AuthPrincipal;
 import jakarta.servlet.FilterChain;
 import jakarta.servlet.ServletException;
 import jakarta.servlet.http.HttpServletRequest;

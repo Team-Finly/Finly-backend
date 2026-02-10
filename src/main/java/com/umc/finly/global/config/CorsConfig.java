@@ -1,5 +1,6 @@
 package com.umc.finly.global.config;
 
+import com.umc.finly.global.config.properties.AppCorsProperties;
 import org.springframework.boot.context.properties.EnableConfigurationProperties;
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
