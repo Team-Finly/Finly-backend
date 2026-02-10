@@ -15,6 +15,6 @@ public class CookieProperties {
      * HTTPS 환경에서만 true
      */
     private boolean secure = false;
-    private String sameSite = "Lax";
-    private String path = "/auth";
+    private String sameSite = "None";
+    private String path = "/";
 }
