@@ -4,7 +4,7 @@ import com.umc.finly.domain.home.dto.response.HomeWeeklyMoodResDTO;
 import com.umc.finly.domain.home.service.HomeWeeklyMoodService;
 import com.umc.finly.global.apiPayload.response.ApiResponse;
 import com.umc.finly.global.apiPayload.response.SuccessCode;
-import com.umc.finly.global.config.security.AuthPrincipal;
+import com.umc.finly.global.security.AuthPrincipal;
 import io.swagger.v3.oas.annotations.Operation;
 import io.swagger.v3.oas.annotations.tags.Tag;
 import lombok.RequiredArgsConstructor;

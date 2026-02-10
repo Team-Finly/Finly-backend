@@ -1,9 +1,10 @@
-package com.umc.finly.global.config.security;
+package com.umc.finly.global.security;
 
 import com.fasterxml.jackson.databind.ObjectMapper;
 import com.umc.finly.domain.auth.exception.code.AuthErrorCode;
 import com.umc.finly.global.apiPayload.response.ApiResponse;
-import com.umc.finly.global.infra.jwt.JwtProvider;
+import com.umc.finly.global.security.jwt.JwtAuthenticationFilter;
+import com.umc.finly.global.security.jwt.JwtProvider;
 import lombok.RequiredArgsConstructor;
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;

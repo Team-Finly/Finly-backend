@@ -1,8 +1,7 @@
-package com.umc.finly.global.util;
+package com.umc.finly.global.security;
 
 import com.umc.finly.global.apiPayload.exception.CustomException;
 import com.umc.finly.global.apiPayload.response.ErrorCode;
-import com.umc.finly.global.config.security.AuthPrincipal;
 import org.springframework.security.authentication.AnonymousAuthenticationToken;
 import org.springframework.security.core.Authentication;
 import org.springframework.security.core.context.SecurityContextHolder;

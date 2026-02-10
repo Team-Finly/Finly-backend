@@ -1,4 +1,4 @@
-package com.umc.finly.global.config;
+package com.umc.finly.global.config.properties;
 
 
 

@@ -1,4 +1,4 @@
-package com.umc.finly.global.infra.jwt;
+package com.umc.finly.global.security.jwt;
 
 import io.jsonwebtoken.Claims;
 import io.jsonwebtoken.ExpiredJwtException;

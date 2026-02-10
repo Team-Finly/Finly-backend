@@ -11,7 +11,7 @@ import com.umc.finly.domain.member.repository.MemberRepository;
 import com.umc.finly.domain.record.repository.FragmentRepository;
 import com.umc.finly.global.apiPayload.exception.CustomException;
 import com.umc.finly.global.infra.image.ImageStorageService;
-import com.umc.finly.global.util.PasswordPolicy;
+import com.umc.finly.global.security.PasswordPolicy;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.security.crypto.password.PasswordEncoder;

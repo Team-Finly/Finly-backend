@@ -1,6 +1,6 @@
 package com.umc.finly.global.util;
 
-import com.umc.finly.global.config.CookieProperties;
+import com.umc.finly.global.config.properties.CookieProperties;
 import jakarta.servlet.http.HttpServletResponse;
 import lombok.RequiredArgsConstructor;
 import org.springframework.http.ResponseCookie;
