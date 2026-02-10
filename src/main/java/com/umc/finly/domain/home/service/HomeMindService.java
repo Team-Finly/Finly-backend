@@ -1,7 +1,7 @@
 package com.umc.finly.domain.home.service;
 
-import com.umc.finly.domain.home.dto.res.HomeMindDetailResDTO;
-import com.umc.finly.domain.home.dto.res.HomeMindResDTO;
+import com.umc.finly.domain.home.dto.response.HomeMindDetailResDTO;
+import com.umc.finly.domain.home.dto.response.HomeMindResDTO;
 
 public interface HomeMindService {
     HomeMindResDTO getHomeMind(Long memberId); // 요약 조회
