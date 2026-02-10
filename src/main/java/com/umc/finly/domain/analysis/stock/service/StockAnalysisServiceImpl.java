@@ -1,5 +1,6 @@
 package com.umc.finly.domain.analysis.stock.service;
 
+<<<<<<< Updated upstream
 import com.umc.finly.domain.analysis.stock.converter.PriceDistributionConverter;
 import com.umc.finly.domain.analysis.stock.converter.RecentDecisionConverter;
 import com.umc.finly.domain.analysis.stock.converter.StockSummaryConverter;
@@ -7,6 +8,13 @@ import com.umc.finly.domain.analysis.stock.dto.res.PriceDistributionResDTO;
 import com.umc.finly.domain.analysis.stock.dto.res.RecentDecisionResDTO;
 import com.umc.finly.domain.analysis.stock.dto.res.StockSummaryResDTO;
 import com.umc.finly.domain.market.exception.MarketErrorCode;
+=======
+import com.umc.finly.domain.analysis.stock.dto.response.PriceDistributionResDTO;
+import com.umc.finly.domain.analysis.stock.dto.response.RecentDecisionResDTO;
+import com.umc.finly.domain.analysis.stock.dto.response.StockSummaryResDTO;
+import com.umc.finly.domain.analysis.stock.enums.PriceRangeType;
+import com.umc.finly.domain.market.exception.code.MarketErrorCode;
+>>>>>>> Stashed changes
 import com.umc.finly.domain.market.stock.entity.Stock;
 import com.umc.finly.domain.market.stock.repository.StockRepository;
 import com.umc.finly.domain.record.entity.RecordEntry;

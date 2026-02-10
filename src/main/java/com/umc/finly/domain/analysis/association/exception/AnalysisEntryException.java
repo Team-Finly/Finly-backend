@@ -1,5 +1,6 @@
 package com.umc.finly.domain.analysis.association.exception;
 
+import com.umc.finly.domain.analysis.association.exception.code.AnalysisEntryErrorCode;
 import com.umc.finly.global.apiPayload.exception.CustomException;
 
 public class AnalysisEntryException extends CustomException {

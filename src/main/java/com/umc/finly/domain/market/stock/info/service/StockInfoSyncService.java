@@ -1,10 +1,10 @@
 package com.umc.finly.domain.market.stock.info.service;
 
-import com.umc.finly.domain.market.stock.info.dto.StockAdminResDTO;
+import com.umc.finly.domain.market.stock.info.dto.response.StockAdminResDTO;
 import com.umc.finly.domain.market.stock.info.dto.StockInfoDTO;
 import com.umc.finly.domain.market.stock.entity.Stock;
 import com.umc.finly.domain.market.stock.enums.MarketType;
-import com.umc.finly.domain.market.stock.info.exception.StockInfoErrorCode;
+import com.umc.finly.domain.market.stock.info.exception.code.StockInfoErrorCode;
 import com.umc.finly.domain.market.stock.info.exception.StockInfoException;
 import com.umc.finly.domain.market.stock.info.infra.KisStockInfoFileClient;
 import com.umc.finly.domain.market.stock.info.infra.StockInfoFileParser;

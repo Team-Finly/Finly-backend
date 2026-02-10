@@ -1,6 +1,6 @@
 package com.umc.finly.domain.analysis.association.converter;
 
-import com.umc.finly.domain.analysis.association.dto.DailyChartResDTO;
+import com.umc.finly.domain.analysis.association.dto.response.DailyChartResDTO;
 import lombok.AccessLevel;
 import lombok.NoArgsConstructor;
 

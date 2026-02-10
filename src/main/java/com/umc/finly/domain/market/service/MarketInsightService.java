@@ -1,6 +1,9 @@
 package com.umc.finly.domain.market.service;
 
+<<<<<<< Updated upstream
 import com.umc.finly.domain.market.converter.MarketInsightConverter;
+=======
+>>>>>>> Stashed changes
 import com.umc.finly.domain.market.dto.response.MarketInsightResDTO;
 import com.umc.finly.domain.market.repository.MarketInsightRepository;
 import com.umc.finly.domain.market.repository.projection.StockEmotionBuyAggregation;

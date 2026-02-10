@@ -1,6 +1,6 @@
 package com.umc.finly.domain.member.controller;
 
-import com.umc.finly.domain.auth.exception.AuthErrorCode;
+import com.umc.finly.domain.auth.exception.code.AuthErrorCode;
 import com.umc.finly.domain.member.dto.request.PersonaTestSubmitReqDTO;
 import com.umc.finly.domain.member.dto.response.PersonaTestQuestionResDTO;
 import com.umc.finly.domain.member.dto.response.PersonaTestSubmitResDTO;

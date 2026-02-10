@@ -1,6 +1,6 @@
 package com.umc.finly.domain.member.controller;
 
-import com.umc.finly.domain.auth.exception.AuthErrorCode;
+import com.umc.finly.domain.auth.exception.code.AuthErrorCode;
 import com.umc.finly.domain.member.dto.request.PasswordChangeReqDTO;
 import com.umc.finly.domain.member.dto.request.UpdateNicknameReqDTO;
 import com.umc.finly.domain.member.dto.response.*;

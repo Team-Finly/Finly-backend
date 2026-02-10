@@ -1,8 +1,8 @@
 package com.umc.finly.domain.analysis.association.converter;
 
-import com.umc.finly.domain.analysis.association.dto.AnalysisEntryResDTO;
-import com.umc.finly.domain.analysis.association.dto.AnalysisEntryResDTO.RecordLevel;
-import com.umc.finly.domain.analysis.association.dto.AnalysisEntryResDTO.DefaultStockDto;
+import com.umc.finly.domain.analysis.association.dto.response.AnalysisEntryResDTO;
+import com.umc.finly.domain.analysis.association.dto.response.AnalysisEntryResDTO.RecordLevel;
+import com.umc.finly.domain.analysis.association.dto.response.AnalysisEntryResDTO.DefaultStockDto;
 
 import com.umc.finly.domain.market.stock.entity.Stock;
 

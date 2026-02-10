@@ -1,9 +1,9 @@
 package com.umc.finly.domain.auth.service;
 
-import com.umc.finly.domain.auth.dto.req.AuthLoginReqDTO;
-import com.umc.finly.domain.auth.dto.req.AuthSignUpReqDTO;
-import com.umc.finly.domain.auth.dto.res.AuthLoginResDTO;
-import com.umc.finly.domain.auth.dto.res.AuthSignUpResDTO;
+import com.umc.finly.domain.auth.dto.request.AuthLoginReqDTO;
+import com.umc.finly.domain.auth.dto.request.AuthSignUpReqDTO;
+import com.umc.finly.domain.auth.dto.response.AuthLoginResDTO;
+import com.umc.finly.domain.auth.dto.response.AuthSignUpResDTO;
 import jakarta.servlet.http.HttpServletResponse;
 
 public interface AuthService {

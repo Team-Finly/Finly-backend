@@ -1,7 +1,7 @@
 package com.umc.finly.global.config.security;
 
 import com.fasterxml.jackson.databind.ObjectMapper;
-import com.umc.finly.domain.auth.exception.AuthErrorCode;
+import com.umc.finly.domain.auth.exception.code.AuthErrorCode;
 import com.umc.finly.global.apiPayload.response.ApiResponse;
 import com.umc.finly.global.infra.jwt.JwtProvider;
 import lombok.RequiredArgsConstructor;

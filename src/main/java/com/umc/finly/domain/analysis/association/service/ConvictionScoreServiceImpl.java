@@ -1,9 +1,9 @@
 package com.umc.finly.domain.analysis.association.service;
 
 import com.umc.finly.domain.analysis.association.converter.ConvictionScoreConverter;
-import com.umc.finly.domain.analysis.association.dto.ConvictionScoreResDTO;
+import com.umc.finly.domain.analysis.association.dto.response.ConvictionScoreResDTO;
 import com.umc.finly.domain.analysis.association.entity.ConvictionScoreResult;
-import com.umc.finly.domain.analysis.association.exception.ConvictionScoreErrorCode;
+import com.umc.finly.domain.analysis.association.exception.code.ConvictionScoreErrorCode;
 import com.umc.finly.domain.analysis.association.exception.ConvictionScoreException;
 import com.umc.finly.domain.analysis.association.repository.ConvictionScoreResultRepository;
 import lombok.RequiredArgsConstructor;
