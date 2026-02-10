@@ -21,10 +21,13 @@ public interface FragmentRepository extends JpaRepository<RecordEntry, Long> {
 
     // 감정 타입별 기록 개수 집계 (조각 모음함 요약용)
     @Query("""
-        select r.emotionCode as emotionCode, count(r) as count
-        from RecordEntry r
-        where r.memberId = :memberId
-        group by r.emotionCode
+    select
+        r.emotionCode as emotionCode,
+        count(r) as count,
+        max(r.createdAt) as latestAt
+    from RecordEntry r
+    where r.memberId = :memberId
+    group by r.emotionCode
     """)
     List<EmotionCountProjection> countGroupByEmotionCode(@Param("memberId") Long memberId);
 
@@ -108,8 +111,9 @@ public interface FragmentRepository extends JpaRepository<RecordEntry, Long> {
 
     // 감정별 개수 집계 결과를 받기 위한 Projection
     interface EmotionCountProjection {
-        EmotionCode getEmotionCode(); // 감정 코드
-        Long getCount();              // 해당 감정의 기록 개수
+        EmotionCode getEmotionCode();           // 감정 코드
+        Long getCount();                        // 해당 감정의 기록 개수
+        java.time.LocalDateTime getLatestAt();  // 해당 감정의 최신 기록 시각
     }
 
     // 조각 리스트 조회 결과를 담는 Projection (Stock 조인 포함)

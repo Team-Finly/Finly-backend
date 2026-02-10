@@ -1,5 +1,6 @@
 package com.umc.finly.domain.record.dto.res;
 
+import com.fasterxml.jackson.annotation.JsonPropertyOrder;
 import com.umc.finly.domain.record.enums.EmotionCode;
 import lombok.*;
 
@@ -11,10 +12,21 @@ import java.util.List;
 @Builder
 @NoArgsConstructor
 @AllArgsConstructor
+@JsonPropertyOrder({
+        "totalCount",
+        "dominantType",
+        "isMultipleDominant",
+        "recessiveType",
+        "isMultipleRecessive",
+        "typeSummary"
+})
 public class FragmentSummaryResDTO {
 
     private int totalCount;                   // 전체 기록 개수
-    private EmotionCode dominantType;         // 가장 많이 기록된 감정 타입 (우세 감정)
+    private EmotionCode dominantType;         // 가장 많이 기록된 감정 타입 (동률 시 최신순)
+    private boolean isMultipleDominant;       // 가장 많은 조각이 여러 개인지 여부
+    private EmotionCode recessiveType;        // 가장 적은 조각 (동률 시 최신순)
+    private boolean isMultipleRecessive;      // 가장 적은 조각이 여러 개인지 여부
     private List<TypeSummary> typeSummary;    // 감정 타입별 요약 정보 리스트
 
     // 감정 타입별 통계
