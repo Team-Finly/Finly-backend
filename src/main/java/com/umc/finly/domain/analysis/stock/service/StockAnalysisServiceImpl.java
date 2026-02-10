@@ -2,10 +2,10 @@ package com.umc.finly.domain.analysis.stock.service;
 
 import com.umc.finly.domain.analysis.stock.converter.PriceDistributionConverter;
 import com.umc.finly.domain.analysis.stock.converter.RecentDecisionConverter;
+import com.umc.finly.domain.analysis.stock.converter.StockSummaryConverter;
 import com.umc.finly.domain.analysis.stock.dto.res.PriceDistributionResDTO;
 import com.umc.finly.domain.analysis.stock.dto.res.RecentDecisionResDTO;
 import com.umc.finly.domain.analysis.stock.dto.res.StockSummaryResDTO;
-import com.umc.finly.domain.analysis.stock.enums.PriceRangeType;
 import com.umc.finly.domain.market.exception.code.MarketErrorCode;
 import com.umc.finly.domain.market.stock.entity.Stock;
 import com.umc.finly.domain.market.stock.repository.StockRepository;
@@ -133,12 +133,12 @@ public class StockAnalysisServiceImpl implements StockAnalysisService {
                     .divide(totalQuantity, 0, RoundingMode.HALF_UP)
                     .intValue();
 
-        return StockSummaryResDTO.builder()
-                .averageBuyPrice(averageBuyPrice)
-                .currentPrice(currentPrice)
-                .totalBuyCount(totalBuyCount)
-                .maxHoldingDays(maxHoldingDays)
-                .build();
+        return StockSummaryConverter.toDto(
+                averageBuyPrice,
+                currentPrice,
+                totalBuyCount,
+                maxHoldingDays
+        );
     }
 
     @Override
