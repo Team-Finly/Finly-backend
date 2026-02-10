@@ -323,6 +323,22 @@ public class RecordServiceImpl implements RecordService {
         return RecentSearchResDTO.from(recentKeywords);
     }
 
+    @Override
+    @Transactional
+    public void deleteSearchKeyword(Long memberId, String keyword) {
+        // 키워드 정규화 (앞뒤 공백 제거)
+        String normalizedKeyword = (keyword == null) ? null : keyword.strip();
+        if (normalizedKeyword == null || normalizedKeyword.isBlank()) {
+            throw new CustomException(RecordErrorCode.RECORD_INVALID_REQUEST);
+        }
+
+        // 검색 기록 삭제 (본인 기록만 삭제됨)
+        int deletedCount = searchHistoryRepository.deleteByMemberIdAndKeyword(memberId, normalizedKeyword);
+        if (deletedCount == 0) {
+            throw new CustomException(RecordErrorCode.SEARCH_HISTORY_NOT_FOUND);
+        }
+    }
+
     // 검색 키워드 저장 (중복 키워드는 updatedAt만 갱신)
     private void saveSearchHistory(Long memberId, String keyword) {
         searchHistoryRepository.findByMemberIdAndKeyword(memberId, keyword)

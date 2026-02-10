@@ -18,6 +18,7 @@ public enum RecordErrorCode implements BaseCode {
     INVALID_PERIOD_KEY(HttpStatus.BAD_REQUEST, "RECORD400_3", "지원하지 않는 기간 설정입니다."),         // 잘못된 FragmentPeriodKey
     RECORD_FORBIDDEN(HttpStatus.FORBIDDEN, "RECORD403_1", "해당 기록에 대한 권한이 없습니다."),         // 다른 사용자 기록 접근 시도
     RECORD_NOT_FOUND(HttpStatus.NOT_FOUND, "RECORD404_2", "기록을 찾을 수 없습니다."),                // 존재하지 않는 recordId
+    SEARCH_HISTORY_NOT_FOUND(HttpStatus.NOT_FOUND, "RECORD404_3", "검색 기록을 찾을 수 없습니다."),    // 존재하지 않는 검색 기록
     RECORD_DUPLICATE_SUBMISSION(HttpStatus.CONFLICT, "RECORD409_3", "중복 제출된 요청입니다."),        // clientRequestId 중복 (멱등성)
 
     // ===== FEEDBACK 에러 (4xx) =====
