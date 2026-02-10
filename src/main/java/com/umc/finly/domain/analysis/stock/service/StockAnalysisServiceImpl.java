@@ -1,5 +1,6 @@
 package com.umc.finly.domain.analysis.stock.service;
 
+import com.umc.finly.domain.analysis.stock.converter.PriceDistributionConverter;
 import com.umc.finly.domain.analysis.stock.converter.RecentDecisionConverter;
 import com.umc.finly.domain.analysis.stock.dto.res.PriceDistributionResDTO;
 import com.umc.finly.domain.analysis.stock.dto.res.RecentDecisionResDTO;
@@ -216,38 +217,17 @@ public class StockAnalysisServiceImpl implements StockAnalysisService {
             highRatio += remain;
         }
 
-        int finalMaxRatio = Math.max(lowRatio, Math.max(midRatio, highRatio));
-
-        List<PriceDistributionResDTO.PriceDistributionItem> items = new ArrayList<>();
-
-        items.add(new PriceDistributionResDTO.PriceDistributionItem(
-                PriceRangeType.LOW,
-                String.format("%,d원 미만", lowerBound),
-                low,
-                lowRatio,
-                lowRatio == finalMaxRatio ? true : null
-        ));
-
-        items.add(new PriceDistributionResDTO.PriceDistributionItem(
-                PriceRangeType.MID,
-                String.format("%,d원 ~ %,d원", lowerBound, upperBound),
-                mid,
-                midRatio,
-                midRatio == finalMaxRatio ? true : null
-        ));
-
-        items.add(new PriceDistributionResDTO.PriceDistributionItem(
-                PriceRangeType.HIGH,
-                String.format("%,d원 이상", upperBound),
-                high,
-                highRatio,
-                highRatio == finalMaxRatio ? true : null
-        ));
-
-        return new PriceDistributionResDTO(
+        return PriceDistributionConverter.toDto(
                 averageBuyPrice,
-                new PriceDistributionResDTO.RangePolicy("AVERAGE_BUY_PRICE", RANGE_PERCENT),
-                items
+                RANGE_PERCENT,
+                lowerBound,
+                upperBound,
+                low,
+                mid,
+                high,
+                lowRatio,
+                midRatio,
+                highRatio
         );
     }
 
