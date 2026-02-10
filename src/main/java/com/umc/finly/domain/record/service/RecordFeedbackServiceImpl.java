@@ -17,8 +17,6 @@ import org.springframework.transaction.annotation.Transactional;
 import org.springframework.transaction.support.TransactionSynchronization;
 import org.springframework.transaction.support.TransactionSynchronizationManager;
 
-import static com.umc.finly.domain.analysis.association.converter.AnalysisEntryConverter.toResDTO;
-
 // AI 피드백 비즈니스 로직 구현체
 // 피드백 생성/조회/재생성과 비동기 실행을 관리함
 @Slf4j
