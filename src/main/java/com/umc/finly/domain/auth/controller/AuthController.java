@@ -11,6 +11,7 @@ import com.umc.finly.domain.auth.service.AuthService;
 import com.umc.finly.global.apiPayload.exception.CustomException;
 import com.umc.finly.global.apiPayload.response.ApiResponse;
 import com.umc.finly.global.apiPayload.response.SuccessCode;
+import com.umc.finly.global.config.security.AuthPrincipal;
 import com.umc.finly.global.util.CookieUtil;
 import io.swagger.v3.oas.annotations.Operation;
 import io.swagger.v3.oas.annotations.tags.Tag;
@@ -19,6 +20,7 @@ import jakarta.validation.Valid;
 import jakarta.validation.constraints.Email;
 import jakarta.validation.constraints.NotBlank;
 import lombok.RequiredArgsConstructor;
+import org.springframework.security.core.annotation.AuthenticationPrincipal;
 import org.springframework.validation.annotation.Validated;
 import org.springframework.web.bind.annotation.*;
 
@@ -28,10 +30,8 @@ import org.springframework.web.bind.annotation.*;
 @RequestMapping("/auth")
 @Tag(name = "Auth", description = "인증 · 회원가입 · 로그인")
 public class AuthController {
-    // 인증 관련 비즈니스 로직 담당 서비스
 
     private final AuthService authService;
-
     private final CookieUtil cookieUtil;
 
     /**
@@ -55,14 +55,11 @@ public class AuthController {
     ) {
         boolean available = authService.isEmailAvailable(email);
 
-        // 이미 가입된 이메일인 경우 에러 응답
-        if(!available){
+        if (!available) {
             throw new CustomException(AuthErrorCode.EMAIL_ALREADY_EXISTS);
         }
 
-        return ApiResponse.onSuccess(CheckEmailResDTO.of(true),
-                SuccessCode.OK
-        );
+        return ApiResponse.onSuccess(new CheckEmailResDTO(true), SuccessCode.OK);
     }
 
     /**
@@ -79,7 +76,7 @@ public class AuthController {
                     """
     )
     @PostMapping("/signup")
-    public ApiResponse<AuthSignUpResDTO> signup(@RequestBody @Valid AuthSignUpReqDTO request){
+    public ApiResponse<AuthSignUpResDTO> signup(@RequestBody @Valid AuthSignUpReqDTO request) {
         AuthSignUpResDTO result = authService.signup(request);
         return ApiResponse.onSuccess(result, SuccessCode.CREATED);
     }
@@ -100,7 +97,7 @@ public class AuthController {
     public ApiResponse<AuthLoginResDTO> login(
             @RequestBody @Valid AuthLoginReqDTO request,
             HttpServletResponse response
-            ){
+    ) {
         AuthService.LoginTokens tokens = authService.login(request);
 
         cookieUtil.addRefreshTokenCookie(
@@ -129,14 +126,16 @@ public class AuthController {
     public ApiResponse<AuthReissueResDTO> reissue(
             @CookieValue(value = "refreshToken", required = false) String refreshToken,
             HttpServletResponse response
-    ){
+    ) {
         AuthService.ReissueTokens tokens = authService.reissue(refreshToken);
-        cookieUtil.addRefreshTokenCookie(response, tokens.refreshToken(), tokens.refreshMaxAgeSeconds());
 
-        return ApiResponse.onSuccess(
-                AuthReissueResDTO.of(tokens.accessToken()),
-                SuccessCode.OK
+        cookieUtil.addRefreshTokenCookie(
+                response,
+                tokens.refreshToken(),
+                tokens.refreshMaxAgeSeconds()
         );
+
+        return ApiResponse.onSuccess(new AuthReissueResDTO(tokens.accessToken()), SuccessCode.OK);
     }
 
     /**
@@ -161,9 +160,15 @@ public class AuthController {
                 """
     )
     @PostMapping("/logout")
-    public ApiResponse<Object> logout(HttpServletResponse response){
-        authService.logout(response);
+    public ApiResponse<Object> logout(
+            @AuthenticationPrincipal AuthPrincipal principal,
+            HttpServletResponse response
+    ) {
+        if (principal == null) {
+            throw new CustomException(AuthErrorCode.UNAUTHORIZED);
+        }
 
+        authService.logout(response);
         return ApiResponse.onSuccess(new Object(), SuccessCode.OK);
     }
 }
