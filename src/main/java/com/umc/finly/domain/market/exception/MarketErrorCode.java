@@ -1,4 +1,4 @@
-package com.umc.finly.domain.market.exception.code;
+package com.umc.finly.domain.market.exception;
 
 import com.umc.finly.global.apiPayload.response.BaseCode;
 import com.umc.finly.global.apiPayload.response.ErrorCode;
