@@ -1,5 +1,6 @@
 package com.umc.finly.domain.home.service;
 
+import com.umc.finly.domain.home.converter.HomeRecordConverter;
 import com.umc.finly.domain.home.dto.res.HomeRecordsResDTO;
 import com.umc.finly.domain.record.dto.res.RecordSearchResDTO;
 import com.umc.finly.domain.record.service.RecordService;
@@ -37,20 +38,7 @@ public class HomeRecordServiceImpl implements HomeRecordService {
                         // 상위 5개
                         .limit(5)
                         // DTO 변환
-                        .map(r -> HomeRecordsResDTO.Record.builder()
-                                .recordId(r.getRecordId())
-                                .recordDate(r.getRecordDate())
-                                .recordedAt(r.getRecordedAt())
-                                .session(r.getSession())
-                                .tradeAction(r.getTradeAction())
-                                .symbol(r.getSymbol())
-                                .unitPrice(r.getUnitPrice())
-                                .quantity(r.getQuantity())
-                                .emotionCode(r.getEmotionCode())
-                                .emotionIntensity(r.getEmotionIntensity())
-                                .memo(r.getMemo())
-                                .build()
-                        )
+                        .map(HomeRecordConverter::toHomeRecord)
                         .toList();
 
         return HomeRecordsResDTO.from(records);
