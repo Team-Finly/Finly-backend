@@ -7,12 +7,6 @@ import lombok.NoArgsConstructor;
 
 @NoArgsConstructor(access = AccessLevel.PRIVATE)
 public class AuthConverter {
-
-    /** 이메일 중복 확인 응답 */
-    public static CheckEmailResDTO toCheckEmailResDTO(boolean available) {
-        return new CheckEmailResDTO(available);
-    }
-
     /** 회원가입 응답 */
     public static AuthSignUpResDTO toSignUpResDTO(Member member, Long personaId) {
         return new AuthSignUpResDTO(
@@ -33,10 +27,5 @@ public class AuthConverter {
                         member.getNickname()
                 )
         );
-    }
-
-    /** 토큰 재발급 응답 */
-    public static AuthReissueResDTO toReissueResDTO(String accessToken) {
-        return new AuthReissueResDTO(accessToken);
     }
 }
