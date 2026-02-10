@@ -1,5 +1,7 @@
 package com.umc.finly.domain.home.service;
 
+import com.umc.finly.domain.analysis.association.entity.ConvictionScoreResult;
+import com.umc.finly.domain.analysis.association.entity.FearIndexResult;
 import com.umc.finly.domain.home.dto.res.HomeMindDetailResDTO;
 import com.umc.finly.domain.home.dto.res.HomeMindResDTO;
 import com.umc.finly.domain.home.exception.code.HomeErrorCode;
@@ -51,17 +53,20 @@ public class HomeMindServiceImpl implements HomeMindService {
           int cScore = (int) ((double) recordedDays / now.lengthOfMonth() * 100);
 
           /* ========= A. 하락장 회복탄력성 ========= */
-          int aScore = homeMindRepository
-                  .findLatestFearIndexResult(memberId)
-                  // 공포지수 ↑ = 회복탄력성 ↓
-                  .map(r -> Math.max(0, 100 - r.getFearIndex().intValue()))
-                  .orElse(0);
+          List<FearIndexResult> fearResults =
+                  homeMindRepository.findLatestFearIndexResults(memberId);
+
+          int aScore = fearResults.isEmpty()
+                  ? 0
+                  : Math.max(0, 100 - fearResults.get(0).getFearIndex().intValue());
 
           /* ========= B. 매수 확신도 ========= */
-          int bScore = homeMindRepository
-                  .findLatestConvictionScoreResult(memberId)
-                  .map(r -> r.getConvictionScore().intValue())
-                  .orElse(0);
+          List<ConvictionScoreResult> convictionResults =
+                  homeMindRepository.findLatestConvictionScoreResults(memberId);
+
+          int bScore = convictionResults.isEmpty()
+                  ? 0
+                  : convictionResults.get(0).getConvictionScore().intValue();
 
           int fmi = (int) (
                   aScore * 0.4 +

@@ -29,24 +29,22 @@ public interface HomeMindRepository extends Repository<RecordEntry, Long> {
             LocalDate end
     );
 
-
-    //A. 하락장 공포지수 (최신)
+    // A. 하락장 공포지수 (최신 1개)
     @Query("""
         select f
         from FearIndexResult f
         where f.memberId = :memberId
         order by f.endDate desc
     """)
-    Optional<FearIndexResult> findLatestFearIndexResult(Long memberId);
+    List<FearIndexResult> findLatestFearIndexResults(Long memberId);
 
-
-    //B. 매수 확신도 (최신)
+    // B. 매수 확신도 (최신 1개)
     @Query("""
         select c
         from ConvictionScoreResult c
         where c.memberId = :memberId
         order by c.endDate desc
     """)
-    Optional<ConvictionScoreResult> findLatestConvictionScoreResult(Long memberId);
+    List<ConvictionScoreResult> findLatestConvictionScoreResults(Long memberId);
 
 }
