@@ -1,5 +1,6 @@
 package com.umc.finly.domain.market.service;
 
+import com.umc.finly.domain.market.converter.MarketInsightConverter;
 import com.umc.finly.domain.market.dto.response.MarketInsightResDTO;
 import com.umc.finly.domain.market.repository.MarketInsightRepository;
 import com.umc.finly.domain.market.repository.projection.StockEmotionBuyAggregation;
@@ -25,13 +26,9 @@ public class MarketInsightService {
         List<StockEmotionBuyAggregation> rows =
                 marketInsightRepository.aggregateBuyEmotionByStock(fromDate);
 
-        if (rows.isEmpty()) {//사용자 데이터가 비어있을 때 (초기 상태)
-            return MarketInsightResDTO.builder()
-                    .message("아직 충분한 사용자 데이터가 없어요")
-                    .dominantEmotion("EMPTY")
-                    .buySellRatio("EMPTY")
-                    .confidenceLevel("EMPTY")
-                    .build();
+        // 사용자 데이터 없음
+        if (rows.isEmpty()) {
+            return MarketInsightConverter.toEmptyInsight();
         }
 
         // 종목별로 가장 많이 나온 감정 하나씩 집계하기
@@ -61,13 +58,13 @@ public class MarketInsightService {
 
         String message = generateMessage(stockName, emotion);
 
-        return MarketInsightResDTO.builder()
-                .stockName(stockName)
-                .message(message)
-                .dominantEmotion(emotion.name())
-                .buySellRatio("BUY_DOMINANT")
-                .confidenceLevel(calcConfidence(candidates.size()))
-                .build();
+        return MarketInsightConverter.toInsight(
+                stockName,
+                message,
+                emotion,
+                "BUY_DOMINANT",
+                calcConfidence(candidates.size())
+        );
     }
 
     private EmotionCode parseEmotion(String emotionCode) {

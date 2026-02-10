@@ -1,5 +1,6 @@
 package com.umc.finly.domain.market.service;
 
+import com.umc.finly.domain.market.converter.MarketIndexConverter;
 import com.umc.finly.domain.market.dto.response.FearGreedResDTO;
 import com.umc.finly.domain.market.dto.response.MarketIndexResDTO;
 import com.umc.finly.domain.market.dto.response.MarketIndicesDTO;
@@ -27,11 +28,9 @@ public class MarketIndexService {
         FearGreedResDTO fearGreed = fearGreedIndexProvider.getFearGreedIndex();
         LocalDateTime snapshotAt = LocalDateTime.now(ZoneId.of("Asia/Seoul"));
 
-        return MarketIndexResDTO.snapshot(
-                indices.getKospi(),
-                indices.getKosdaq(),
-                fearGreed.getScore(),
-                fearGreed.getStatus().name(),
+        return MarketIndexConverter.toMarketIndexSnapshot(
+                indices,
+                fearGreed,
                 snapshotAt
         );
     }
