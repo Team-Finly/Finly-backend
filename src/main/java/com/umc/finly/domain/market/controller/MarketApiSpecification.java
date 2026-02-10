@@ -8,7 +8,7 @@ import io.swagger.v3.oas.annotations.media.Content;
 import io.swagger.v3.oas.annotations.media.ExampleObject;
 import io.swagger.v3.oas.annotations.responses.ApiResponses;
 
-public interface MarkApiSpecification {
+public interface MarketApiSpecification {
 
     @Operation(
             summary = "시장 지수 조회",

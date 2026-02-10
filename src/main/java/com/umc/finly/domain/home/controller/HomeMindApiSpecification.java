@@ -37,16 +37,13 @@ public interface HomeMindApiSpecification {
                                                 "personaTitle": "신중한 거북이",
                                                 "fmiScore": 64,
                                                 "fmiLevelLabel": "평균적 대응",
-                                                "fmiDescription": "일부 상황에서는 이성적으로 대응하고 있어요",
-                                     
+                                                "fmiDescription": "일부 상황에서는 이성적으로 대응하고 있어요"
                                               }
-                                            }
-                                            
+                                            }                                            
                                             """
                             )
                     )
-            )
-    })
+            )  })
     public ApiResponse<HomeMindResDTO> getHomeMind(
             @AuthenticationPrincipal AuthPrincipal principal
     );
