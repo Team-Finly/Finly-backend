@@ -1,5 +1,6 @@
 package com.umc.finly.domain.analysis.stock.service;
 
+import com.umc.finly.domain.analysis.stock.converter.RecentDecisionConverter;
 import com.umc.finly.domain.analysis.stock.dto.res.PriceDistributionResDTO;
 import com.umc.finly.domain.analysis.stock.dto.res.RecentDecisionResDTO;
 import com.umc.finly.domain.analysis.stock.dto.res.StockSummaryResDTO;
@@ -292,24 +293,12 @@ public class StockAnalysisServiceImpl implements StockAnalysisService {
                     continue;
                 }
 
-                BigDecimal sellAmount = record.getUnitPrice().multiply(record.getQuantity());
-
-                int decisionResult = sellAmount
-                        .subtract(accumulatedBuyAmount)
-                        .multiply(BigDecimal.valueOf(100))
-                        .divide(accumulatedBuyAmount, 0, RoundingMode.HALF_UP)
-                        .intValue();
-
                 results.add(
-                        RecentDecisionResDTO.builder()
-                                .stockName(stock.getName())
-                                .emotion(record.getEmotionCode().name())
-                                .tradeType("매도")
-                                .price(record.getUnitPrice().intValue())
-                                .date(record.getRecordDate())
-                                .quantity(record.getQuantity().intValue())
-                                .decisionResult(decisionResult)
-                                .build()
+                        RecentDecisionConverter.toDto(
+                                stock,
+                                record,
+                                accumulatedBuyAmount
+                        )
                 );
 
                 accumulatedBuyAmount = BigDecimal.ZERO;
