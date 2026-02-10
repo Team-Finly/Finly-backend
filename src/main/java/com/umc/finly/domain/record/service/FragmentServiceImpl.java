@@ -92,8 +92,16 @@ public class FragmentServiceImpl implements FragmentService {
         // 퍼센트 합이 100이 되도록 보정 (반올림 오차 수정)
         adjustPercentTo100(summaries);
 
-        // count 기준 내림차순 정렬
-        summaries.sort((a, b) -> Long.compare(b.getCount(), a.getCount()));
+        // count 기준 내림차순 정렬 + 동률 시 한글 라벨 ㄱㄴㄷ순
+        summaries.sort((a, b) -> {
+            int cmp = Long.compare(b.getCount(), a.getCount()); // 내림차순
+            if (cmp != 0) return cmp;
+
+            // 동률 시 한글 라벨 ㄱㄴㄷ순 정렬
+            String al = (a.getType() == null) ? "" : a.getType().getLabel();
+            String bl = (b.getType() == null) ? "" : b.getType().getLabel();
+            return al.compareTo(bl);
+        });
 
         // 집계 데이터가 없으면(이론상 total>0이면 없기 어렵지만) 방어
         if (aggs.isEmpty()) {
@@ -118,7 +126,7 @@ public class FragmentServiceImpl implements FragmentService {
         // recessive 비교 기준: count asc, 동률이면 latestAt desc
         // min으로 뽑을 거라 "동률이면 최신이 선택"되게 latestAt을 반대로(내림차순) 넣어줌
         java.util.Comparator<EmotionAgg> recessiveComparator = (a, b) -> {
-            int cmp = Long.compare(a.count, b.count); // // count 오름차순
+            int cmp = Long.compare(a.count, b.count); // count 오름차순
             if (cmp != 0) return cmp;
             // 동률이면 최신이 앞으로 오도록 (내림차순)
             return compareLatestDesc(a.latestAt, b.latestAt);
@@ -239,12 +247,12 @@ public class FragmentServiceImpl implements FragmentService {
                             .type(e.getKey())
                             .count(e.getValue() == null ? 0L : e.getValue())
                             .build())
-                    // 안정적인 정렬: count 내림차순, 같으면 type 이름 오름차순
+                    // 안정적인 정렬: count 내림차순, 같으면 감정 한글 라벨 기준 ㄱㄴㄷ 정렬
                     .sorted((a, b) -> {
                         int cmp = Long.compare(b.getCount(), a.getCount());
                         if (cmp != 0) return cmp;
-                        String at = (a.getType() == null) ? "" : a.getType().name();
-                        String bt = (b.getType() == null) ? "" : b.getType().name();
+                        String at = (a.getType() == null) ? "" : a.getType().getLabel();
+                        String bt = (b.getType() == null) ? "" : b.getType().getLabel();
                         return at.compareTo(bt);
                     })
                     .toList();
@@ -304,7 +312,7 @@ public class FragmentServiceImpl implements FragmentService {
         }
     }
 
-    // /dominant/recessive 산출을 위한 내부 집계 모델
+    // dominant/recessive 산출을 위한 내부 집계 모델
     private static class EmotionAgg {
         private final EmotionCode type;
         private final long count;
