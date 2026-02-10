@@ -1,9 +1,11 @@
 package com.umc.finly.domain.analysis.stock.service;
 
+import com.umc.finly.domain.analysis.stock.converter.PriceDistributionConverter;
+import com.umc.finly.domain.analysis.stock.converter.RecentDecisionConverter;
+import com.umc.finly.domain.analysis.stock.converter.StockSummaryConverter;
 import com.umc.finly.domain.analysis.stock.dto.res.PriceDistributionResDTO;
 import com.umc.finly.domain.analysis.stock.dto.res.RecentDecisionResDTO;
 import com.umc.finly.domain.analysis.stock.dto.res.StockSummaryResDTO;
-import com.umc.finly.domain.analysis.stock.enums.PriceRangeType;
 import com.umc.finly.domain.market.exception.MarketErrorCode;
 import com.umc.finly.domain.market.stock.entity.Stock;
 import com.umc.finly.domain.market.stock.repository.StockRepository;
@@ -131,12 +133,12 @@ public class StockAnalysisServiceImpl implements StockAnalysisService {
                     .divide(totalQuantity, 0, RoundingMode.HALF_UP)
                     .intValue();
 
-        return StockSummaryResDTO.builder()
-                .averageBuyPrice(averageBuyPrice)
-                .currentPrice(currentPrice)
-                .totalBuyCount(totalBuyCount)
-                .maxHoldingDays(maxHoldingDays)
-                .build();
+        return StockSummaryConverter.toDto(
+                averageBuyPrice,
+                currentPrice,
+                totalBuyCount,
+                maxHoldingDays
+        );
     }
 
     @Override
@@ -215,38 +217,17 @@ public class StockAnalysisServiceImpl implements StockAnalysisService {
             highRatio += remain;
         }
 
-        int finalMaxRatio = Math.max(lowRatio, Math.max(midRatio, highRatio));
-
-        List<PriceDistributionResDTO.PriceDistributionItem> items = new ArrayList<>();
-
-        items.add(new PriceDistributionResDTO.PriceDistributionItem(
-                PriceRangeType.LOW,
-                String.format("%,d원 미만", lowerBound),
-                low,
-                lowRatio,
-                lowRatio == finalMaxRatio ? true : null
-        ));
-
-        items.add(new PriceDistributionResDTO.PriceDistributionItem(
-                PriceRangeType.MID,
-                String.format("%,d원 ~ %,d원", lowerBound, upperBound),
-                mid,
-                midRatio,
-                midRatio == finalMaxRatio ? true : null
-        ));
-
-        items.add(new PriceDistributionResDTO.PriceDistributionItem(
-                PriceRangeType.HIGH,
-                String.format("%,d원 이상", upperBound),
-                high,
-                highRatio,
-                highRatio == finalMaxRatio ? true : null
-        ));
-
-        return new PriceDistributionResDTO(
+        return PriceDistributionConverter.toDto(
                 averageBuyPrice,
-                new PriceDistributionResDTO.RangePolicy("AVERAGE_BUY_PRICE", RANGE_PERCENT),
-                items
+                RANGE_PERCENT,
+                lowerBound,
+                upperBound,
+                low,
+                mid,
+                high,
+                lowRatio,
+                midRatio,
+                highRatio
         );
     }
 
@@ -292,24 +273,12 @@ public class StockAnalysisServiceImpl implements StockAnalysisService {
                     continue;
                 }
 
-                BigDecimal sellAmount = record.getUnitPrice().multiply(record.getQuantity());
-
-                int decisionResult = sellAmount
-                        .subtract(accumulatedBuyAmount)
-                        .multiply(BigDecimal.valueOf(100))
-                        .divide(accumulatedBuyAmount, 0, RoundingMode.HALF_UP)
-                        .intValue();
-
                 results.add(
-                        RecentDecisionResDTO.builder()
-                                .stockName(stock.getName())
-                                .emotion(record.getEmotionCode().name())
-                                .tradeType("매도")
-                                .price(record.getUnitPrice().intValue())
-                                .date(record.getRecordDate())
-                                .quantity(record.getQuantity().intValue())
-                                .decisionResult(decisionResult)
-                                .build()
+                        RecentDecisionConverter.toDto(
+                                stock,
+                                record,
+                                accumulatedBuyAmount
+                        )
                 );
 
                 accumulatedBuyAmount = BigDecimal.ZERO;
