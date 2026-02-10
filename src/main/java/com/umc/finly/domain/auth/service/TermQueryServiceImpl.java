@@ -20,12 +20,14 @@ public class TermQueryServiceImpl implements TermQueryService {
 
     private final TermRepository termRepository;
 
+    /** 약관 조회  **/
     @Override
     public TermResDTO.TermList getTerms() {
         List<Term> terms = termRepository.findAllByOrderByIdAsc();
         return TermConverter.toTermList(terms);
     }
 
+    /** 약관 상세 조회 **/
     @Override
     public TermDetailResDTO getTermDetail(Long termId) {
         Term term = termRepository.findById(termId)
