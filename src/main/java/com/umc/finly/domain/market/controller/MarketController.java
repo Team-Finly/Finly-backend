@@ -1,7 +1,7 @@
 package com.umc.finly.domain.market.controller;
 
-import com.umc.finly.domain.market.dto.res.MarketIndexResDTO;
-import com.umc.finly.domain.market.dto.res.MarketInsightResDTO;
+import com.umc.finly.domain.market.dto.response.MarketIndexResDTO;
+import com.umc.finly.domain.market.dto.response.MarketInsightResDTO;
 import com.umc.finly.domain.market.service.MarketIndexService;
 import com.umc.finly.domain.market.service.MarketInsightService;
 import com.umc.finly.global.apiPayload.response.ApiResponse;

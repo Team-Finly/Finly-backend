@@ -22,7 +22,7 @@ import com.umc.finly.domain.record.enums.TradeAction;
 import com.umc.finly.domain.record.repository.RecordEntryRepository;
 import com.umc.finly.domain.record.repository.SearchHistoryRepository;
 import com.umc.finly.global.apiPayload.exception.CustomException;
-import com.umc.finly.domain.market.exception.code.MarketErrorCode;
+import com.umc.finly.domain.market.exception.MarketErrorCode;
 import lombok.RequiredArgsConstructor;
 import org.springframework.dao.DataIntegrityViolationException;
 import org.springframework.data.domain.PageRequest;
