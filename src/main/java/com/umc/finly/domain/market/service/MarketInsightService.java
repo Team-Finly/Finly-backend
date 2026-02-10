@@ -57,7 +57,7 @@ public class MarketInsightService {
                 candidates.get(new Random().nextInt(candidates.size()));
 
         String stockName = picked.getStockName();
-        EmotionCode emotion = EmotionCode.valueOf(picked.getEmotionCode());// 감정 enum 받아오기
+        EmotionCode emotion = parseEmotion(picked.getEmotionCode());
 
         String message = generateMessage(stockName, emotion);
 
@@ -68,6 +68,19 @@ public class MarketInsightService {
                 .buySellRatio("BUY_DOMINANT")
                 .confidenceLevel(calcConfidence(candidates.size()))
                 .build();
+    }
+
+    private EmotionCode parseEmotion(String emotionCode) {
+        if (emotionCode == null || emotionCode.isBlank()) {
+            return EmotionCode.CALM;
+        }
+
+        try {
+            return EmotionCode.valueOf(emotionCode);
+        } catch (IllegalArgumentException e) {
+            // enum에 없는 값은 기본값으로 처리
+            return EmotionCode.CALM;
+        }
     }
 
     //문장 생성하기 (사용자가 구매한 종목명 표시하기  )
