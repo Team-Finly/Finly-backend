@@ -1,7 +1,7 @@
 package com.umc.finly.domain.home.controller;
 
-import com.umc.finly.domain.home.dto.res.HomeMindDetailResDTO;
-import com.umc.finly.domain.home.dto.res.HomeMindResDTO;
+import com.umc.finly.domain.home.dto.response.HomeMindDetailResDTO;
+import com.umc.finly.domain.home.dto.response.HomeMindResDTO;
 import com.umc.finly.domain.home.service.HomeMindService;
 import com.umc.finly.global.apiPayload.response.ApiResponse;
 import com.umc.finly.global.apiPayload.response.SuccessCode;

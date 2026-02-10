@@ -1,6 +1,6 @@
 package com.umc.finly.domain.home.converter;
 
-import com.umc.finly.domain.home.dto.res.HomeWeeklyMoodResDTO;
+import com.umc.finly.domain.home.dto.response.HomeWeeklyMoodResDTO;
 import com.umc.finly.domain.record.entity.RecordEntry;
 
 import java.time.DayOfWeek;

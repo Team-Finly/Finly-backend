@@ -1,6 +1,6 @@
 package com.umc.finly.domain.home.controller;
 
-import com.umc.finly.domain.home.dto.res.HomeWeeklyMoodResDTO;
+import com.umc.finly.domain.home.dto.response.HomeWeeklyMoodResDTO;
 import com.umc.finly.domain.home.service.HomeWeeklyMoodService;
 import com.umc.finly.global.apiPayload.response.ApiResponse;
 import com.umc.finly.global.apiPayload.response.SuccessCode;

@@ -1,7 +1,7 @@
 package com.umc.finly.domain.home.converter;
 
-import com.umc.finly.domain.home.dto.res.HomeMindDetailResDTO;
-import com.umc.finly.domain.home.dto.res.HomeMindResDTO;
+import com.umc.finly.domain.home.dto.response.HomeMindDetailResDTO;
+import com.umc.finly.domain.home.dto.response.HomeMindResDTO;
 import com.umc.finly.domain.member.entity.Member;
 import com.umc.finly.domain.member.entity.Persona;
 

@@ -1,7 +1,7 @@
 package com.umc.finly.domain.home.service;
 
 import com.umc.finly.domain.home.converter.HomeRecordConverter;
-import com.umc.finly.domain.home.dto.res.HomeRecordsResDTO;
+import com.umc.finly.domain.home.dto.response.HomeRecordsResDTO;
 import com.umc.finly.domain.record.dto.res.RecordSearchResDTO;
 import com.umc.finly.domain.record.service.RecordService;
 import lombok.RequiredArgsConstructor;

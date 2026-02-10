@@ -1,8 +1,8 @@
 package com.umc.finly.domain.market.service;
 
-import com.umc.finly.domain.market.dto.res.FearGreedResDTO;
-import com.umc.finly.domain.market.dto.res.MarketIndexResDTO;
-import com.umc.finly.domain.market.dto.res.MarketIndicesDTO;
+import com.umc.finly.domain.market.dto.response.FearGreedResDTO;
+import com.umc.finly.domain.market.dto.response.MarketIndexResDTO;
+import com.umc.finly.domain.market.dto.response.MarketIndicesDTO;
 import com.umc.finly.domain.market.infra.FearGreedIndexProvider;
 import com.umc.finly.domain.market.infra.MarketIndexProvider;
 import lombok.RequiredArgsConstructor;

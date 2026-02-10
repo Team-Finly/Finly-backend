@@ -1,6 +1,6 @@
 package com.umc.finly.domain.market.service;
 
-import com.umc.finly.domain.market.dto.res.MarketInsightResDTO;
+import com.umc.finly.domain.market.dto.response.MarketInsightResDTO;
 import com.umc.finly.domain.market.repository.MarketInsightRepository;
 import com.umc.finly.domain.market.repository.projection.StockEmotionBuyAggregation;
 import lombok.RequiredArgsConstructor;

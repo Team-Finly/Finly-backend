@@ -1,7 +1,7 @@
 package com.umc.finly.domain.home.service;
 
 import com.umc.finly.domain.home.converter.HomeWeeklyMoodConverter;
-import com.umc.finly.domain.home.dto.res.HomeWeeklyMoodResDTO;
+import com.umc.finly.domain.home.dto.response.HomeWeeklyMoodResDTO;
 import com.umc.finly.domain.home.exception.HomeErrorCode;
 import com.umc.finly.domain.home.repository.HomeRecordRepository;
 import com.umc.finly.domain.record.entity.RecordEntry;
