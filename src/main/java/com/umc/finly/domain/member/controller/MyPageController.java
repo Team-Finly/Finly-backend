@@ -119,7 +119,7 @@ public class MyPageController {
                 - 인증되지 않은 경우 UNAUTHORIZED 에러를 반환합니다.
                 """
     )
-    @PostMapping("/me/nickname")
+    @PatchMapping("/me/nickname")
     public ApiResponse<UpdateNicknameResDTO> updateNickname(
             @AuthenticationPrincipal AuthPrincipal principal,
             @RequestBody @Valid UpdateNicknameReqDTO request
