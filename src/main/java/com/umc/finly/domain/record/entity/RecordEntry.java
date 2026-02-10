@@ -3,7 +3,7 @@ package com.umc.finly.domain.record.entity;
 import com.umc.finly.domain.record.enums.EmotionCode;
 import com.umc.finly.domain.record.enums.Session;
 import com.umc.finly.domain.record.enums.TradeAction;
-import com.umc.finly.global.entity.CreatedUpdatedDeletedBaseEntity;
+import com.umc.finly.global.entity.BaseEntity;
 import jakarta.persistence.*;
 import lombok.*;
 
@@ -19,7 +19,7 @@ import java.time.LocalDate;
 @NoArgsConstructor(access = AccessLevel.PROTECTED)
 @AllArgsConstructor
 @Builder
-public class RecordEntry extends CreatedUpdatedDeletedBaseEntity {
+public class RecordEntry extends BaseEntity {
 
     @Id
     @GeneratedValue(strategy = GenerationType.IDENTITY)

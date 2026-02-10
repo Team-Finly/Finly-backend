@@ -96,7 +96,6 @@ public interface FragmentRepository extends JpaRepository<RecordEntry, Long> {
     where r.memberId = :memberId
       and r.recordDate >= :fromDate
       and r.recordDate <= :toDate
-      and r.deletedAt is null
     """)
     long countByMemberIdAndRecordDateBetween(
             @Param("memberId") Long memberId,
