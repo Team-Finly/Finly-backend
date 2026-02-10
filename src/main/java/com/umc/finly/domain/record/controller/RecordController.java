@@ -84,6 +84,17 @@ public class RecordController {
         return ApiResponse.onSuccess(result, SuccessCode.OK);
     }
 
+    // 특정 검색 기록 삭제
+    @Operation(summary = "검색 기록 삭제 API", description = "특정 검색 키워드를 삭제")
+    @DeleteMapping("/search/recent")
+    public ApiResponse<Void> deleteSearchKeyword(
+            @AuthenticationPrincipal AuthPrincipal principal,
+            @RequestParam String keyword
+    ) {
+        recordService.deleteSearchKeyword(principal.getMemberId(), keyword);
+        return ApiResponse.onSuccess(null, SuccessCode.OK);
+    }
+
     // 단일 기록 상세 조회
     // 본인 기록만 조회 가능 (권한 검사 포함)
     @Operation(summary = "기록 상세 조회 API", description = "특정 기록의 상세 정보를 조회")

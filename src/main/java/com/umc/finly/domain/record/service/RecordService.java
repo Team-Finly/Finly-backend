@@ -37,4 +37,7 @@ public interface RecordService {
 
     // 최근 검색 키워드 조회 (최대 3개)
     RecentSearchResDTO getRecentSearchKeywords(Long memberId);
+
+    // 특정 검색 키워드 삭제
+    void deleteSearchKeyword(Long memberId, String keyword);
 }
