@@ -1,7 +1,7 @@
 package com.umc.finly.domain.home.converter;
 
 import com.umc.finly.domain.home.dto.response.HomeRecordsResDTO;
-import com.umc.finly.domain.record.dto.res.RecordSearchResDTO;
+import com.umc.finly.domain.record.dto.response.RecordSearchResDTO;
 
 public class HomeRecordConverter {
 

@@ -1,6 +1,7 @@
 package com.umc.finly.domain.record.service;
 
-import com.umc.finly.domain.record.dto.res.RecordFeedbackResDTO;
+import com.umc.finly.domain.record.converter.RecordFeedbackConverter;
+import com.umc.finly.domain.record.dto.response.RecordFeedbackResDTO;
 import com.umc.finly.domain.record.entity.RecordEntry;
 import com.umc.finly.domain.record.entity.RecordFeedback;
 import com.umc.finly.domain.record.enums.FeedbackStatus;
@@ -16,6 +17,8 @@ import org.springframework.transaction.annotation.Transactional;
 import org.springframework.transaction.support.TransactionSynchronization;
 import org.springframework.transaction.support.TransactionSynchronizationManager;
 
+import static com.umc.finly.domain.analysis.association.converter.AnalysisEntryConverter.toResDTO;
+
 // AI 피드백 비즈니스 로직 구현체
 // 피드백 생성/조회/재생성과 비동기 실행을 관리함
 @Slf4j
@@ -23,6 +26,7 @@ import org.springframework.transaction.support.TransactionSynchronizationManager
 @RequiredArgsConstructor
 public class RecordFeedbackServiceImpl implements RecordFeedbackService {
 
+    private final RecordFeedbackConverter recordFeedbackConverter;
     private final RecordFeedbackRepository feedbackRepository;
     private final RecordEntryRepository recordEntryRepository;
     private final RecordFeedbackAsyncExecutor asyncExecutor; // 비동기 실행 담당
@@ -60,7 +64,7 @@ public class RecordFeedbackServiceImpl implements RecordFeedbackService {
         RecordFeedback feedback = feedbackRepository.findByRecordEntryIdAndMemberId(recordEntryId, memberId)
                 .orElseThrow(() -> new CustomException(RecordErrorCode.FEEDBACK_NOT_FOUND));
 
-        return RecordFeedbackResDTO.from(feedback);
+        return recordFeedbackConverter.toResDTO(feedback);
     }
 
     @Override
@@ -110,6 +114,6 @@ public class RecordFeedbackServiceImpl implements RecordFeedbackService {
             }
         });
 
-        return RecordFeedbackResDTO.from(feedback);
+        return recordFeedbackConverter.toResDTO(feedback);
     }
 }
