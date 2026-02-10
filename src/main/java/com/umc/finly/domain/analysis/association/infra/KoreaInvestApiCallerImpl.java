@@ -1,17 +1,14 @@
 package com.umc.finly.domain.analysis.association.infra;
 
-import com.umc.finly.domain.analysis.association.dto.HourlyChartResDTO;
 import com.umc.finly.domain.analysis.association.dto.KoreaInvestRawResponse;
-import com.umc.finly.domain.analysis.association.exception.KoreaInvestErrorCode;
+import com.umc.finly.domain.analysis.association.exception.code.KoreaInvestErrorCode;
 import com.umc.finly.domain.analysis.association.exception.KoreaInvestException;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
-import org.springframework.beans.factory.annotation.Qualifier;
 import org.springframework.http.HttpStatusCode;
 import org.springframework.stereotype.Component;
 import org.springframework.web.client.RestClient;
 
-import java.math.BigDecimal;
 import java.util.ArrayList;
 import java.util.List;
 import java.util.Map;

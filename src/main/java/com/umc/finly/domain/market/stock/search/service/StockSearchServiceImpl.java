@@ -4,7 +4,7 @@ import com.umc.finly.domain.market.stock.entity.Stock;
 import com.umc.finly.domain.market.stock.repository.StockRepository;
 import com.umc.finly.domain.market.stock.search.converter.StockSearchConverter;
 import com.umc.finly.domain.market.stock.search.dto.StockSearchResDTO;
-import com.umc.finly.domain.market.stock.search.exception.StockSearchErrorCode;
+import com.umc.finly.domain.market.stock.search.exception.code.StockSearchErrorCode;
 import com.umc.finly.domain.market.stock.search.exception.StockSearchException;
 import com.umc.finly.global.apiPayload.exception.CustomException;
 import com.umc.finly.global.apiPayload.response.ErrorCode;

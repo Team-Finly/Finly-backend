@@ -1,6 +1,6 @@
 package com.umc.finly.domain.member.service;
 
-import com.umc.finly.domain.auth.exception.AuthErrorCode;
+import com.umc.finly.domain.auth.exception.code.AuthErrorCode;
 import com.umc.finly.domain.member.dto.response.*;
 import com.umc.finly.domain.member.entity.Member;
 import com.umc.finly.domain.member.entity.mapping.MembersPersonasResult;

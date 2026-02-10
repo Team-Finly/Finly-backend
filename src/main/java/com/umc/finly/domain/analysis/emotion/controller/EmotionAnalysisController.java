@@ -20,7 +20,7 @@ import org.springframework.web.bind.annotation.RestController;
 
 @RequiredArgsConstructor
 @RestController
-@Tag(name = "Analysis - emotion", description = "통계 감정 분석 API")
+@Tag(name = "EmotionAnalysis", description = "통계 감정 분석 API")
 @RequestMapping("/api/analysis/stocks")
 public class EmotionAnalysisController {
 

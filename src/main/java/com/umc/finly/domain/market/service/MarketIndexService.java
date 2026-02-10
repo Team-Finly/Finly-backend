@@ -1,6 +1,9 @@
 package com.umc.finly.domain.market.service;
 
+<<<<<<< Updated upstream
 import com.umc.finly.domain.market.converter.MarketIndexConverter;
+=======
+>>>>>>> Stashed changes
 import com.umc.finly.domain.market.dto.response.FearGreedResDTO;
 import com.umc.finly.domain.market.dto.response.MarketIndexResDTO;
 import com.umc.finly.domain.market.dto.response.MarketIndicesDTO;

@@ -2,10 +2,16 @@ package com.umc.finly.domain.home.service;
 
 import com.umc.finly.domain.analysis.association.entity.ConvictionScoreResult;
 import com.umc.finly.domain.analysis.association.entity.FearIndexResult;
+<<<<<<< Updated upstream
 import com.umc.finly.domain.home.converter.HomeMindConverter;
 import com.umc.finly.domain.home.dto.response.HomeMindDetailResDTO;
 import com.umc.finly.domain.home.dto.response.HomeMindResDTO;
 import com.umc.finly.domain.home.exception.HomeErrorCode;
+=======
+import com.umc.finly.domain.home.dto.response.HomeMindDetailResDTO;
+import com.umc.finly.domain.home.dto.response.HomeMindResDTO;
+import com.umc.finly.domain.home.exception.code.HomeErrorCode;
+>>>>>>> Stashed changes
 import com.umc.finly.domain.home.repository.HomeMindRepository;
 import com.umc.finly.domain.member.entity.Member;
 import com.umc.finly.domain.member.entity.Persona;

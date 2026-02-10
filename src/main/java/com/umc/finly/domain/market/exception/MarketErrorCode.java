@@ -11,40 +11,17 @@ import org.springframework.http.HttpStatus;
 public enum MarketErrorCode implements BaseCode {
 
     // 시장 지표
-    MARKET_INDEX_NOT_FOUND(
-            ErrorCode.NOT_FOUND,
-            "MARKET404",
-            "시장 지표 데이터가 존재하지 않습니다."
-    ),
-    MARKET_STOCK_NOT_FOUND(
-            ErrorCode.NOT_FOUND,
-            "MARKET404",
-            "종목 데이터가 존재하지 않습니다."
-    ),
-    MARKET_INDEX_API_FAILED(
-            ErrorCode.BAD_GATEWAY,
-            "MARKET502",
-            "시장 지표 조회 API 호출에 실패했습니다."
-    ),
-    MARKET_INDEX_RESPONSE_INVALID(
-            ErrorCode.BAD_GATEWAY,
-            "MARKET503",
-            "시장 지표 응답 형식이 올바르지 않습니다."
-    ),
+    //x4xx
+    MARKET_INDEX_NOT_FOUND(HttpStatus.NOT_FOUND, "MARKET404_1", "시장 지표 데이터가 존재하지 않습니다."),
+    MARKET_STOCK_NOT_FOUND(HttpStatus.NOT_FOUND, "MARKET404_1", "종목 데이터가 존재하지 않습니다."),
+    // 5xx
+    MARKET_INDEX_API_FAILED(HttpStatus.BAD_GATEWAY, "MARKET502", "시장 지표 조회 API 호출에 실패했습니다."),
+    MARKET_INDEX_RESPONSE_INVALID(HttpStatus.BAD_GATEWAY, "MARKET503", "시장 지표 응답 형식이 올바르지 않습니다."),
 
     // 인사이트
-    MARKET_INSIGHT_NOT_FOUND(
-            ErrorCode.NOT_FOUND,
-            "MARKET404",
-            "실시간 인사이트 데이터를 불러올 수 없습니다."
-    );
+    MARKET_INSIGHT_NOT_FOUND(HttpStatus.NOT_FOUND, "MARKET404", "실시간 인사이트 데이터를 불러올 수 없습니다.");
 
-    private final ErrorCode errorCode; // global ErrorCode
-    private final String code;         // MARKETxxx
+    private final HttpStatus httpStatus;
+    private final String code;
     private final String message;
-
-    @Override
-    public HttpStatus getHttpStatus() {
-        return errorCode.getHttpStatus();
-    }
 }

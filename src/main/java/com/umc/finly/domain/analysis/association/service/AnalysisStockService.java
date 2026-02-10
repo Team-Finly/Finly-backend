@@ -1,6 +1,6 @@
 package com.umc.finly.domain.analysis.association.service;
 
-import com.umc.finly.domain.analysis.association.dto.AnalysisStockResDTO;
+import com.umc.finly.domain.analysis.association.dto.response.AnalysisStockResDTO;
 import java.util.List;
 
 public interface AnalysisStockService {

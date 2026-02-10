@@ -1,7 +1,7 @@
 package com.umc.finly.domain.market.stock.info.controller;
 
-import com.umc.finly.domain.market.stock.info.dto.StockAdminResDTO;
-import com.umc.finly.domain.market.stock.info.dto.StockInfoResDTO;
+import com.umc.finly.domain.market.stock.info.dto.response.StockAdminResDTO;
+import com.umc.finly.domain.market.stock.info.dto.response.StockInfoResDTO;
 import com.umc.finly.domain.market.stock.repository.StockRepository;
 import com.umc.finly.domain.market.stock.info.service.StockInfoScheduler;
 import com.umc.finly.domain.market.stock.info.service.StockInfoSyncService;

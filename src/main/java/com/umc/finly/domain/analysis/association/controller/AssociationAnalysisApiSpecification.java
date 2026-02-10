@@ -1,6 +1,6 @@
 package com.umc.finly.domain.analysis.association.controller;
 
-import com.umc.finly.domain.analysis.association.dto.*;
+import com.umc.finly.domain.analysis.association.dto.response.*;
 import com.umc.finly.global.apiPayload.response.ApiResponse;
 import com.umc.finly.global.config.security.AuthPrincipal;
 import io.swagger.v3.oas.annotations.Operation;
@@ -8,7 +8,6 @@ import io.swagger.v3.oas.annotations.media.Content;
 import io.swagger.v3.oas.annotations.media.ExampleObject;
 import io.swagger.v3.oas.annotations.responses.ApiResponses;
 import io.swagger.v3.oas.annotations.tags.Tag;
-import org.springframework.security.core.annotation.AuthenticationPrincipal;
 
 import java.time.LocalDate;
 import java.util.List;

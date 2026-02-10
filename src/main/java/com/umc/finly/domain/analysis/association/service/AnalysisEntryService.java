@@ -1,8 +1,8 @@
 package com.umc.finly.domain.analysis.association.service;
 
 import com.umc.finly.domain.analysis.association.converter.AnalysisEntryConverter;
-import com.umc.finly.domain.analysis.association.dto.AnalysisEntryResDTO;
-import com.umc.finly.domain.analysis.association.exception.AnalysisEntryErrorCode;
+import com.umc.finly.domain.analysis.association.dto.response.AnalysisEntryResDTO;
+import com.umc.finly.domain.analysis.association.exception.code.AnalysisEntryErrorCode;
 import com.umc.finly.domain.analysis.association.exception.AnalysisEntryException;
 import com.umc.finly.domain.market.stock.entity.Stock;
 import com.umc.finly.domain.market.stock.repository.StockRepository;
