@@ -17,17 +17,24 @@ import org.springframework.security.core.annotation.AuthenticationPrincipal;
 import org.springframework.web.bind.annotation.*;
 import org.springframework.web.multipart.MultipartFile;
 
+import java.util.Map;
+
 @RestController
 @RequiredArgsConstructor
 @RequestMapping("/api/mypage")
-@Tag(name = "MyPage", description = "마이페이지 · 내 정보 관리")
+@Tag(name = "MyPage", description = "마이페이지 · 내 정보 관리 API")
 public class MyPageController {
 
     private final MyPageService myPageService;
 
-    /**
-     * 마이페이지 상단 통합 조회
-     */
+    private Long requireMemberId(AuthPrincipal principal) {
+        if (principal == null) {
+            throw new CustomException(AuthErrorCode.UNAUTHORIZED);
+        }
+        return principal.getMemberId();
+    }
+
+    /** 마이페이지 상단 통합 조회 */
     @Operation(
             summary = "마이페이지 상단 조회",
             description = """
@@ -41,126 +48,102 @@ public class MyPageController {
     public ApiResponse<MyPageResDTO> getMyPageTop(
             @AuthenticationPrincipal AuthPrincipal principal
     ) {
-        if (principal == null) {
-            throw new CustomException(AuthErrorCode.UNAUTHORIZED);
-        }
-
+        Long memberId = requireMemberId(principal);
         return ApiResponse.onSuccess(
-                myPageService.getMyPage(principal.getMemberId()),
+                myPageService.getMyPage(memberId),
                 SuccessCode.OK
         );
     }
 
-    /**
-     * 내 페르소나 조회
-     */
+    /** 내 페르소나 조회 */
     @Operation(
             summary = "내 페르소나 조회",
             description = """
-                로그인한 사용자의 페르소나 정보를 조회합니다.
-                
-                - JWT 인증이 필요한 API입니다.
-                - 회원이 최근에 확정된 페르소나 결과를 반환합니다.
-                - 인증되지 않은 경우 UNAUTHORIZED 에러를 반환합니다.
-                """
+            로그인한 사용자의 페르소나 정보를 조회합니다.
+            
+            - JWT 인증이 필요한 API입니다.
+            - 회원이 최근에 확정된 페르소나 결과를 반환합니다.
+            """
     )
     @GetMapping("/persona")
     public ApiResponse<MyPagePersonaResDTO> getMyPersona(
             @AuthenticationPrincipal AuthPrincipal principal
     ){
-        if(principal == null){
-            throw new CustomException(AuthErrorCode.UNAUTHORIZED);
-        }
+        Long memberId = requireMemberId(principal);
         return ApiResponse.onSuccess(
-                myPageService.getMyPersona(principal.getMemberId()),
+                myPageService.getMyPersona(memberId),
                 SuccessCode.OK
         );
     }
 
-    /**
-     * 내 프로필 조회
-     */
+    /** 내 프로필 조회 */
     @Operation(
             summary = "내 프로필 조회",
             description = """
-                로그인한 사용자의 기본 프로필 정보를 조회합니다.
-                
-                - JWT 인증이 필요한 API입니다.
-                - 닉네임, 이메일 등 마이페이지에 표시될 기본 정보를 반환합니다.
-                - 인증되지 않은 경우 UNAUTHORIZED 에러를 반환합니다.
-                """
+            로그인한 사용자의 기본 프로필 정보를 조회합니다.
+            
+            - JWT 인증이 필요한 API입니다.
+            - 닉네임, 이메일 등 마이페이지에 표시될 기본 정보를 반환합니다.
+            """
     )
     @GetMapping("/me")
     public ApiResponse<MyPageMeResDTO> getMyInfo(
             @AuthenticationPrincipal AuthPrincipal principal
     ){
-        if (principal == null){
-            throw new CustomException(AuthErrorCode.UNAUTHORIZED);
-        }
-
+        Long memberId = requireMemberId(principal);
         return ApiResponse.onSuccess(
-                myPageService.getMyInfo(principal.getMemberId()),
+                myPageService.getMyInfo(memberId),
                 SuccessCode.OK
         );
     }
 
-    /**
-     * 내 닉네임 변경
-     */
+    /** 내 닉네임 변경 */
     @Operation(
             summary = "내 닉네임 변경",
             description = """
-                로그인한 사용자의 닉네임을 변경합니다.
-                
-                - JWT 인증이 필요한 API입니다.
-                - 요청 바디에 새로운 닉네임을 전달합니다.
-                - 닉네임 변경이 성공하면 변경된 닉네임을 반환합니다.
-                - 인증되지 않은 경우 UNAUTHORIZED 에러를 반환합니다.
-                """
+            로그인한 사용자의 닉네임을 변경합니다.
+            
+            - JWT 인증이 필요한 API입니다.
+            - 요청 바디에 새로운 닉네임을 전달합니다.
+            - 닉네임 변경이 성공하면 변경된 닉네임을 반환합니다.
+            """
     )
     @PatchMapping("/me/nickname")
     public ApiResponse<UpdateNicknameResDTO> updateNickname(
             @AuthenticationPrincipal AuthPrincipal principal,
             @RequestBody @Valid UpdateNicknameReqDTO request
-            ){
-
-        if (principal == null){
-            throw new CustomException(AuthErrorCode.UNAUTHORIZED);
-        }
-
+    ){
+        Long memberId = requireMemberId(principal);
         return ApiResponse.onSuccess(
-                myPageService.updateMyNickname(
-                        principal.getMemberId(),
-                        request.getNickname()
-                ),
+                myPageService.updateMyNickname(memberId, request.getNickname()),
                 SuccessCode.OK
         );
     }
 
+    /** 프로필 사진 추가 */
     @Operation(
             summary = "프로필 사진 추가",
             description = """
-                프로필 사진이 없는 사용자가 새 프로필 이미지를 등록합니다.
-                
-                - JWT 인증이 필요한 API입니다.
-                - multipart/form-data 형식으로 이미지를 업로드합니다.
-                - 이미 프로필 사진이 있는 경우 에러를 반환합니다.
-                """
+            프로필 사진이 없는 사용자가 새 프로필 이미지를 등록합니다.
+            
+            - JWT 인증이 필요한 API입니다.
+            - multipart/form-data 형식으로 이미지를 업로드합니다.
+            - 이미 프로필 사진이 있는 경우 에러를 반환합니다.
+            """
     )
     @PostMapping(value = "/me/profile-image", consumes = "multipart/form-data")
     public ApiResponse<ProfileImageResDTO> addProfileImage(
             @AuthenticationPrincipal AuthPrincipal principal,
             @RequestPart("image") MultipartFile image
     ) {
-        if (principal == null){
-            throw new CustomException(AuthErrorCode.UNAUTHORIZED);
-        }
+        Long memberId = requireMemberId(principal);
         return ApiResponse.onSuccess(
-                myPageService.addProfileImage(principal.getMemberId(), image),
+                myPageService.addProfileImage(memberId, image),
                 SuccessCode.CREATED
         );
     }
 
+    /** 프로필 사진 변경 */
     @Operation(
             summary = "프로필 사진 변경",
             description = """
@@ -176,16 +159,14 @@ public class MyPageController {
             @AuthenticationPrincipal AuthPrincipal principal,
             @RequestPart("image") MultipartFile image
     ) {
-        if (principal == null) {
-            throw new CustomException(AuthErrorCode.UNAUTHORIZED);
-        }
-
+        Long memberId = requireMemberId(principal);
         return ApiResponse.onSuccess(
-                myPageService.updateProfileImage(principal.getMemberId(), image),
+                myPageService.updateProfileImage(memberId, image),
                 SuccessCode.OK
         );
     }
 
+    /** 프로필 사진 삭제 */
     @Operation(
             summary = "프로필 사진 삭제",
             description = """
@@ -197,21 +178,15 @@ public class MyPageController {
             """
     )
     @DeleteMapping("/me/profile-image")
-    public ApiResponse<Object> deleteProfileImage(
+    public ApiResponse<Map<String, Object>> deleteProfileImage(
             @AuthenticationPrincipal AuthPrincipal principal
     ){
-        if (principal == null) {
-            throw new CustomException(AuthErrorCode.UNAUTHORIZED);
-        }
-
-        myPageService.deleteProfileImage(principal.getMemberId());
-
-        return ApiResponse.onSuccess(
-                new Object(),
-                SuccessCode.OK
-        );
+        Long memberId = requireMemberId(principal);
+        myPageService.deleteProfileImage(memberId);
+        return ApiResponse.onSuccess(Map.of(), SuccessCode.OK);
     }
 
+    /** 비밀번호 변경 */
     @Operation(
             summary = "비밀번호 변경",
             description = """
@@ -223,17 +198,16 @@ public class MyPageController {
             """
     )
     @PatchMapping("/me/password")
-    public ApiResponse<Object> changePassword(
+    public ApiResponse<Map<String, Object>> changePassword(
             @AuthenticationPrincipal AuthPrincipal principal,
             @Valid @RequestBody PasswordChangeReqDTO request
     ){
-        if (principal == null){
-            throw new CustomException(AuthErrorCode.UNAUTHORIZED);
-        }
-        myPageService.changePassword(principal.getMemberId(), request.getNewPassword(), request.getNewPasswordConfirm());
-        return ApiResponse.onSuccess(new Object(), SuccessCode.OK);
+        Long memberId = requireMemberId(principal);
+        myPageService.changePassword(memberId, request.getNewPassword(), request.getNewPasswordConfirm());
+        return ApiResponse.onSuccess(Map.of(), SuccessCode.OK);
     }
 
+    /** 회원 탈퇴 */
     @Operation(
             summary = "회원 탈퇴",
             description = """
@@ -242,22 +216,14 @@ public class MyPageController {
             - JWT 인증이 필요한 API입니다.
             - 회원 정보는 논리 삭제 처리됩니다.
             - 리프레시 토큰은 함께 정리됩니다.
-            - 프로필 이미지는 프로필 삭제 api 머지 이후 리팩토링할 예정입니다. 
             """
     )
-    @DeleteMapping("/members/me")
-    public ApiResponse<Object> withdraw(
+    @DeleteMapping("/me") // ✅ 기존 "/members/me"가 필요하면 이 줄만 원복
+    public ApiResponse<Map<String, Object>> withdraw(
             @AuthenticationPrincipal AuthPrincipal principal
     ){
-        if (principal == null){
-            throw new CustomException(AuthErrorCode.UNAUTHORIZED);
-        }
-
-        myPageService.withdraw(principal.getMemberId());
-
-        return ApiResponse.onSuccess(
-                java.util.Map.of(),
-                SuccessCode.OK
-        );
+        Long memberId = requireMemberId(principal);
+        myPageService.withdraw(memberId);
+        return ApiResponse.onSuccess(Map.of(), SuccessCode.OK);
     }
 }

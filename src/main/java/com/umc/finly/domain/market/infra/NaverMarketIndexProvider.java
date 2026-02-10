@@ -3,11 +3,7 @@ package com.umc.finly.domain.market.infra;
 import com.fasterxml.jackson.databind.JsonNode;
 import com.fasterxml.jackson.databind.ObjectMapper;
 import com.umc.finly.domain.market.dto.response.MarketIndicesDTO;
-<<<<<<< Updated upstream
-import com.umc.finly.domain.market.exception.MarketErrorCode;
-=======
 import com.umc.finly.domain.market.exception.code.MarketErrorCode;
->>>>>>> Stashed changes
 import com.umc.finly.global.apiPayload.exception.CustomException;
 import org.springframework.beans.factory.annotation.Qualifier;
 import org.springframework.stereotype.Component;

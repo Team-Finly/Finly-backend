@@ -1,6 +1,6 @@
 package com.umc.finly.domain.analysis.stock.converter;
 
-import com.umc.finly.domain.analysis.stock.dto.res.PriceDistributionResDTO;
+import com.umc.finly.domain.analysis.stock.dto.response.PriceDistributionResDTO;
 import com.umc.finly.domain.analysis.stock.enums.PriceRangeType;
 
 import java.util.ArrayList;

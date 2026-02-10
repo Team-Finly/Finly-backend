@@ -7,7 +7,7 @@ import com.umc.finly.domain.member.entity.PersonaTestQuestion;
 import com.umc.finly.domain.member.enums.ChoiceCode;
 import com.umc.finly.domain.member.enums.PersonaType;
 import com.umc.finly.domain.member.enums.QuestionCode;
-import com.umc.finly.domain.member.exception.MemberErrorCode;
+import com.umc.finly.domain.member.exception.code.MemberErrorCode;
 import com.umc.finly.domain.member.repository.PersonaRepository;
 import com.umc.finly.domain.member.repository.PersonaTestOptionsRepository;
 import com.umc.finly.domain.member.repository.PersonaTestQuestionsRepository;

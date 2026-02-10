@@ -1,5 +1,6 @@
 package com.umc.finly.domain.member.service;
 
+import com.umc.finly.domain.member.converter.PersonaTestConverter;
 import com.umc.finly.domain.member.dto.response.PersonaTestOptionResDTO;
 import com.umc.finly.domain.member.dto.response.PersonaTestQuestionResDTO;
 import com.umc.finly.domain.member.entity.PersonaTestQuestion;
@@ -14,7 +15,7 @@ import java.util.List;
 @Service
 @RequiredArgsConstructor
 @Transactional(readOnly = true)
-public class PersonasTestServiceImpl implements PersonaTestService {
+public class PersonaTestServiceImpl implements PersonaTestService {
 
     private final PersonaTestQuestionsRepository questionRepository;
     private final PersonaTestOptionsRepository optionRepository;
@@ -28,14 +29,14 @@ public class PersonasTestServiceImpl implements PersonaTestService {
 
         // 각 질문에 대한 선택지 조회 후 DTO 변환
         return questions.stream()
-                .map(question->{
+                .map(question -> {
                     List<PersonaTestOptionResDTO> options =
-                            optionRepository
-                                    .findByQuestionIdOrderByChoiceCodeAsc(question.getId())
+                            optionRepository.findByQuestionIdOrderByChoiceCodeAsc(question.getId())
                                     .stream()
-                                    .map(PersonaTestOptionResDTO::from)
+                                    .map(PersonaTestConverter::toOptionResDTO)
                                     .toList();
-                    return PersonaTestQuestionResDTO.of(question, options);
+
+                    return PersonaTestConverter.toQuestionResDTO(question, options);
                 })
                 .toList();
     }

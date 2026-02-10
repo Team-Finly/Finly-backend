@@ -1,4 +1,4 @@
-package com.umc.finly.domain.home.exception;
+package com.umc.finly.domain.home.exception.code;
 
 import com.umc.finly.global.apiPayload.response.BaseCode;
 import lombok.AllArgsConstructor;

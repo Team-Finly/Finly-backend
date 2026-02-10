@@ -1,7 +1,6 @@
-package com.umc.finly.domain.market.exception;
+package com.umc.finly.domain.market.exception.code;
 
 import com.umc.finly.global.apiPayload.response.BaseCode;
-import com.umc.finly.global.apiPayload.response.ErrorCode;
 import lombok.AllArgsConstructor;
 import lombok.Getter;
 import org.springframework.http.HttpStatus;
