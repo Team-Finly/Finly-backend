@@ -22,7 +22,7 @@ public enum MemberErrorCode implements BaseCode {
     PROFILE_IMAGE_NOT_FOUND(HttpStatus.NOT_FOUND, "MEMBER404_3", "프로필 이미지를 찾을 수 없습니다."),
 
     // 413
-    IMAGE_FILE_TOO_LARGE(HttpStatus.PAYLOAD_TOO_LARGE, "MEMBER413", "이미지 파일 용량이 너무 큽니다."),
+    IMAGE_FILE_TOO_LARGE(HttpStatus.PAYLOAD_TOO_LARGE, "MEMBER413_1", "이미지 파일 용량이 너무 큽니다."),
 
     // 500
     IMAGE_UPLOAD_FAILED(HttpStatus.INTERNAL_SERVER_ERROR, "MEMBER500_1", "이미지 업로드에 실패했습니다.");
