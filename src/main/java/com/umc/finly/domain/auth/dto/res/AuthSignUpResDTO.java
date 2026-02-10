@@ -6,7 +6,7 @@ import lombok.Getter;
 @Getter
 @AllArgsConstructor
 public class AuthSignUpResDTO {
-    // 로그인 응답 DTO
+    // 회원가입 응답 DTO
 
     private Long memberId;
     private String email;
