@@ -7,6 +7,8 @@ import lombok.Getter;
 @Getter
 @AllArgsConstructor
 public class MyPageResDTO {
+    // 마이 페이지 상단 조회 응답 DTO
+
     private Long memberId;
     private String nickname;
     private PersonaUiType personaType;

@@ -20,6 +20,7 @@ public class PersonaTestSubmitServiceImpl implements PersonaTestSubmitService{
     private final PersonaScoringService personaScoringService;
     private final MemberPersonaResultsRepository memberPersonaResultsRepository;
 
+    /** 페르소나 테스트 제출 **/
     @Override
     public PersonaTestSubmitResDTO submit(String mode, Long memberId, PersonaTestSubmitReqDTO request){
 

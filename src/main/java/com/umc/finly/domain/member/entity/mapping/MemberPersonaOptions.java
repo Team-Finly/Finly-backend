@@ -5,7 +5,6 @@ import com.umc.finly.domain.member.entity.PersonaTestQuestion;
 import jakarta.persistence.*;
 import lombok.*;
 
-// 멤버-페르소나 테스트 질문에 대한 선택지
 @Entity
 @NoArgsConstructor(access = AccessLevel.PROTECTED)
 @AllArgsConstructor
@@ -21,6 +20,7 @@ import lombok.*;
         }
 )
 public class MemberPersonaOptions {
+    // 멤버-페르소나 테스트 질문에 대한 선택지
 
     @Id
     @GeneratedValue(strategy = GenerationType.IDENTITY)

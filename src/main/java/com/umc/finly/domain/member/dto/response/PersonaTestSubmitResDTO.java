@@ -9,6 +9,8 @@ import java.time.LocalDateTime;
 @Getter
 @AllArgsConstructor
 public class PersonaTestSubmitResDTO {
+    // 페르소나 제출 응답 DTO
+
     private final PersonaUiType personaType;
     private final boolean saved;
     private final LocalDateTime createdAt;    // 최초 페르소나 결과 생성 시각
