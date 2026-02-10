@@ -37,7 +37,6 @@ public class FragmentController {
     public ApiResponse<FragmentSummaryResDTO> getFragmentSummary(
             @AuthenticationPrincipal AuthPrincipal principal
     ) {
-        // principal null 체크 (인증 실패 시)
         if (principal == null) {
             throw new CustomException(ErrorCode.UNAUTHORIZED);
         }
