@@ -1,8 +1,8 @@
 package com.umc.finly.domain.analysis.association.service;
 
 import com.umc.finly.domain.analysis.association.converter.HourlyChartConverter;
-import com.umc.finly.domain.analysis.association.dto.HourlyChartResDTO;
-import com.umc.finly.domain.analysis.association.exception.KoreaInvestErrorCode;
+import com.umc.finly.domain.analysis.association.dto.response.HourlyChartResDTO;
+import com.umc.finly.domain.analysis.association.exception.code.KoreaInvestErrorCode;
 import com.umc.finly.domain.analysis.association.exception.KoreaInvestException;
 import com.umc.finly.domain.analysis.association.infra.HourlyChartApiCaller;
 import com.umc.finly.domain.market.stock.entity.Stock;

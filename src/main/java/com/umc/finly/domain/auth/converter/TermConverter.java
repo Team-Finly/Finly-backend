@@ -1,7 +1,7 @@
 package com.umc.finly.domain.auth.converter;
 
-import com.umc.finly.domain.auth.dto.res.TermDetailResDTO;
-import com.umc.finly.domain.auth.dto.res.TermResDTO;
+import com.umc.finly.domain.auth.dto.response.TermDetailResDTO;
+import com.umc.finly.domain.auth.dto.response.TermResDTO;
 import com.umc.finly.domain.auth.entity.Term;
 import lombok.AccessLevel;
 import lombok.NoArgsConstructor;

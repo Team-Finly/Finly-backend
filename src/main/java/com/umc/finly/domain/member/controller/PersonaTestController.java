@@ -1,6 +1,6 @@
 package com.umc.finly.domain.member.controller;
 
-import com.umc.finly.domain.auth.exception.AuthErrorCode;
+import com.umc.finly.domain.auth.exception.code.AuthErrorCode;
 import com.umc.finly.domain.member.dto.request.PersonaTestSubmitReqDTO;
 import com.umc.finly.domain.member.dto.response.PersonaTestQuestionResDTO;
 import com.umc.finly.domain.member.dto.response.PersonaTestSubmitResDTO;
@@ -10,7 +10,7 @@ import com.umc.finly.domain.member.service.PersonaTestSubmitService;
 import com.umc.finly.global.apiPayload.exception.CustomException;
 import com.umc.finly.global.apiPayload.response.ApiResponse;
 import com.umc.finly.global.apiPayload.response.SuccessCode;
-import com.umc.finly.global.config.security.AuthPrincipal;
+import com.umc.finly.global.security.AuthPrincipal;
 import io.swagger.v3.oas.annotations.Operation;
 import io.swagger.v3.oas.annotations.tags.Tag;
 import jakarta.validation.Valid;
@@ -24,7 +24,7 @@ import java.util.List;
 @RequiredArgsConstructor
 @RestController
 @RequestMapping("/api/persona-test")
-@Tag(name = "PersonaTest", description = "페르소나 테스트")
+@Tag(name = "PersonaTest", description = "페르소나 테스트 API")
 public class PersonaTestController {
 
     private final PersonaTestService personasTestService;

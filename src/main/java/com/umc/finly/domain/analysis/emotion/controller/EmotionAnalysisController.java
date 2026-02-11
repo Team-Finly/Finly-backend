@@ -8,7 +8,7 @@ import com.umc.finly.global.apiPayload.exception.CustomException;
 import com.umc.finly.global.apiPayload.response.ApiResponse;
 import com.umc.finly.global.apiPayload.response.ErrorCode;
 import com.umc.finly.global.apiPayload.response.SuccessCode;
-import com.umc.finly.global.config.security.AuthPrincipal;
+import com.umc.finly.global.security.AuthPrincipal;
 import io.swagger.v3.oas.annotations.Operation;
 import io.swagger.v3.oas.annotations.tags.Tag;
 import lombok.RequiredArgsConstructor;
@@ -20,7 +20,7 @@ import org.springframework.web.bind.annotation.RestController;
 
 @RequiredArgsConstructor
 @RestController
-@Tag(name = "Analysis - emotion", description = "통계 감정 분석 API")
+@Tag(name = "EmotionAnalysis", description = "통계 감정 분석 API")
 @RequestMapping("/api/analysis/stocks")
 public class EmotionAnalysisController {
 

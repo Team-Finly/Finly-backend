@@ -1,6 +1,6 @@
 package com.umc.finly.domain.member.controller;
 
-import com.umc.finly.domain.auth.exception.AuthErrorCode;
+import com.umc.finly.domain.auth.exception.code.AuthErrorCode;
 import com.umc.finly.domain.member.dto.request.PasswordChangeReqDTO;
 import com.umc.finly.domain.member.dto.request.UpdateNicknameReqDTO;
 import com.umc.finly.domain.member.dto.response.*;
@@ -8,7 +8,7 @@ import com.umc.finly.domain.member.service.MyPageService;
 import com.umc.finly.global.apiPayload.exception.CustomException;
 import com.umc.finly.global.apiPayload.response.ApiResponse;
 import com.umc.finly.global.apiPayload.response.SuccessCode;
-import com.umc.finly.global.config.security.AuthPrincipal;
+import com.umc.finly.global.security.AuthPrincipal;
 import io.swagger.v3.oas.annotations.Operation;
 import io.swagger.v3.oas.annotations.tags.Tag;
 import jakarta.validation.Valid;
@@ -22,7 +22,7 @@ import java.util.Map;
 @RestController
 @RequiredArgsConstructor
 @RequestMapping("/api/mypage")
-@Tag(name = "MyPage", description = "마이페이지 · 내 정보 관리")
+@Tag(name = "MyPage", description = "마이페이지 · 내 정보 관리 API")
 public class MyPageController {
 
     private final MyPageService myPageService;

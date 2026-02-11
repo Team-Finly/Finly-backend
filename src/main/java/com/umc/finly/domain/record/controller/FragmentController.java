@@ -1,8 +1,8 @@
 package com.umc.finly.domain.record.controller;
 
-import com.umc.finly.domain.record.dto.res.FragmentCalendarResDTO;
-import com.umc.finly.domain.record.dto.res.FragmentSummaryResDTO;
-import com.umc.finly.domain.record.dto.res.FragmentListResDTO;
+import com.umc.finly.domain.record.dto.response.FragmentCalendarResDTO;
+import com.umc.finly.domain.record.dto.response.FragmentSummaryResDTO;
+import com.umc.finly.domain.record.dto.response.FragmentListResDTO;
 import com.umc.finly.domain.record.enums.EmotionCode;
 import com.umc.finly.domain.record.enums.FragmentPeriodKey;
 import com.umc.finly.domain.record.service.FragmentService;
@@ -10,7 +10,7 @@ import com.umc.finly.global.apiPayload.exception.CustomException;
 import com.umc.finly.global.apiPayload.response.ApiResponse;
 import com.umc.finly.global.apiPayload.response.ErrorCode;
 import com.umc.finly.global.apiPayload.response.SuccessCode;
-import com.umc.finly.global.config.security.AuthPrincipal;
+import com.umc.finly.global.security.AuthPrincipal;
 import io.swagger.v3.oas.annotations.Operation;
 import io.swagger.v3.oas.annotations.tags.Tag;
 import lombok.RequiredArgsConstructor;
@@ -37,7 +37,6 @@ public class FragmentController {
     public ApiResponse<FragmentSummaryResDTO> getFragmentSummary(
             @AuthenticationPrincipal AuthPrincipal principal
     ) {
-        // principal null 체크 (인증 실패 시)
         if (principal == null) {
             throw new CustomException(ErrorCode.UNAUTHORIZED);
         }

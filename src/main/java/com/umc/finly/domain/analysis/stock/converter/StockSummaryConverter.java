@@ -1,6 +1,7 @@
 package com.umc.finly.domain.analysis.stock.converter;
 
-import com.umc.finly.domain.analysis.stock.dto.res.StockSummaryResDTO;
+
+import com.umc.finly.domain.analysis.stock.dto.response.StockSummaryResDTO;
 
 public class StockSummaryConverter {
     private StockSummaryConverter() {}

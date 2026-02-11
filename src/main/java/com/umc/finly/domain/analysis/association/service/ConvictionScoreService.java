@@ -1,6 +1,6 @@
 package com.umc.finly.domain.analysis.association.service;
 
-import com.umc.finly.domain.analysis.association.dto.ConvictionScoreResDTO;
+import com.umc.finly.domain.analysis.association.dto.response.ConvictionScoreResDTO;
 
 import java.time.LocalDate;
 

@@ -1,12 +1,12 @@
 package com.umc.finly.domain.member.service;
 
-import com.umc.finly.domain.auth.exception.AuthErrorCode;
+import com.umc.finly.domain.auth.exception.code.AuthErrorCode;
 import com.umc.finly.domain.member.converter.PersonaTestConverter;
 import com.umc.finly.domain.member.dto.request.PersonaTestSubmitReqDTO;
 import com.umc.finly.domain.member.dto.response.PersonaTestSubmitResDTO;
 import com.umc.finly.domain.member.entity.Persona;
 import com.umc.finly.domain.member.entity.mapping.MemberPersonaResults;
-import com.umc.finly.domain.member.exception.MemberErrorCode;
+import com.umc.finly.domain.member.exception.code.MemberErrorCode;
 import com.umc.finly.domain.member.repository.MemberPersonaResultsRepository;
 import com.umc.finly.global.apiPayload.exception.CustomException;
 import lombok.RequiredArgsConstructor;

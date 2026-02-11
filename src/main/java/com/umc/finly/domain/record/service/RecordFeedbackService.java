@@ -1,6 +1,6 @@
 package com.umc.finly.domain.record.service;
 
-import com.umc.finly.domain.record.dto.res.RecordFeedbackResDTO;
+import com.umc.finly.domain.record.dto.response.RecordFeedbackResDTO;
 import com.umc.finly.domain.record.entity.RecordEntry;
 import com.umc.finly.domain.record.entity.RecordFeedback;
 

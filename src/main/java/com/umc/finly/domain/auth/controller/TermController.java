@@ -1,7 +1,7 @@
 package com.umc.finly.domain.auth.controller;
 
-import com.umc.finly.domain.auth.dto.res.TermDetailResDTO;
-import com.umc.finly.domain.auth.dto.res.TermResDTO;
+import com.umc.finly.domain.auth.dto.response.TermDetailResDTO;
+import com.umc.finly.domain.auth.dto.response.TermResDTO;
 import com.umc.finly.domain.auth.service.TermQueryService;
 import com.umc.finly.global.apiPayload.response.ApiResponse;
 import com.umc.finly.global.apiPayload.response.SuccessCode;
@@ -16,7 +16,7 @@ import org.springframework.web.bind.annotation.RestController;
 @RestController
 @RequiredArgsConstructor
 @RequestMapping("/api/terms")
-@Tag(name = "Terms", description = "약관 조회")
+@Tag(name = "Terms", description = "약관 조회 API")
 public class TermController {
 
     private final TermQueryService termQueryService;

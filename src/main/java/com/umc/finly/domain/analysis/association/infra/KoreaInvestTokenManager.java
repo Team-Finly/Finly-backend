@@ -1,6 +1,6 @@
 package com.umc.finly.domain.analysis.association.infra;
 
-import com.umc.finly.domain.analysis.association.exception.KoreaInvestErrorCode;
+import com.umc.finly.domain.analysis.association.exception.code.KoreaInvestErrorCode;
 import com.umc.finly.domain.analysis.association.exception.KoreaInvestException;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.beans.factory.annotation.Value;

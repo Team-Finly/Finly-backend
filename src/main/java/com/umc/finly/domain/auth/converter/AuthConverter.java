@@ -1,6 +1,6 @@
 package com.umc.finly.domain.auth.converter;
 
-import com.umc.finly.domain.auth.dto.res.*;
+import com.umc.finly.domain.auth.dto.response.*;
 import com.umc.finly.domain.member.entity.Member;
 import lombok.AccessLevel;
 import lombok.NoArgsConstructor;
