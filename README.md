@@ -251,7 +251,7 @@ Resolves: #12
     <img width="200" alt="인증/회원" src="https://github.com/user-attachments/assets/b45948c7-ee4a-47b4-b049-b4d96adbb79b" />
   </td>
   <td align="center" valign="top">
-    <b>기록/리포트</b><br/>
+    <b>기록/리포트/AI피드백</b><br/>
     <img width="200" alt="기록/리포트" src="https://github.com/user-attachments/assets/884a130d-54f6-4818-93b5-0973c10f6525" />
   </td>
   <td align="center" valign="top">
