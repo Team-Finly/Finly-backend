@@ -6,6 +6,7 @@ import lombok.Getter;
 @Getter
 @AllArgsConstructor
 public class TermDetailResDTO {
+    // 약관 상세 조회 응답 DTO
 
     private Long termId;
     private String termType;
