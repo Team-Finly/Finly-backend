@@ -5,7 +5,7 @@ import com.umc.finly.domain.member.converter.MyPageConverter;
 import com.umc.finly.domain.member.dto.response.*;
 import com.umc.finly.domain.member.entity.Member;
 import com.umc.finly.domain.member.entity.mapping.MemberPersonaResults;
-import com.umc.finly.domain.member.exception.MemberErrorCode;
+import com.umc.finly.domain.member.exception.code.MemberErrorCode;
 import com.umc.finly.domain.member.repository.MemberPersonaResultsRepository;
 import com.umc.finly.domain.member.repository.MemberRepository;
 import com.umc.finly.domain.record.repository.FragmentRepository;

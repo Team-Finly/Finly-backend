@@ -1,7 +1,7 @@
 package com.umc.finly.global.apiPayload.exception;
 
 import com.fasterxml.jackson.databind.exc.InvalidFormatException;
-import com.umc.finly.domain.member.exception.MemberErrorCode;
+import com.umc.finly.domain.member.exception.code.MemberErrorCode;
 import com.umc.finly.domain.record.enums.EmotionCode;
 import com.umc.finly.domain.record.enums.FragmentPeriodKey;
 import com.umc.finly.domain.record.exception.code.RecordErrorCode;
