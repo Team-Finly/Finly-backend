@@ -1,6 +1,5 @@
 package com.umc.finly.domain.record.dto.response;
 
-import com.umc.finly.domain.record.entity.RecordFeedback;
 import com.umc.finly.domain.record.enums.FeedbackStatus;
 import lombok.Builder;
 import lombok.Getter;
@@ -20,17 +19,4 @@ public class RecordFeedbackResDTO {
     private String suggestion;       // AI 제안 (투자 조언)
     private LocalDateTime createdAt; // 생성 시각
     private LocalDateTime updatedAt; // 수정 시각 (상태 변경 시 갱신)
-
-    // Entity → DTO 변환
-    public static RecordFeedbackResDTO from(RecordFeedback feedback) {
-        return RecordFeedbackResDTO.builder()
-                .feedbackId(feedback.getId())
-                .recordEntryId(feedback.getRecordEntryId())
-                .status(feedback.getStatus())
-                .content(feedback.getContent())
-                .suggestion(feedback.getSuggestion())
-                .createdAt(feedback.getCreatedAt())
-                .updatedAt(feedback.getUpdatedAt())
-                .build();
-    }
 }

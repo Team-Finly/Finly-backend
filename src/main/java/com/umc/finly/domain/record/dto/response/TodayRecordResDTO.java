@@ -1,6 +1,5 @@
 package com.umc.finly.domain.record.dto.response;
 
-import com.umc.finly.domain.record.entity.RecordEntry;
 import com.umc.finly.domain.record.enums.EmotionCode;
 import com.umc.finly.domain.record.enums.Session;
 import com.umc.finly.domain.record.enums.TradeAction;
@@ -47,46 +46,5 @@ public class TodayRecordResDTO {
         private EmotionCode emotionCode; // 감정 코드
         private Integer emotionIntensity; // 감정 강도
         private String memo;             // 메모
-
-        // Entity → DTO 변환
-        public static TimelineEntry from(RecordEntry entry, String symbol) {
-            return TimelineEntry.builder()
-                    .recordId(entry.getId())
-                    .recordDate(entry.getRecordDate())
-                    .recordedAt(entry.getCreatedAt())
-                    .session(entry.getSession())
-                    .tradeAction(entry.getTradeAction())
-                    .symbol(symbol)
-                    .unitPrice(entry.getUnitPrice())
-                    .quantity(entry.getQuantity())
-                    .emotionCode(entry.getEmotionCode())
-                    .emotionIntensity(entry.getEmotionIntensity())
-                    .memo(entry.getMemo())
-                    .build();
-        }
-    }
-
-    // 프리즘 타이틀 생성 (오늘 기록들의 감정 흐름 요약)
-    // 기록 0개: 위로 메시지
-    // 기록 1개: 해당 감정 강조
-    // 기록 2개+: 첫 감정 → 마지막 감정 흐름 표현
-    public static String generatePrismTitle(List<RecordEntry> entries) {
-        if (entries == null || entries.isEmpty()) {
-            return "괜찮아요. 기록이 없는 날도 있을 수 있죠.";
-        }
-        if (entries.size() == 1) {
-            EmotionCode emotion = entries.get(0).getEmotionCode();
-            if (emotion == null) { // null 체크
-                return "오늘 하루도 기록을 남겼네요!";
-            }
-            return "{{" + emotion.getLabel() + "}}한 하루네요!";
-        }
-        EmotionCode first = entries.get(0).getEmotionCode();
-        EmotionCode last = entries.get(entries.size() - 1).getEmotionCode();
-        if (first == null || last == null) { // null 체크
-            return "오늘도 열심히 기록했네요!";
-        }
-        // {{감정}}으로/로 조사 처리 (particle 사용)
-        return "{{" + first.getLabel() + "}}하게 시작해 {{" + last.getLabel() + "}}" + last.getParticle() + " 마무리한 날이네요.";
     }
 }

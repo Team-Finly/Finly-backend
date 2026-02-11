@@ -1,8 +1,5 @@
 package com.umc.finly.domain.record.dto.response;
 
-import com.umc.finly.domain.market.stock.entity.Stock;
-import com.umc.finly.domain.record.entity.RecordEntry;
-import com.umc.finly.domain.record.entity.RecordFeedback;
 import com.umc.finly.domain.record.enums.EmotionCode;
 import com.umc.finly.domain.record.enums.Session;
 import com.umc.finly.domain.record.enums.TradeAction;
@@ -35,29 +32,5 @@ public class RecordCreateResDTO {
     public static class FeedbackInfo {
         private Long feedbackId;     // 피드백 ID
         private String status;       // 피드백 상태 (PENDING, GENERATING, COMPLETED, FAILED)
-    }
-
-    // Entity → DTO 변환 (팩토리 메서드)
-    public static RecordCreateResDTO from(RecordEntry entry, Stock stock, RecordFeedback feedback) {
-        FeedbackInfo feedbackInfo = null;
-        if (feedback != null) {
-            feedbackInfo = FeedbackInfo.builder()
-                    .feedbackId(feedback.getId())
-                    .status(feedback.getStatus().name())
-                    .build();
-        }
-
-        return RecordCreateResDTO.builder()
-                .recordId(entry.getId())
-                .recordDate(entry.getRecordDate())
-                .recordedAt(entry.getCreatedAt())
-                .session(entry.getSession())
-                .tradeAction(entry.getTradeAction())
-                .symbol(stock.getSymbol())
-                .emotionCode(entry.getEmotionCode())
-                .emotionIntensity(entry.getEmotionIntensity())
-                .memo(entry.getMemo())
-                .feedback(feedbackInfo)
-                .build();
     }
 }
