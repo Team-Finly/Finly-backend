@@ -1,17 +1,10 @@
 package com.umc.finly.domain.auth.service;
 
-<<<<<<< Updated upstream
 import com.umc.finly.domain.auth.converter.AuthConverter;
-import com.umc.finly.domain.auth.dto.req.AuthLoginReqDTO;
-import com.umc.finly.domain.auth.dto.req.AuthSignUpReqDTO;
-import com.umc.finly.domain.auth.dto.res.AuthLoginResDTO;
-import com.umc.finly.domain.auth.dto.res.AuthSignUpResDTO;
-=======
 import com.umc.finly.domain.auth.dto.request.AuthLoginReqDTO;
 import com.umc.finly.domain.auth.dto.request.AuthSignUpReqDTO;
 import com.umc.finly.domain.auth.dto.response.AuthLoginResDTO;
 import com.umc.finly.domain.auth.dto.response.AuthSignUpResDTO;
->>>>>>> Stashed changes
 import com.umc.finly.domain.auth.entity.Term;
 import com.umc.finly.domain.auth.entity.mapping.MemberTerm;
 import com.umc.finly.domain.auth.enums.TermType;
