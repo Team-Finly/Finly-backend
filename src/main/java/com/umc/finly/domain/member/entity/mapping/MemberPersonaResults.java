@@ -5,7 +5,6 @@ import com.umc.finly.global.entity.BaseEntity;
 import jakarta.persistence.*;
 import lombok.*;
 
-// 멤버-페르소나 테스트 결과
 @Entity
 @NoArgsConstructor(access = AccessLevel.PROTECTED)
 @AllArgsConstructor
@@ -21,6 +20,7 @@ import lombok.*;
         }
 )
 public class MemberPersonaResults extends BaseEntity {
+    // 멤버-페르소나 테스트 결과
 
     @Id
     @GeneratedValue(strategy = GenerationType.IDENTITY)

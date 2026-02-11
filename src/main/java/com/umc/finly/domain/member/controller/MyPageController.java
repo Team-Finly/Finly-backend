@@ -120,6 +120,27 @@ public class MyPageController {
         );
     }
 
+    /** 비밀번호 변경 */
+    @Operation(
+            summary = "비밀번호 변경",
+            description = """
+            로그인한 사용자의 비밀번호를 변경합니다.
+            
+            - Authorization: Bearer {accessToken} 필요
+            - newPassword와 newPasswordConfirm이 일치해야 합니다.
+            - 비밀번호 정책을 만족해야 합니다.
+            """
+    )
+    @PatchMapping("/me/password")
+    public ApiResponse<Map<String, Object>> changePassword(
+            @AuthenticationPrincipal AuthPrincipal principal,
+            @Valid @RequestBody PasswordChangeReqDTO request
+    ){
+        Long memberId = requireMemberId(principal);
+        myPageService.changePassword(memberId, request.getNewPassword(), request.getNewPasswordConfirm());
+        return ApiResponse.onSuccess(Map.of(), SuccessCode.OK);
+    }
+
     /** 프로필 사진 추가 */
     @Operation(
             summary = "프로필 사진 추가",
@@ -183,27 +204,6 @@ public class MyPageController {
     ){
         Long memberId = requireMemberId(principal);
         myPageService.deleteProfileImage(memberId);
-        return ApiResponse.onSuccess(Map.of(), SuccessCode.OK);
-    }
-
-    /** 비밀번호 변경 */
-    @Operation(
-            summary = "비밀번호 변경",
-            description = """
-            로그인한 사용자의 비밀번호를 변경합니다.
-            
-            - Authorization: Bearer {accessToken} 필요
-            - newPassword와 newPasswordConfirm이 일치해야 합니다.
-            - 비밀번호 정책을 만족해야 합니다.
-            """
-    )
-    @PatchMapping("/me/password")
-    public ApiResponse<Map<String, Object>> changePassword(
-            @AuthenticationPrincipal AuthPrincipal principal,
-            @Valid @RequestBody PasswordChangeReqDTO request
-    ){
-        Long memberId = requireMemberId(principal);
-        myPageService.changePassword(memberId, request.getNewPassword(), request.getNewPasswordConfirm());
         return ApiResponse.onSuccess(Map.of(), SuccessCode.OK);
     }
 

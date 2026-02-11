@@ -80,6 +80,24 @@ public class MyPageServiceImpl implements MyPageService {
         return MyPageConverter.toUpdateNicknameResDTO(member.getNickname());
     }
 
+    /** 내 비밀번호 변경 */
+    @Override
+    @Transactional
+    public void changePassword(Long memberId, String newPassword, String newPasswordConfirm) {
+        if (newPassword == null || !newPassword.equals(newPasswordConfirm)) {
+            throw new CustomException(AuthErrorCode.PASSWORD_CONFIRM_MISMATCH);
+        }
+
+        if (!PasswordPolicy.isValid(newPassword)) {
+            throw new CustomException(AuthErrorCode.INVALID_PASSWORD);
+        }
+
+        Member member = memberRepository.findById(memberId)
+                .orElseThrow(() -> new CustomException(MemberErrorCode.MEMBER_NOT_FOUND));
+
+        member.changePassword(passwordEncoder.encode(newPassword));
+    }
+
     /** 프로필 사진 추가 */
     @Override
     @Transactional
@@ -176,24 +194,6 @@ public class MyPageServiceImpl implements MyPageService {
         } catch (Exception e) {
             log.warn("[deleteProfileImage] image delete failed. oldUrl={}", oldImageUrl, e);
         }
-    }
-
-    /** 내 비밀번호 변경 */
-    @Override
-    @Transactional
-    public void changePassword(Long memberId, String newPassword, String newPasswordConfirm) {
-        if (newPassword == null || !newPassword.equals(newPasswordConfirm)) {
-            throw new CustomException(AuthErrorCode.PASSWORD_CONFIRM_MISMATCH);
-        }
-
-        if (!PasswordPolicy.isValid(newPassword)) {
-            throw new CustomException(AuthErrorCode.INVALID_PASSWORD);
-        }
-
-        Member member = memberRepository.findById(memberId)
-                .orElseThrow(() -> new CustomException(MemberErrorCode.MEMBER_NOT_FOUND));
-
-        member.changePassword(passwordEncoder.encode(newPassword));
     }
 
     /** 회원 탈퇴 */

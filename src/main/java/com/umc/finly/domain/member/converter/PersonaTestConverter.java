@@ -15,6 +15,7 @@ import java.util.List;
 @NoArgsConstructor(access = AccessLevel.PRIVATE)
 public class PersonaTestConverter {
 
+    /** 페르소나 테스트 선택지 조회  **/
     public static PersonaTestOptionResDTO toOptionResDTO(PersonaTestOption option) {
         return new PersonaTestOptionResDTO(
                 option.getId(),
@@ -23,6 +24,7 @@ public class PersonaTestConverter {
         );
     }
 
+    /** 페르소나 테스트 질문 조회  **/
     public static PersonaTestQuestionResDTO toQuestionResDTO(
             PersonaTestQuestion question,
             List<PersonaTestOptionResDTO> options
@@ -35,6 +37,7 @@ public class PersonaTestConverter {
         );
     }
 
+    /** 페르소나 테스트 제출  **/
     public static PersonaTestSubmitResDTO toSubmitResDTO(
             Persona persona,
             boolean saved,
