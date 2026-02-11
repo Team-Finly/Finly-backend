@@ -1,17 +1,17 @@
 package com.umc.finly.domain.auth.controller;
 
-import com.umc.finly.domain.auth.dto.req.AuthLoginReqDTO;
-import com.umc.finly.domain.auth.dto.req.AuthSignUpReqDTO;
-import com.umc.finly.domain.auth.dto.res.AuthLoginResDTO;
-import com.umc.finly.domain.auth.dto.res.AuthReissueResDTO;
-import com.umc.finly.domain.auth.dto.res.AuthSignUpResDTO;
-import com.umc.finly.domain.auth.dto.res.CheckEmailResDTO;
-import com.umc.finly.domain.auth.exception.AuthErrorCode;
+import com.umc.finly.domain.auth.dto.request.AuthLoginReqDTO;
+import com.umc.finly.domain.auth.dto.request.AuthSignUpReqDTO;
+import com.umc.finly.domain.auth.dto.response.AuthLoginResDTO;
+import com.umc.finly.domain.auth.dto.response.AuthReissueResDTO;
+import com.umc.finly.domain.auth.dto.response.AuthSignUpResDTO;
+import com.umc.finly.domain.auth.dto.response.CheckEmailResDTO;
+import com.umc.finly.domain.auth.exception.code.AuthErrorCode;
 import com.umc.finly.domain.auth.service.AuthService;
 import com.umc.finly.global.apiPayload.exception.CustomException;
 import com.umc.finly.global.apiPayload.response.ApiResponse;
 import com.umc.finly.global.apiPayload.response.SuccessCode;
-import com.umc.finly.global.config.security.AuthPrincipal;
+import com.umc.finly.global.security.AuthPrincipal;
 import com.umc.finly.global.util.CookieUtil;
 import io.swagger.v3.oas.annotations.Operation;
 import io.swagger.v3.oas.annotations.tags.Tag;
@@ -28,7 +28,7 @@ import org.springframework.web.bind.annotation.*;
 @RequiredArgsConstructor
 @RestController
 @RequestMapping("/auth")
-@Tag(name = "Auth", description = "인증 · 회원가입 · 로그인")
+@Tag(name = "Auth", description = "인증 · 회원가입 · 로그인 API")
 public class AuthController {
 
     private final AuthService authService;

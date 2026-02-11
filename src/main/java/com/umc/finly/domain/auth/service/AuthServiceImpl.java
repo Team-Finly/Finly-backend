@@ -1,14 +1,14 @@
 package com.umc.finly.domain.auth.service;
 
 import com.umc.finly.domain.auth.converter.AuthConverter;
-import com.umc.finly.domain.auth.dto.req.AuthLoginReqDTO;
-import com.umc.finly.domain.auth.dto.req.AuthSignUpReqDTO;
-import com.umc.finly.domain.auth.dto.res.AuthLoginResDTO;
-import com.umc.finly.domain.auth.dto.res.AuthSignUpResDTO;
+import com.umc.finly.domain.auth.dto.request.AuthLoginReqDTO;
+import com.umc.finly.domain.auth.dto.request.AuthSignUpReqDTO;
+import com.umc.finly.domain.auth.dto.response.AuthLoginResDTO;
+import com.umc.finly.domain.auth.dto.response.AuthSignUpResDTO;
 import com.umc.finly.domain.auth.entity.Term;
 import com.umc.finly.domain.auth.entity.mapping.MemberTerm;
 import com.umc.finly.domain.auth.enums.TermType;
-import com.umc.finly.domain.auth.exception.AuthErrorCode;
+import com.umc.finly.domain.auth.exception.code.AuthErrorCode;
 import com.umc.finly.domain.auth.repository.TermRepository;
 import com.umc.finly.domain.member.dto.request.PersonaAnswerReqDTO;
 import com.umc.finly.domain.member.entity.Member;
@@ -19,10 +19,10 @@ import com.umc.finly.domain.member.repository.MemberRepository;
 import com.umc.finly.domain.member.repository.MemberTermRepository;
 import com.umc.finly.domain.member.service.PersonaScoringService;
 import com.umc.finly.global.apiPayload.exception.CustomException;
-import com.umc.finly.global.infra.jwt.JwtProvider;
+import com.umc.finly.global.security.jwt.JwtProvider;
 import com.umc.finly.global.util.CookieUtil;
-import com.umc.finly.global.util.PasswordPolicy;
-import com.umc.finly.global.util.SecurityUtil;
+import com.umc.finly.global.security.PasswordPolicy;
+import com.umc.finly.global.security.SecurityUtil;
 import io.jsonwebtoken.ExpiredJwtException;
 import io.jsonwebtoken.JwtException;
 import jakarta.servlet.http.HttpServletResponse;
@@ -113,7 +113,6 @@ public class AuthServiceImpl implements AuthService {
         // 8. 약관 동의 저장
         saveTermAgreements(savedMember, agreedMap);
 
-        // Converter로 이동
         return AuthConverter.toSignUpResDTO(savedMember, persona.getId());
     }
 
@@ -147,7 +146,6 @@ public class AuthServiceImpl implements AuthService {
                 (jwtProvider.getExpiration(refreshToken).getTime() - System.currentTimeMillis()) / 1000
         );
 
-        // Converter로 이동
         AuthLoginResDTO body = AuthConverter.toLoginResDTO(accessToken, member);
 
         return new LoginTokens(body, refreshToken, refreshMaxAgeSeconds);
@@ -244,6 +242,7 @@ public class AuthServiceImpl implements AuthService {
     }
 
     // -----------------------------------------------------------
+    /** 유효성 검사 **/
     private boolean isValidPassword(String raw) {
         return PasswordPolicy.isValid(raw);
     }
@@ -252,6 +251,7 @@ public class AuthServiceImpl implements AuthService {
         return nickname != null && nickname.matches(NICKNAME_REGEX);
     }
 
+    // 약관 동의 요청 리스트 맵으로 변환
     private Map<Long, Boolean> toAgreedMap(List<AuthSignUpReqDTO.TermAgreementReq> agreements) {
         if (agreements == null || agreements.isEmpty()) {
             throw new CustomException(AuthErrorCode.INVALID_TERM_REQUEST);
@@ -264,6 +264,7 @@ public class AuthServiceImpl implements AuthService {
         ));
     }
 
+    // 필수 약관이 모두 True로 처리됐는지 검증
     private void validateRequiredTermsAgreed(Map<Long, Boolean> agreedMap) {
         List<Term> requiredTerms = REQUIRED_TERMS.stream()
                 .map(tt -> termRepository.findByTermType(tt)
@@ -279,6 +280,7 @@ public class AuthServiceImpl implements AuthService {
         }
     }
 
+    // 회원가입 시 제출된 페르소나 답변 리스트로부터 최종 페르소나 계산
     private Persona resolvePersonaFromSignup(List<PersonaAnswerReqDTO> answers) {
         if (answers == null || answers.isEmpty()) {
             throw new CustomException(AuthErrorCode.INVALID_PERSONA_ANSWERS);
@@ -291,6 +293,7 @@ public class AuthServiceImpl implements AuthService {
         return personaScoringService.resolvePersona(convertedAnswers);
     }
 
+    // agreedMap 기반으로 members-terms 매핑 테이블에 저장
     private void saveTermAgreements(Member member, Map<Long, Boolean> agreedMap) {
         List<Long> termIds = new ArrayList<>(agreedMap.keySet());
 

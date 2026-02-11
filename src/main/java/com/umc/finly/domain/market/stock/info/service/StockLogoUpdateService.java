@@ -1,9 +1,9 @@
 package com.umc.finly.domain.market.stock.info.service;
 
 import com.google.common.collect.Lists;
-import com.umc.finly.domain.market.stock.info.dto.StockAdminResDTO;
+import com.umc.finly.domain.market.stock.info.dto.response.StockAdminResDTO;
 import com.umc.finly.domain.market.stock.entity.Stock;
-import com.umc.finly.domain.market.stock.info.exception.StockInfoErrorCode;
+import com.umc.finly.domain.market.stock.info.exception.code.StockInfoErrorCode;
 import com.umc.finly.domain.market.stock.info.exception.StockInfoException;
 import com.umc.finly.domain.market.stock.info.infra.TradingViewLogoExtractor;
 import com.umc.finly.domain.market.stock.info.infra.TradingViewSymbolClient;

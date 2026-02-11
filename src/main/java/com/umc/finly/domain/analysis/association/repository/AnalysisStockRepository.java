@@ -1,6 +1,6 @@
 package com.umc.finly.domain.analysis.association.repository;
 
-import com.umc.finly.domain.analysis.association.dto.AnalysisStockResDTO;
+import com.umc.finly.domain.analysis.association.dto.response.AnalysisStockResDTO;
 import com.umc.finly.domain.record.entity.RecordEntry;
 import org.springframework.data.jpa.repository.JpaRepository;
 import org.springframework.data.jpa.repository.Query;
@@ -12,7 +12,7 @@ public interface AnalysisStockRepository
         extends JpaRepository<RecordEntry, Long> {
 
     @Query("""
-        select distinct new com.umc.finly.domain.analysis.association.dto.AnalysisStockResDTO(
+        select distinct new com.umc.finly.domain.analysis.association.dto.response.AnalysisStockResDTO(
             s.id,
             s.symbol,
             s.name

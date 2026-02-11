@@ -1,6 +1,6 @@
 package com.umc.finly.domain.analysis.association.converter;
 
-import com.umc.finly.domain.analysis.association.dto.HourlyChartResDTO;
+import com.umc.finly.domain.analysis.association.dto.response.HourlyChartResDTO;
 import com.umc.finly.domain.market.stock.entity.Stock;
 import com.umc.finly.domain.record.entity.RecordEntry;
 import com.umc.finly.domain.record.entity.RecordFeedback;
@@ -10,7 +10,6 @@ import java.time.LocalDate;
 import java.time.LocalDateTime;
 import java.time.LocalTime;
 import java.time.format.DateTimeFormatter;
-import java.util.Collections;
 import java.util.List;
 import java.util.Map;
 

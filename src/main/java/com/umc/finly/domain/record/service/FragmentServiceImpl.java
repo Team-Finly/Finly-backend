@@ -1,9 +1,9 @@
 package com.umc.finly.domain.record.service;
 
 import com.umc.finly.domain.record.converter.FragmentConverter;
-import com.umc.finly.domain.record.dto.res.FragmentCalendarResDTO;
-import com.umc.finly.domain.record.dto.res.FragmentListResDTO;
-import com.umc.finly.domain.record.dto.res.FragmentSummaryResDTO;
+import com.umc.finly.domain.record.dto.response.FragmentCalendarResDTO;
+import com.umc.finly.domain.record.dto.response.FragmentListResDTO;
+import com.umc.finly.domain.record.dto.response.FragmentSummaryResDTO;
 import com.umc.finly.domain.record.enums.EmotionCode;
 import com.umc.finly.domain.record.enums.FragmentPeriodKey;
 import com.umc.finly.domain.record.exception.code.RecordErrorCode;

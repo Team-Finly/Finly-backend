@@ -1,10 +1,10 @@
 package com.umc.finly.domain.auth.service;
 
 import com.umc.finly.domain.auth.converter.TermConverter;
-import com.umc.finly.domain.auth.dto.res.TermDetailResDTO;
-import com.umc.finly.domain.auth.dto.res.TermResDTO;
+import com.umc.finly.domain.auth.dto.response.TermDetailResDTO;
+import com.umc.finly.domain.auth.dto.response.TermResDTO;
 import com.umc.finly.domain.auth.entity.Term;
-import com.umc.finly.domain.auth.exception.AuthErrorCode;
+import com.umc.finly.domain.auth.exception.code.AuthErrorCode;
 import com.umc.finly.domain.auth.repository.TermRepository;
 import com.umc.finly.global.apiPayload.exception.CustomException;
 import lombok.RequiredArgsConstructor;

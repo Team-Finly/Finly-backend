@@ -1,6 +1,6 @@
 package com.umc.finly.domain.analysis.association.service;
 
-import com.umc.finly.domain.analysis.association.dto.AiAnalysisResDTO;
+import com.umc.finly.domain.analysis.association.dto.response.AiAnalysisResDTO;
 import com.umc.finly.domain.analysis.association.entity.ConvictionScoreResult;
 import com.umc.finly.domain.analysis.association.entity.FearIndexResult;
 import com.umc.finly.domain.analysis.association.infra.AiAnalysisPromptBuilder;

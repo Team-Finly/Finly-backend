@@ -1,6 +1,7 @@
 package com.umc.finly.domain.analysis.stock.converter;
 
-import com.umc.finly.domain.analysis.stock.dto.res.RecentDecisionResDTO;
+
+import com.umc.finly.domain.analysis.stock.dto.response.RecentDecisionResDTO;
 import com.umc.finly.domain.market.stock.entity.Stock;
 import com.umc.finly.domain.record.entity.RecordEntry;
 

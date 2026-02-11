@@ -1,6 +1,6 @@
 package com.umc.finly.domain.analysis.association.converter;
 
-import com.umc.finly.domain.analysis.association.dto.ConvictionScoreResDTO;
+import com.umc.finly.domain.analysis.association.dto.response.ConvictionScoreResDTO;
 import com.umc.finly.domain.analysis.association.enums.Status;
 
 public class ConvictionScoreConverter {
