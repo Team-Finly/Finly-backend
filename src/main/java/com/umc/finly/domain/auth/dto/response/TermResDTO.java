@@ -5,8 +5,8 @@ import lombok.Getter;
 
 import java.util.List;
 
-// 약관 관련 API 응답 DTO
 public class TermResDTO {
+    // 약관 조회 응답 DTO
 
     // 약관 목록 응답 Wrapper
     @Getter

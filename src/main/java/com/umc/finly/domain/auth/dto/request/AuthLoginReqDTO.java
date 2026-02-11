@@ -6,7 +6,7 @@ import lombok.Getter;
 
 @Getter
 public class AuthLoginReqDTO {
-    // 로그인 DTO
+    // 로그인 요청 DTO
 
     @Email(message = "유효한 이메일이어야 합니다.")
     @NotBlank(message = "이메일을 입력하세요.")
