@@ -10,7 +10,7 @@ import org.springframework.http.HttpStatus;
 public enum EmotionAnalysisErrorCode implements BaseCode {
 
     // 4xx
-    ANALYSIS_STOCK_NOT_FOUND(HttpStatus.NOT_FOUND, "ANALYSIS_EMOTION404_1", "종목을 찾을 수 없습니다.");
+    ANALYSIS_EMOTION_STOCK_NOT_FOUND(HttpStatus.NOT_FOUND, "ANALYSIS_EMOTION404_1", "종목을 찾을 수 없습니다.");
 
     private final HttpStatus httpStatus;
     private final String code;

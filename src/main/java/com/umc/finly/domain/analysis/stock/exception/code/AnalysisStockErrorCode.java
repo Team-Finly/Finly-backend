@@ -7,7 +7,7 @@ import org.springframework.http.HttpStatus;
 
 @Getter
 @AllArgsConstructor
-public enum AnalysisErrorCode implements BaseCode {
+public enum AnalysisStockErrorCode implements BaseCode {
 
     // 주식 데이터 탭
     // 4xx

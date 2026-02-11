@@ -2,7 +2,7 @@ package com.umc.finly.domain.analysis.stock.infra;
 
 import com.fasterxml.jackson.databind.JsonNode;
 import com.fasterxml.jackson.databind.ObjectMapper;
-import com.umc.finly.domain.analysis.stock.exception.code.AnalysisErrorCode;
+import com.umc.finly.domain.analysis.stock.exception.code.AnalysisStockErrorCode;
 import com.umc.finly.global.apiPayload.exception.CustomException;
 import org.springframework.beans.factory.annotation.Qualifier;
 import org.springframework.stereotype.Component;
@@ -38,25 +38,25 @@ public class NaverStockPriceProvider implements StockPriceProvider {
             JsonNode stockSnapshots = root.get("datas");
 
             if (stockSnapshots == null || !stockSnapshots.isArray()) { // 네이버 주식 API 응답에 주식 데이터가 없음
-                throw new CustomException(AnalysisErrorCode.STOCK_CURRENT_PRICE_RESPONSE_INVALID);
+                throw new CustomException(AnalysisStockErrorCode.STOCK_CURRENT_PRICE_RESPONSE_INVALID);
             }
 
             if (stockSnapshots.isEmpty()) { // 존재하지 않는 종목 코드에 대한 요청인 경우
-                throw new CustomException(AnalysisErrorCode.STOCK_CURRENT_PRICE_NOT_FOUND);
+                throw new CustomException(AnalysisStockErrorCode.STOCK_CURRENT_PRICE_NOT_FOUND);
             }
 
             JsonNode stock = stockSnapshots.get(0);
             JsonNode closePriceRaw = stock.get("closePriceRaw");
 
             if (closePriceRaw == null) { // closePriceRaw 데이터가 없음
-                throw new CustomException(AnalysisErrorCode.STOCK_CURRENT_PRICE_RESPONSE_INVALID);
+                throw new CustomException(AnalysisStockErrorCode.STOCK_CURRENT_PRICE_RESPONSE_INVALID);
             }
 
             return closePriceRaw.asInt();
         } catch (CustomException e) {
             throw e;
         } catch (Exception e) {
-            throw new CustomException(AnalysisErrorCode.STOCK_CURRENT_PRICE_API_FAILED);
+            throw new CustomException(AnalysisStockErrorCode.STOCK_CURRENT_PRICE_API_FAILED);
         }
     }
 }

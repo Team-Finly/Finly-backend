@@ -47,7 +47,7 @@ public class EmotionAnalysisServiceImpl implements EmotionAnalysisService {
 
         // symbol로 Stock을 찾아서 stockId/stockName 확보
         Stock stock = stockRepository.findBySymbol(symbol)
-                .orElseThrow(() -> new CustomException(EmotionAnalysisErrorCode.ANALYSIS_STOCK_NOT_FOUND));
+                .orElseThrow(() -> new CustomException(EmotionAnalysisErrorCode.ANALYSIS_EMOTION_STOCK_NOT_FOUND));
 
         // 종목 DTO 생성
         EmotionDistributionResDTO.SelectedStock stockDto =
@@ -121,7 +121,7 @@ public class EmotionAnalysisServiceImpl implements EmotionAnalysisService {
 
         // 종목 조회
         Stock stock = stockRepository.findBySymbol(symbol)
-                .orElseThrow(() -> new CustomException(EmotionAnalysisErrorCode.ANALYSIS_STOCK_NOT_FOUND));
+                .orElseThrow(() -> new CustomException(EmotionAnalysisErrorCode.ANALYSIS_EMOTION_STOCK_NOT_FOUND));
 
         // 기록 조회(매수/매도 모두 포함)
         List<RecordEntry> records = emotionAnalysisRepository.findAllByMemberIdAndStockId(memberId, stock.getId());
@@ -172,7 +172,7 @@ public class EmotionAnalysisServiceImpl implements EmotionAnalysisService {
 
         // 종목 조회
         Stock stock = stockRepository.findBySymbol(symbol)
-                .orElseThrow(() -> new CustomException(EmotionAnalysisErrorCode.ANALYSIS_STOCK_NOT_FOUND));
+                .orElseThrow(() -> new CustomException(EmotionAnalysisErrorCode.ANALYSIS_EMOTION_STOCK_NOT_FOUND));
 
         // 세션별 count 집계
         List<EmotionAnalysisRepository.SessionCountProjection> projections =
