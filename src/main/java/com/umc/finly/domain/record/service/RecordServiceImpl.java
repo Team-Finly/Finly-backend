@@ -33,7 +33,6 @@ import org.springframework.transaction.annotation.Transactional;
 
 import java.math.BigDecimal;
 import java.time.LocalDate;
-import java.time.LocalDateTime;
 import java.time.LocalTime;
 import java.util.List;
 import java.util.Map;
@@ -193,7 +192,7 @@ public class RecordServiceImpl implements RecordService {
             }
         }
 
-        return DailyReportResDTO.from(entry, stock, content);
+        return recordConverter.toDailyReportRes(entry, stock, content);
     }
 
     @Override
@@ -202,14 +201,7 @@ public class RecordServiceImpl implements RecordService {
         List<RecordEntry> entries = recordEntryRepository
                 .findByMemberIdAndRecordDateOrderByCreatedAtAsc(memberId, date);
 
-        // 2. 프리즘 피드백 타이틀 자동 생성 (감정 기반 문구)
-        String title = TodayRecordResDTO.generatePrismTitle(entries);
-        TodayRecordResDTO.PrismFeedback prismFeedback = TodayRecordResDTO.PrismFeedback.builder()
-                .title(title)
-                .generatedAt(LocalDateTime.now())
-                .build();
-
-        // 3. N+1 방지: 기록에 포함된 stockId 일괄 조회
+        // 2. N+1 방지: 기록에 포함된 stockId 일괄 조회
         List<Long> stockIds = entries.stream()
                 .map(RecordEntry::getStockId)
                 .distinct()
@@ -217,22 +209,8 @@ public class RecordServiceImpl implements RecordService {
         Map<Long, Stock> stockMap = stockRepository.findAllById(stockIds).stream()
                 .collect(Collectors.toMap(Stock::getId, Function.identity()));
 
-        // 4. 타임라인 엔트리 변환
-        List<TodayRecordResDTO.TimelineEntry> timelineSummary = entries.stream()
-                .map(entry -> {
-                    Stock stock = stockMap.get(entry.getStockId());
-                    String symbol = stock != null ? stock.getSymbol() : "";
-                    return TodayRecordResDTO.TimelineEntry.from(entry, symbol);
-                })
-                .toList();
-
-        return TodayRecordResDTO.builder()
-                .date(date)
-                .prismFeedback(prismFeedback)
-                .timelineSummary(timelineSummary)
-                .hasRecords(!entries.isEmpty())
-                .recordCount(entries.size())
-                .build();
+        // 3. 응답 DTO 변환 (converter에 위임)
+        return recordConverter.toTodayRecordRes(date, entries, stockMap);
     }
 
     @Override
@@ -272,19 +250,8 @@ public class RecordServiceImpl implements RecordService {
         Map<Long, Stock> stockMap = stockRepository.findAllById(resultStockIds).stream()
                 .collect(Collectors.toMap(Stock::getId, Function.identity()));
 
-        // 6. 응답 DTO 생성
-        List<RecordSearchResDTO.SearchEntry> searchEntries = entries.stream()
-                .map(entry -> {
-                    Stock stock = stockMap.get(entry.getStockId());
-                    String symbol = stock != null ? stock.getSymbol() : "";
-                    return RecordSearchResDTO.SearchEntry.from(entry, symbol);
-                })
-                .toList();
-
-        return RecordSearchResDTO.builder()
-                .records(searchEntries)
-                .totalCount(searchEntries.size())
-                .build();
+        // 6. 응답 DTO 변환 (converter에 위임)
+        return recordConverter.toSearchRes(entries, stockMap);
     }
 
     @Override
@@ -292,7 +259,7 @@ public class RecordServiceImpl implements RecordService {
         // 최근 검색 키워드 조회 (최신순, 상위 N개)
         List<String> recentKeywords = searchHistoryRepository
                 .findRecentKeywordsByMemberId(memberId, PageRequest.of(0, RECENT_SEARCH_LIMIT));
-        return RecentSearchResDTO.from(recentKeywords);
+        return recordConverter.toRecentSearchRes(recentKeywords);
     }
 
     @Override

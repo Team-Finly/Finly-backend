@@ -10,6 +10,14 @@ public class RecordFeedbackConverter {
 
     // RecordFeedback 엔티티를 응답 DTO로 변환
     public RecordFeedbackResDTO toResDTO(RecordFeedback feedback) {
-        return RecordFeedbackResDTO.from(feedback);
+        return RecordFeedbackResDTO.builder()
+                .feedbackId(feedback.getId())
+                .recordEntryId(feedback.getRecordEntryId())
+                .status(feedback.getStatus())
+                .content(feedback.getContent())
+                .suggestion(feedback.getSuggestion())
+                .createdAt(feedback.getCreatedAt())
+                .updatedAt(feedback.getUpdatedAt())
+                .build();
     }
 }

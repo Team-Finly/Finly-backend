@@ -1,6 +1,5 @@
 package com.umc.finly.domain.record.dto.response;
 
-import com.umc.finly.domain.record.entity.RecordEntry;
 import com.umc.finly.domain.record.enums.EmotionCode;
 import com.umc.finly.domain.record.enums.Session;
 import com.umc.finly.domain.record.enums.TradeAction;
@@ -36,22 +35,5 @@ public class RecordSearchResDTO {
         private EmotionCode emotionCode; // 감정 코드
         private Integer emotionIntensity; // 감정 강도
         private String memo;             // 메모
-
-        // Entity → DTO 변환
-        public static SearchEntry from(RecordEntry entry, String symbol) {
-            return SearchEntry.builder()
-                    .recordId(entry.getId())
-                    .recordDate(entry.getRecordDate())
-                    .recordedAt(entry.getCreatedAt())
-                    .session(entry.getSession())
-                    .tradeAction(entry.getTradeAction())
-                    .symbol(symbol)
-                    .unitPrice(entry.getUnitPrice())
-                    .quantity(entry.getQuantity())
-                    .emotionCode(entry.getEmotionCode())
-                    .emotionIntensity(entry.getEmotionIntensity())
-                    .memo(entry.getMemo())
-                    .build();
-        }
     }
 }

@@ -1,7 +1,5 @@
 package com.umc.finly.domain.record.dto.response;
 
-import com.umc.finly.domain.market.stock.entity.Stock;
-import com.umc.finly.domain.record.entity.RecordEntry;
 import com.umc.finly.domain.record.enums.EmotionCode;
 import com.umc.finly.domain.record.enums.Session;
 import com.umc.finly.domain.record.enums.TradeAction;
@@ -29,21 +27,4 @@ public class RecordUpdateResDTO {
     private EmotionCode emotionCode; // 감정 코드
     private Integer emotionIntensity; // 감정 강도
     private String memo;             // 메모
-
-    // Entity → DTO 변환
-    public static RecordUpdateResDTO from(RecordEntry entry, Stock stock) {
-        return RecordUpdateResDTO.builder()
-                .recordId(entry.getId())
-                .recordDate(entry.getRecordDate())
-                .updatedAt(entry.getUpdatedAt())
-                .session(entry.getSession())
-                .tradeAction(entry.getTradeAction())
-                .symbol(stock.getSymbol())
-                .unitPrice(entry.getUnitPrice())
-                .quantity(entry.getQuantity())
-                .emotionCode(entry.getEmotionCode())
-                .emotionIntensity(entry.getEmotionIntensity())
-                .memo(entry.getMemo())
-                .build();
-    }
 }

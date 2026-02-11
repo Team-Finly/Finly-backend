@@ -12,11 +12,4 @@ import java.util.List;
 public class RecentSearchResDTO {
 
     private List<String> recentKeywords; // 최근 검색 키워드 리스트 (최신순)
-
-    // 키워드 리스트 → DTO 변환
-    public static RecentSearchResDTO from(List<String> keywords) {
-        return RecentSearchResDTO.builder()
-                .recentKeywords(keywords)
-                .build();
-    }
 }
