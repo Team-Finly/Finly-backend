@@ -18,7 +18,6 @@ public interface HomeMindApiSpecification {
                     홈 화면에 표시되는 사용자의 금융 마음 지수 정보를 조회합니다.
                     """
     )
-
     @ApiResponses({
             @io.swagger.v3.oas.annotations.responses.ApiResponse(
                     responseCode = "200",
@@ -26,24 +25,28 @@ public interface HomeMindApiSpecification {
                     content = @Content(
                             mediaType = "application/json",
                             examples = @ExampleObject(
-                                    name = "지수 응답 예시",
+                                    name = "금융 마음 지수 응답 예시",
                                     value = """
                                             {
                                               "isSuccess": true,
                                               "code": "COMMON200",
                                               "message": "요청에 성공했습니다.",
                                               "result": {
-                                                "userName": "키르",
-                                                "personaTitle": "신중한 거북이",
-                                                "fmiScore": 64,
-                                                "fmiLevelLabel": "평균적 대응",
-                                                "fmiDescription": "일부 상황에서는 이성적으로 대응하고 있어요"
+                                                "fmiComment": "시장의 흐름보다 감정의 영향을 더 많이 받고 있습니다.",
+                                                "fmiLevel": "감정 영향 높음",
+                                                "fmiScore": 8,
+                                                "memberName": "핀리",
+                                                "persona": {
+                                                  "personaTitle": "신중한 거북이",
+                                                  "personaType": "CAUTIOUS_TURTLE"
+                                                }
                                               }
-                                            }                                            
-                                            """
+                                            }
+                                           """
                             )
                     )
-            )  })
+            )
+    })
     public ApiResponse<HomeMindResDTO> getHomeMind(
             @AuthenticationPrincipal AuthPrincipal principal
     );
@@ -68,18 +71,20 @@ public interface HomeMindApiSpecification {
                                             {
                                               "isSuccess": true,
                                               "code": "COMMON200",
-                                              "message": "성공적으로 요청을 처리했습니다.",
+                                              "message": "요청에 성공했습니다.",
                                               "result": {
-                                                "memberName": "키드",
-                                                "personaTitle": "신중한 거북이",
-                                                "personaDescription": "변동성 속에서도 천천히 판단하는 투자자",
-                                                "fmiScore": 64,
-                                                "fmiLevel": "평균적 관리",
-                                                "fmiComment": "일부 상황에서는 이성적으로 대응하고 있어요",
+                                            	  "fmiScore": 64,
+                                                "fmiLevel": "평균적 대응",
+                                                "fmiComment": "일부 상황에서는 이성적으로 대응하고 있습니다.",
+                                                "memberName": "키르",
+                                                "persona": {
+                                                  "personaType": "과감한 면이 있어도, 원칙(안정)이 우선하는 성향이에요!",
+                                                  "personaTitle": "string"
+                                                },
                                                 "scores": {
                                                   "downMarketResilience": {
                                                     "score": 58,
-                                                    "description": "코스피가 -1% 이상 하락했을 때 부정적인 감정 조각을 남긴 비율이 다소 높습니다. 변동성 속에서 멘탈을 다듬는 연습이 필요합니다."
+                                                    "description": "확신 상태에서 내린 판단과 실제 시장 결과의 괴리가 큽니다."
                                                   },
                                                   "decisionConsistency": {
                                                     "score": 72,
