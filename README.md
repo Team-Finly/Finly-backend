@@ -14,6 +14,10 @@
 - **Auth**: JWT, Spring Security
 - **외부 API**: OpenAI API, 한국투자증권 API
 
+## 🏗️ 서버 아키텍처
+<img width="1443" height="963" alt="image" src="https://github.com/user-attachments/assets/5f23caf2-9ae1-4c97-8286-c8fedaf7d82c" />
+
+
 ## 📂 프로젝트 구조  
 ```
 Finly/
