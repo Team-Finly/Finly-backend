@@ -1,7 +1,10 @@
-# Finly-backend
-Finly의 SpringBoot 서버 레포지토리입니다.
+# Finly
 
----
+> **감정과 투자 데이터를 연결해 사용자가 자신의 금융 성향을 이해하도록 돕는 서비스**
+
+<img width="700" alt="00_표지" src="https://github.com/user-attachments/assets/4f3445ad-d7b4-4dfc-9ba9-8211f05d824e" />
+
+
 ## 🚀 기술 스택
 - **Language**: Java 21
 - **Framework**: SpringBoot 4.0.1
@@ -10,40 +13,51 @@ Finly의 SpringBoot 서버 레포지토리입니다.
 - **Infra**: AWS, Github Actions, Docker
 - **Auth**: JWT, Spring Security
 - **외부 API**: OpenAI API, 한국투자증권 API
-- **기타**:
 
 ## 📂 프로젝트 구조  
 ```
 Finly/
-└── src/main/
-    ├── java/
-    │   └── com/umc/finly
-    │       ├── FinlyApplication.java 
-    │       ├── domain/
-    │       │   ├── auth/
-    │       │   │   ├── controller/
-    │       │   │   ├── converter/
-    │       │   │   ├── dto/
-    │       │   │   ├── entity/
-    │       │   │   ├── enums/
-    │       │   │   ├── repository/
-    │       │   │   └── service/
-    │       │   ├── member/
-    │       │   ├── home/
-    │       │   ├── record/
-    │       │   ├── market/
-    │       │   └── analysis/
-    │       └── global/
-    │           ├── config/             
-    │           ├── entity/             
-    │           ├── infra/
-    │           ├── apiPayload/
-    │           │   ├── exception/
-    │           │   └── response/
-    │           └── util/    
-    └── resources/
-        ├── application.yml       
-        ├── ...             
+├── .gitignore                      # Git에 올리지 않을 파일/디렉토리 설정
+├── .github/                        # GitHub 관련 설정 디렉토리
+│   ├── ISSUE_TEMPLATE/             # 이슈 템플릿
+│   ├── workflows/                  # GitHub Actions 워크플로우
+│   └── pull_request_template.md    # PR 템플릿
+├── Dockerfile                      # 애플리케이션 Docker 이미지 빌드 설정
+├── docker-compose.yml              # Docker 컨테이너 구성
+├── build.gradle                    # Gradle 빌드 스크립트
+├── settings.gradle                 # Gradle 프로젝트 설정
+└── src/
+    └── main/
+        ├── java/
+        │   └── com/umc/finly
+        │       ├── FinlyApplication.java      # Spring Boot 애플리케이션 진입점
+        │       ├── domain/                    # 비즈니스 도메인 계층
+        │       │   ├── auth/                  # 인증/인가, 회원가입/로그인, JWT 등
+        │       │   │   ├── controller/        
+        │       │   │   ├── converter/         
+        │       │   │   ├── dto/               
+        │       │   │   ├── entity/           
+        │       │   │   ├── enums/
+        │       │   │   ├── exception/                
+        │       │   │   ├── repository/        
+        │       │   │   └── service/           
+        │       │   ├── member/                # 회원 도메인 
+        │       │   ├── home/                  # 홈/대시보드 도메인
+        │       │   ├── record/                # 기록 도메인
+        │       │   ├── market/                # 주식 데이터(종목, 지수) 도메인
+        │       │   └── analysis/              # 통계 도메인
+        │       └── global/                    # 전역 공통 모듈
+        │           ├── config/                # 설정 파일
+        │           ├── entity/                # 공통 BaseEntity
+        │           ├── infra/                 # 외부 인프라 연동
+        │           ├── apiPayload/            # 공통 응답/예외 포맷
+        │           │   ├── exception/         # 전역 예외 정의 및 핸들러
+        │           │   └── response/          # 공통 API 응답 래퍼, 상태 코드
+        │           └── util/                  # 공통 유틸리티 클래스
+        └── resources/
+            ├── application.yml                # Spring Boot 환경 설정
+            ├── application-dev.yml            # 개발 환경 설정
+            └── application-prod.yml           # 운영 환경 설정                          
 
 ```
 
