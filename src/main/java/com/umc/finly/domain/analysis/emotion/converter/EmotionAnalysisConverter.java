@@ -4,6 +4,7 @@ import com.umc.finly.domain.analysis.emotion.dto.response.EmotionDistributionRes
 import com.umc.finly.domain.analysis.emotion.dto.response.GoldenTimeResDTO;
 import com.umc.finly.domain.analysis.emotion.dto.response.ShakenKeywordsResDTO;
 import com.umc.finly.domain.market.stock.entity.Stock;
+
 import com.umc.finly.domain.record.enums.Session;
 import org.springframework.stereotype.Component;
 
@@ -54,6 +55,7 @@ public class EmotionAnalysisConverter {
 
     // 감정 골든 타임 응답 DTO 변환
     public GoldenTimeResDTO toGoldenTimeResDTO(
+            String nickname,
             Stock stock,
             int totalRecords,
             Session goldenTime,
@@ -73,6 +75,7 @@ public class EmotionAnalysisConverter {
                 .build();
 
         return GoldenTimeResDTO.builder()
+                .nickname(nickname)
                 .stock(stockDto)
                 .summary(summaryDto)
                 .session(sessions)

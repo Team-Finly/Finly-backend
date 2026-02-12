@@ -9,6 +9,9 @@ import com.umc.finly.domain.analysis.emotion.repository.EmotionAnalysisRepositor
 import com.umc.finly.domain.analysis.emotion.util.KeywordExtractor;
 import com.umc.finly.domain.market.stock.entity.Stock;
 import com.umc.finly.domain.market.stock.repository.StockRepository;
+import com.umc.finly.domain.member.entity.Member;
+import com.umc.finly.domain.member.exception.code.MemberErrorCode;
+import com.umc.finly.domain.member.repository.MemberRepository;
 import com.umc.finly.domain.record.entity.RecordEntry;
 import com.umc.finly.domain.record.enums.EmotionCode;
 import com.umc.finly.domain.record.enums.Session;
@@ -31,6 +34,7 @@ public class EmotionAnalysisServiceImpl implements EmotionAnalysisService {
 
     // 키워드 추출 상위 8개
     private static final int MAX_KEYWORDS = 8;
+    private final MemberRepository memberRepository;
 
     @Override
     public EmotionDistributionResDTO getEmotionDistribution(Long memberId, String symbol) {
@@ -170,6 +174,12 @@ public class EmotionAnalysisServiceImpl implements EmotionAnalysisService {
             throw new CustomException(ErrorCode.INVALID_REQUEST);
         }
 
+        // Member nickname
+        Member member = memberRepository.findById(memberId)
+                .orElseThrow(() -> new CustomException(MemberErrorCode.MEMBER_NOT_FOUND));
+
+        String nickname = member.getNickname();
+
         // 종목 조회
         Stock stock = stockRepository.findBySymbol(symbol)
                 .orElseThrow(() -> new CustomException(EmotionAnalysisErrorCode.ANALYSIS_EMOTION_STOCK_NOT_FOUND));
@@ -232,6 +242,7 @@ public class EmotionAnalysisServiceImpl implements EmotionAnalysisService {
 
         // Converter로 최종 응답 조립
         return emotionAnalysisConverter.toGoldenTimeResDTO(
+                nickname,
                 stock,
                 totalRecords,
                 goldenTime,
