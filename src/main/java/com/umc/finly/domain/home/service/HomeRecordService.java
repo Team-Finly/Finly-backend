@@ -1,6 +1,6 @@
 package com.umc.finly.domain.home.service;
 
-import com.umc.finly.domain.home.dto.res.HomeRecordsResDTO;
+import com.umc.finly.domain.home.dto.response.HomeRecordsResDTO;
 
 public interface HomeRecordService {
 

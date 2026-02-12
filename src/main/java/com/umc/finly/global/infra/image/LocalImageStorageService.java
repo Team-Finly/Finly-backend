@@ -1,6 +1,6 @@
 package com.umc.finly.global.infra.image;
 
-import com.umc.finly.domain.member.exception.MemberErrorCode;
+import com.umc.finly.domain.member.exception.code.MemberErrorCode;
 import com.umc.finly.global.apiPayload.exception.CustomException;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.beans.factory.annotation.Value;

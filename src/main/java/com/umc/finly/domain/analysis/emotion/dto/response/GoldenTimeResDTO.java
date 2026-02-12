@@ -1,5 +1,6 @@
 package com.umc.finly.domain.analysis.emotion.dto.response;
 
+import com.umc.finly.domain.member.entity.Member;
 import com.umc.finly.domain.record.enums.Session;
 import lombok.AllArgsConstructor;
 import lombok.Builder;
@@ -14,6 +15,7 @@ import java.util.List;
 @AllArgsConstructor
 public class GoldenTimeResDTO {
 
+    private String nickname;
     private SelectedStock stock;
     private Summary summary;
     private List<Sessions> session;

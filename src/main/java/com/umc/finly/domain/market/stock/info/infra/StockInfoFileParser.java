@@ -2,7 +2,7 @@ package com.umc.finly.domain.market.stock.info.infra;
 
 import com.umc.finly.domain.market.stock.info.dto.StockInfoDTO;
 import com.umc.finly.domain.market.stock.enums.MarketType;
-import com.umc.finly.domain.market.stock.info.exception.StockInfoErrorCode;
+import com.umc.finly.domain.market.stock.info.exception.code.StockInfoErrorCode;
 import com.umc.finly.domain.market.stock.info.exception.StockInfoException;
 import org.springframework.stereotype.Component;
 

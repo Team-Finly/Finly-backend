@@ -9,11 +9,11 @@ import lombok.RequiredArgsConstructor;
 @Getter
 @RequiredArgsConstructor
 public enum EmotionCode {
-    CALM("평온", "으로"),       // 평온 - 차분하고 안정된 상태
     ANXIETY("불안", "으로"),    // 불안 - 걱정, 초조한 상태
-    REGRET("후회", "로"),       // 후회 - 매매 결정에 대한 아쉬움
     GREED("탐욕", "으로"),      // 탐욕 - 더 많은 수익을 원하는 상태
-    CONFIDENCE("확신", "으로"); // 확신 - 매매 결정에 대한 강한 믿음
+    CALM("평온", "으로"),       // 평온 - 차분하고 안정된 상태
+    CONFIDENCE("확신", "으로"), // 확신 - 매매 결정에 대한 강한 믿음
+    REGRET("후회", "로");       // 후회 - 매매 결정에 대한 아쉬움
 
     private final String label;    // 한글 표기명
     private final String particle; // 조사 (문장 생성용)

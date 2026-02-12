@@ -1,7 +1,8 @@
 package com.umc.finly.domain.record.controller;
 
-import com.umc.finly.domain.record.dto.res.FragmentSummaryResDTO;
-import com.umc.finly.domain.record.dto.res.FragmentListResDTO;
+import com.umc.finly.domain.record.dto.response.FragmentCalendarResDTO;
+import com.umc.finly.domain.record.dto.response.FragmentSummaryResDTO;
+import com.umc.finly.domain.record.dto.response.FragmentListResDTO;
 import com.umc.finly.domain.record.enums.EmotionCode;
 import com.umc.finly.domain.record.enums.FragmentPeriodKey;
 import com.umc.finly.domain.record.service.FragmentService;
@@ -9,7 +10,7 @@ import com.umc.finly.global.apiPayload.exception.CustomException;
 import com.umc.finly.global.apiPayload.response.ApiResponse;
 import com.umc.finly.global.apiPayload.response.ErrorCode;
 import com.umc.finly.global.apiPayload.response.SuccessCode;
-import com.umc.finly.global.config.security.AuthPrincipal;
+import com.umc.finly.global.security.AuthPrincipal;
 import io.swagger.v3.oas.annotations.Operation;
 import io.swagger.v3.oas.annotations.tags.Tag;
 import lombok.RequiredArgsConstructor;
@@ -36,7 +37,6 @@ public class FragmentController {
     public ApiResponse<FragmentSummaryResDTO> getFragmentSummary(
             @AuthenticationPrincipal AuthPrincipal principal
     ) {
-        // principal null 체크 (인증 실패 시)
         if (principal == null) {
             throw new CustomException(ErrorCode.UNAUTHORIZED);
         }
@@ -62,6 +62,22 @@ public class FragmentController {
                 principal.getMemberId(), boxType, periodKey
         );
 
+        return ApiResponse.onSuccess(result, SuccessCode.OK);
+    }
+
+    // 기록 홈 캘린더용 날짜별 조각 집계 조회
+    // yearMonth(yyyy-MM) 기준으로 해당 월 범위 내 날짜별/감정별 count를 반환
+    @Operation(summary = "캘린더용 날짜별 조각 조회 API", description = "기록 홈 월 캘린더에서 날짜 별 조각 여부/개수를 표시하기 위한 API")
+    @GetMapping("/calendar")
+    public ApiResponse<FragmentCalendarResDTO> getFragmentCalendar(
+            @AuthenticationPrincipal AuthPrincipal principal,
+            @RequestParam(required = false) String yearMonth
+    ) {
+        if (principal == null) {
+            throw new CustomException(ErrorCode.UNAUTHORIZED);
+        }
+
+        FragmentCalendarResDTO result = fragmentService.getFragmentCalendar(principal.getMemberId(), yearMonth);
         return ApiResponse.onSuccess(result, SuccessCode.OK);
     }
 }

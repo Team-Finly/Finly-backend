@@ -9,6 +9,9 @@ import com.umc.finly.domain.analysis.emotion.repository.EmotionAnalysisRepositor
 import com.umc.finly.domain.analysis.emotion.util.KeywordExtractor;
 import com.umc.finly.domain.market.stock.entity.Stock;
 import com.umc.finly.domain.market.stock.repository.StockRepository;
+import com.umc.finly.domain.member.entity.Member;
+import com.umc.finly.domain.member.exception.code.MemberErrorCode;
+import com.umc.finly.domain.member.repository.MemberRepository;
 import com.umc.finly.domain.record.entity.RecordEntry;
 import com.umc.finly.domain.record.enums.EmotionCode;
 import com.umc.finly.domain.record.enums.Session;
@@ -31,6 +34,7 @@ public class EmotionAnalysisServiceImpl implements EmotionAnalysisService {
 
     // 키워드 추출 상위 8개
     private static final int MAX_KEYWORDS = 8;
+    private final MemberRepository memberRepository;
 
     @Override
     public EmotionDistributionResDTO getEmotionDistribution(Long memberId, String symbol) {
@@ -47,7 +51,7 @@ public class EmotionAnalysisServiceImpl implements EmotionAnalysisService {
 
         // symbol로 Stock을 찾아서 stockId/stockName 확보
         Stock stock = stockRepository.findBySymbol(symbol)
-                .orElseThrow(() -> new CustomException(EmotionAnalysisErrorCode.ANALYSIS_STOCK_NOT_FOUND));
+                .orElseThrow(() -> new CustomException(EmotionAnalysisErrorCode.ANALYSIS_EMOTION_STOCK_NOT_FOUND));
 
         // 종목 DTO 생성
         EmotionDistributionResDTO.SelectedStock stockDto =
@@ -121,15 +125,15 @@ public class EmotionAnalysisServiceImpl implements EmotionAnalysisService {
 
         // 종목 조회
         Stock stock = stockRepository.findBySymbol(symbol)
-                .orElseThrow(() -> new CustomException(EmotionAnalysisErrorCode.ANALYSIS_STOCK_NOT_FOUND));
+                .orElseThrow(() -> new CustomException(EmotionAnalysisErrorCode.ANALYSIS_EMOTION_STOCK_NOT_FOUND));
 
         // 기록 조회(매수/매도 모두 포함)
-        List<RecordEntry> aliveRecords  = emotionAnalysisRepository.findAllByMemberIdAndStockIdAndDeletedAtIsNull(memberId, stock.getId());
+        List<RecordEntry> records = emotionAnalysisRepository.findAllByMemberIdAndStockId(memberId, stock.getId());
 
         // DF(Document Frequency): 메모 1개에서 토큰은 1번만 카운트
         Map<String, Integer> dfCountMap = new HashMap<>();
 
-        for (RecordEntry r : aliveRecords) {
+        for (RecordEntry r : records) {
             // 메모에서 중복 제거된 토큰 추출
             Set<String> tokens = KeywordExtractor.extractUniqueTokens(r.getMemo());
 
@@ -170,9 +174,15 @@ public class EmotionAnalysisServiceImpl implements EmotionAnalysisService {
             throw new CustomException(ErrorCode.INVALID_REQUEST);
         }
 
+        // Member nickname
+        Member member = memberRepository.findById(memberId)
+                .orElseThrow(() -> new CustomException(MemberErrorCode.MEMBER_NOT_FOUND));
+
+        String nickname = member.getNickname();
+
         // 종목 조회
         Stock stock = stockRepository.findBySymbol(symbol)
-                .orElseThrow(() -> new CustomException(EmotionAnalysisErrorCode.ANALYSIS_STOCK_NOT_FOUND));
+                .orElseThrow(() -> new CustomException(EmotionAnalysisErrorCode.ANALYSIS_EMOTION_STOCK_NOT_FOUND));
 
         // 세션별 count 집계
         List<EmotionAnalysisRepository.SessionCountProjection> projections =
@@ -232,6 +242,7 @@ public class EmotionAnalysisServiceImpl implements EmotionAnalysisService {
 
         // Converter로 최종 응답 조립
         return emotionAnalysisConverter.toGoldenTimeResDTO(
+                nickname,
                 stock,
                 totalRecords,
                 goldenTime,

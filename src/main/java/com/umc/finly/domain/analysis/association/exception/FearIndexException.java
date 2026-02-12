@@ -1,5 +1,6 @@
 package com.umc.finly.domain.analysis.association.exception;
 
+import com.umc.finly.domain.analysis.association.exception.code.FearIndexErrorCode;
 import com.umc.finly.global.apiPayload.exception.CustomException;
 
 public class FearIndexException extends CustomException {

@@ -2,15 +2,16 @@ package com.umc.finly.domain.record.service;
 
 import com.umc.finly.domain.market.stock.entity.Stock;
 import com.umc.finly.domain.market.stock.repository.StockRepository;
-import com.umc.finly.domain.record.dto.req.RecordCreateReqDTO;
-import com.umc.finly.domain.record.dto.req.RecordUpdateReqDTO;
-import com.umc.finly.domain.record.dto.res.DailyReportResDTO;
-import com.umc.finly.domain.record.dto.res.RecentSearchResDTO;
-import com.umc.finly.domain.record.dto.res.RecordCreateResDTO;
-import com.umc.finly.domain.record.dto.res.RecordDetailResDTO;
-import com.umc.finly.domain.record.dto.res.RecordSearchResDTO;
-import com.umc.finly.domain.record.dto.res.RecordUpdateResDTO;
-import com.umc.finly.domain.record.dto.res.TodayRecordResDTO;
+import com.umc.finly.domain.record.converter.RecordConverter;
+import com.umc.finly.domain.record.dto.request.RecordCreateReqDTO;
+import com.umc.finly.domain.record.dto.request.RecordUpdateReqDTO;
+import com.umc.finly.domain.record.dto.response.DailyReportResDTO;
+import com.umc.finly.domain.record.dto.response.RecentSearchResDTO;
+import com.umc.finly.domain.record.dto.response.RecordCreateResDTO;
+import com.umc.finly.domain.record.dto.response.RecordDetailResDTO;
+import com.umc.finly.domain.record.dto.response.RecordSearchResDTO;
+import com.umc.finly.domain.record.dto.response.RecordUpdateResDTO;
+import com.umc.finly.domain.record.dto.response.TodayRecordResDTO;
 import com.umc.finly.domain.record.exception.code.RecordErrorCode;
 import com.umc.finly.domain.record.infra.OpenAiFeedbackClient;
 import com.umc.finly.domain.record.entity.RecordEntry;
@@ -32,7 +33,6 @@ import org.springframework.transaction.annotation.Transactional;
 
 import java.math.BigDecimal;
 import java.time.LocalDate;
-import java.time.LocalDateTime;
 import java.time.LocalTime;
 import java.util.List;
 import java.util.Map;
@@ -46,6 +46,7 @@ import java.util.stream.Collectors;
 @Transactional(readOnly = true) // 기본적으로 읽기 전용 트랜잭션 사용
 public class RecordServiceImpl implements RecordService {
 
+    private final RecordConverter recordConverter;
     private final RecordEntryRepository recordEntryRepository;
     private final RecordFeedbackService feedbackService; // AI 피드백 서비스
     private final StockRepository stockRepository;
@@ -81,19 +82,7 @@ public class RecordServiceImpl implements RecordService {
         Session session = Session.fromTime(LocalTime.now());
 
         // 5. RecordEntry 엔티티 생성 및 저장
-        RecordEntry entry = RecordEntry.builder()
-                .memberId(memberId)
-                .clientRequestId(request.getClientRequestId())
-                .recordDate(request.getRecordDate())
-                .stockId(stock.getId())
-                .tradeAction(request.getTradeAction())
-                .unitPrice(request.getUnitPrice())
-                .quantity(request.getQuantity())
-                .emotionCode(request.getEmotionCode())
-                .emotionIntensity(request.getEmotionIntensity())
-                .memo(request.getMemo())
-                .session(session)
-                .build();
+        RecordEntry entry = recordConverter.toEntity(memberId, request, stock, session);
 
         RecordEntry savedEntry;
         try {
@@ -107,7 +96,7 @@ public class RecordServiceImpl implements RecordService {
         RecordFeedback feedback = feedbackService.requestFeedbackAsync(memberId, savedEntry);
 
         // 7. 응답 DTO 반환
-        return RecordCreateResDTO.from(savedEntry, stock, feedback);
+        return recordConverter.toCreateRes(savedEntry, stock, feedback);
     }
 
     @Override
@@ -126,7 +115,7 @@ public class RecordServiceImpl implements RecordService {
                 .orElseThrow(() -> new CustomException(MarketErrorCode.MARKET_STOCK_NOT_FOUND));
 
         // 4. 응답 DTO 반환
-        return RecordDetailResDTO.from(entry, stock);
+        return recordConverter.toDetailRes(entry, stock);
     }
 
     @Override
@@ -141,34 +130,15 @@ public class RecordServiceImpl implements RecordService {
             throw new CustomException(RecordErrorCode.RECORD_FORBIDDEN);
         }
 
-        // 3. 부분 업데이트 (null이 아닌 필드만 수정)
-        Stock stock = null;
-        if (request.getRecordDate() != null) {
-            entry.setRecordDate(request.getRecordDate());
-        }
+        // 3. 부분 업데이트 (symbol 변경 시 stock 조회)
+        Stock changedStock = null;
         if (request.getSymbol() != null) {
-            stock = stockRepository.findBySymbol(request.getSymbol())
+            changedStock = stockRepository.findBySymbol(request.getSymbol())
                     .orElseThrow(() -> new CustomException(MarketErrorCode.MARKET_STOCK_NOT_FOUND));
-            entry.setStockId(stock.getId());
         }
-        if (request.getTradeAction() != null) {
-            entry.setTradeAction(request.getTradeAction());
-        }
-        if (request.getUnitPrice() != null) {
-            entry.setUnitPrice(request.getUnitPrice());
-        }
-        if (request.getQuantity() != null) {
-            entry.setQuantity(request.getQuantity());
-        }
-        if (request.getEmotionCode() != null) {
-            entry.setEmotionCode(request.getEmotionCode());
-        }
-        if (request.getEmotionIntensity() != null) {
-            entry.setEmotionIntensity(request.getEmotionIntensity());
-        }
-        if (request.getMemo() != null) {
-            entry.setMemo(request.getMemo());
-        }
+
+        // 3-1. 수정 내용 반영 (변환 책임은 컨버터로)
+        recordConverter.applyUpdate(entry, request, changedStock);
 
         // 4. 수정 후에도 매수/매도 유효성 검증
         if (entry.getTradeAction() == TradeAction.BUY || entry.getTradeAction() == TradeAction.SELL) {
@@ -182,13 +152,14 @@ public class RecordServiceImpl implements RecordService {
         }
 
         // 5. symbol 변경 없으면 기존 Stock 조회
+        Stock stock = changedStock;
         if (stock == null) {
             stock = stockRepository.findById(entry.getStockId())
                     .orElseThrow(() -> new CustomException(MarketErrorCode.MARKET_STOCK_NOT_FOUND));
         }
 
-        // 6. 응답 DTO 반환 (Dirty Checking으로 자동 저장)
-        return RecordUpdateResDTO.from(entry, stock);
+        // 6. 응답 DTO 반환
+        return recordConverter.toUpdateRes(entry, stock);
     }
 
     @Override
@@ -221,7 +192,7 @@ public class RecordServiceImpl implements RecordService {
             }
         }
 
-        return DailyReportResDTO.from(entry, stock, content);
+        return recordConverter.toDailyReportRes(entry, stock, content);
     }
 
     @Override
@@ -230,14 +201,7 @@ public class RecordServiceImpl implements RecordService {
         List<RecordEntry> entries = recordEntryRepository
                 .findByMemberIdAndRecordDateOrderByCreatedAtAsc(memberId, date);
 
-        // 2. 프리즘 피드백 타이틀 자동 생성 (감정 기반 문구)
-        String title = TodayRecordResDTO.generatePrismTitle(entries);
-        TodayRecordResDTO.PrismFeedback prismFeedback = TodayRecordResDTO.PrismFeedback.builder()
-                .title(title)
-                .generatedAt(LocalDateTime.now())
-                .build();
-
-        // 3. N+1 방지: 기록에 포함된 stockId 일괄 조회
+        // 2. N+1 방지: 기록에 포함된 stockId 일괄 조회
         List<Long> stockIds = entries.stream()
                 .map(RecordEntry::getStockId)
                 .distinct()
@@ -245,22 +209,8 @@ public class RecordServiceImpl implements RecordService {
         Map<Long, Stock> stockMap = stockRepository.findAllById(stockIds).stream()
                 .collect(Collectors.toMap(Stock::getId, Function.identity()));
 
-        // 4. 타임라인 엔트리 변환
-        List<TodayRecordResDTO.TimelineEntry> timelineSummary = entries.stream()
-                .map(entry -> {
-                    Stock stock = stockMap.get(entry.getStockId());
-                    String symbol = stock != null ? stock.getSymbol() : "";
-                    return TodayRecordResDTO.TimelineEntry.from(entry, symbol);
-                })
-                .toList();
-
-        return TodayRecordResDTO.builder()
-                .date(date)
-                .prismFeedback(prismFeedback)
-                .timelineSummary(timelineSummary)
-                .hasRecords(!entries.isEmpty())
-                .recordCount(entries.size())
-                .build();
+        // 3. 응답 DTO 변환 (converter에 위임)
+        return recordConverter.toTodayRecordRes(date, entries, stockMap);
     }
 
     @Override
@@ -300,19 +250,8 @@ public class RecordServiceImpl implements RecordService {
         Map<Long, Stock> stockMap = stockRepository.findAllById(resultStockIds).stream()
                 .collect(Collectors.toMap(Stock::getId, Function.identity()));
 
-        // 6. 응답 DTO 생성
-        List<RecordSearchResDTO.SearchEntry> searchEntries = entries.stream()
-                .map(entry -> {
-                    Stock stock = stockMap.get(entry.getStockId());
-                    String symbol = stock != null ? stock.getSymbol() : "";
-                    return RecordSearchResDTO.SearchEntry.from(entry, symbol);
-                })
-                .toList();
-
-        return RecordSearchResDTO.builder()
-                .records(searchEntries)
-                .totalCount(searchEntries.size())
-                .build();
+        // 6. 응답 DTO 변환 (converter에 위임)
+        return recordConverter.toSearchRes(entries, stockMap);
     }
 
     @Override
@@ -320,7 +259,23 @@ public class RecordServiceImpl implements RecordService {
         // 최근 검색 키워드 조회 (최신순, 상위 N개)
         List<String> recentKeywords = searchHistoryRepository
                 .findRecentKeywordsByMemberId(memberId, PageRequest.of(0, RECENT_SEARCH_LIMIT));
-        return RecentSearchResDTO.from(recentKeywords);
+        return recordConverter.toRecentSearchRes(recentKeywords);
+    }
+
+    @Override
+    @Transactional
+    public void deleteSearchKeyword(Long memberId, String keyword) {
+        // 키워드 정규화 (앞뒤 공백 제거)
+        String normalizedKeyword = (keyword == null) ? null : keyword.strip();
+        if (normalizedKeyword == null || normalizedKeyword.isBlank()) {
+            throw new CustomException(RecordErrorCode.RECORD_INVALID_REQUEST);
+        }
+
+        // 검색 기록 삭제 (본인 기록만 삭제됨)
+        int deletedCount = searchHistoryRepository.deleteByMemberIdAndKeyword(memberId, normalizedKeyword);
+        if (deletedCount == 0) {
+            throw new CustomException(RecordErrorCode.SEARCH_HISTORY_NOT_FOUND);
+        }
     }
 
     // 검색 키워드 저장 (중복 키워드는 updatedAt만 갱신)

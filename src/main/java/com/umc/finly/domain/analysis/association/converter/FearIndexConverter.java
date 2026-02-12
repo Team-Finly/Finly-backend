@@ -1,7 +1,7 @@
 package com.umc.finly.domain.analysis.association.converter;
 
 import com.umc.finly.domain.analysis.association.enums.ChangeDirection;
-import com.umc.finly.domain.analysis.association.dto.FearIndexResDTO;
+import com.umc.finly.domain.analysis.association.dto.response.FearIndexResDTO;
 
 public class FearIndexConverter {
 

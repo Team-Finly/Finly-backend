@@ -1,7 +1,8 @@
 package com.umc.finly.domain.record.converter;
 
-import com.umc.finly.domain.record.dto.res.FragmentListResDTO;
-import com.umc.finly.domain.record.dto.res.FragmentSummaryResDTO;
+import com.umc.finly.domain.record.dto.response.FragmentCalendarResDTO;
+import com.umc.finly.domain.record.dto.response.FragmentListResDTO;
+import com.umc.finly.domain.record.dto.response.FragmentSummaryResDTO;
 import com.umc.finly.domain.record.enums.EmotionCode;
 import com.umc.finly.domain.record.enums.FragmentPeriodKey;
 import com.umc.finly.domain.record.repository.FragmentRepository;
@@ -23,10 +24,16 @@ public class FragmentConverter {
     public FragmentSummaryResDTO toFragmentSummaryRes(
             long totalCount,
             EmotionCode dominantType,
+            boolean multipleDominant,
+            EmotionCode recessiveType,
+            boolean multipleRecessive,
             List<FragmentSummaryResDTO.TypeSummary> summaries) {
         return FragmentSummaryResDTO.builder()
                 .totalCount((int) totalCount)
                 .dominantType(dominantType)
+                .multipleDominant(multipleDominant)
+                .recessiveType(recessiveType)
+                .multipleRecessive(multipleRecessive)
                 .typeSummary(summaries)
                 .build();
     }
@@ -65,6 +72,26 @@ public class FragmentConverter {
                 .fragments(rows.stream()
                         .map(this::toFragment)
                         .collect(Collectors.toList()))
+                .build();
+    }
+
+    // 캘린더용 응답 DTO 변환
+    // yearMonth: yyyy-MM / from~to: 해당 월 범위 / days: 날짜별 집계 결과
+    public FragmentCalendarResDTO toCalendarFragment(
+            String yearMonth,
+            LocalDate from,
+            LocalDate to,
+            long totalRecords,
+            List<FragmentCalendarResDTO.Day> days
+    ){
+        return FragmentCalendarResDTO.builder()
+                .yearMonth(yearMonth)
+                .range(FragmentCalendarResDTO.Range.builder()
+                        .from(from)
+                        .to(to)
+                        .build())
+                .totalRecords(totalRecords)
+                .days(days)
                 .build();
     }
 

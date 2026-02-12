@@ -1,8 +1,8 @@
 package com.umc.finly.domain.analysis.stock.service;
 
-import com.umc.finly.domain.analysis.stock.dto.res.PriceDistributionResDTO;
-import com.umc.finly.domain.analysis.stock.dto.res.RecentDecisionResDTO;
-import com.umc.finly.domain.analysis.stock.dto.res.StockSummaryResDTO;
+import com.umc.finly.domain.analysis.stock.dto.response.PriceDistributionResDTO;
+import com.umc.finly.domain.analysis.stock.dto.response.RecentDecisionResDTO;
+import com.umc.finly.domain.analysis.stock.dto.response.StockSummaryResDTO;
 
 import java.util.List;
 

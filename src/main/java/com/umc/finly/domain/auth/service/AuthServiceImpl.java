@@ -1,27 +1,28 @@
 package com.umc.finly.domain.auth.service;
 
-import com.umc.finly.domain.auth.dto.req.AuthLoginReqDTO;
-import com.umc.finly.domain.auth.dto.req.AuthSignUpReqDTO;
-import com.umc.finly.domain.auth.dto.res.AuthLoginResDTO;
-import com.umc.finly.domain.auth.dto.res.AuthSignUpResDTO;
+import com.umc.finly.domain.auth.converter.AuthConverter;
+import com.umc.finly.domain.auth.dto.request.AuthLoginReqDTO;
+import com.umc.finly.domain.auth.dto.request.AuthSignUpReqDTO;
+import com.umc.finly.domain.auth.dto.response.AuthLoginResDTO;
+import com.umc.finly.domain.auth.dto.response.AuthSignUpResDTO;
 import com.umc.finly.domain.auth.entity.Term;
 import com.umc.finly.domain.auth.entity.mapping.MemberTerm;
 import com.umc.finly.domain.auth.enums.TermType;
-import com.umc.finly.domain.auth.exception.AuthErrorCode;
+import com.umc.finly.domain.auth.exception.code.AuthErrorCode;
 import com.umc.finly.domain.auth.repository.TermRepository;
 import com.umc.finly.domain.member.dto.request.PersonaAnswerReqDTO;
 import com.umc.finly.domain.member.entity.Member;
 import com.umc.finly.domain.member.entity.Persona;
-import com.umc.finly.domain.member.entity.mapping.MembersPersonasResult;
-import com.umc.finly.domain.member.repository.MemberPersonaResultRepository;
+import com.umc.finly.domain.member.entity.mapping.MemberPersonaResults;
+import com.umc.finly.domain.member.repository.MemberPersonaResultsRepository;
 import com.umc.finly.domain.member.repository.MemberRepository;
 import com.umc.finly.domain.member.repository.MemberTermRepository;
 import com.umc.finly.domain.member.service.PersonaScoringService;
 import com.umc.finly.global.apiPayload.exception.CustomException;
-import com.umc.finly.global.infra.jwt.JwtProvider;
+import com.umc.finly.global.security.jwt.JwtProvider;
 import com.umc.finly.global.util.CookieUtil;
-import com.umc.finly.global.util.PasswordPolicy;
-import com.umc.finly.global.util.SecurityUtil;
+import com.umc.finly.global.security.PasswordPolicy;
+import com.umc.finly.global.security.SecurityUtil;
 import io.jsonwebtoken.ExpiredJwtException;
 import io.jsonwebtoken.JwtException;
 import jakarta.servlet.http.HttpServletResponse;
@@ -43,14 +44,17 @@ import java.util.stream.Collectors;
 @RequiredArgsConstructor
 @Transactional
 public class AuthServiceImpl implements AuthService {
+
     private final MemberRepository memberRepository;
     private final TermRepository termRepository;
     private final MemberTermRepository memberTermRepository;
     private final PersonaScoringService personaScoringService;
-    private final MemberPersonaResultRepository memberPersonaResultRepository;
+    private final MemberPersonaResultsRepository memberPersonaResultsRepository;
 
     private final PasswordEncoder passwordEncoder;
     private final JwtProvider jwtProvider;
+
+    private final CookieUtil cookieUtil;
 
     // 닉네임 양식
     private static final String NICKNAME_REGEX = "^[가-힣a-zA-Z0-9]{2,}$";
@@ -58,29 +62,30 @@ public class AuthServiceImpl implements AuthService {
     // 필수 약관 정의
     private static final EnumSet<TermType> REQUIRED_TERMS =
             EnumSet.of(TermType.TERMS_AGREED, TermType.PRIVACY_AGREED);
-    private final CookieUtil cookieUtil;
 
     /** 이메일 중복 확인 **/
     @Override
+    @Transactional(readOnly = true)
     public boolean isEmailAvailable(String email) {
         return !memberRepository.existsByEmail(email);
     }
 
     /** 회원가입 **/
     @Override
-    public AuthSignUpResDTO signup(AuthSignUpReqDTO request){
+    public AuthSignUpResDTO signup(AuthSignUpReqDTO request) {
+
         // 1. 이메일 중복 체크
-        if (memberRepository.existsByEmail(request.getEmail())){
+        if (memberRepository.existsByEmail(request.getEmail())) {
             throw new CustomException(AuthErrorCode.EMAIL_ALREADY_EXISTS);
         }
 
         // 2. 비밀번호 정책 검증
-        if (!isValidPassword(request.getPassword())){
+        if (!isValidPassword(request.getPassword())) {
             throw new CustomException(AuthErrorCode.INVALID_PASSWORD);
         }
 
         // 3. 닉네임 검증
-        if (!isValidNickname(request.getNickname())){
+        if (!isValidNickname(request.getNickname())) {
             throw new CustomException(AuthErrorCode.INVALID_NICKNAME);
         }
 
@@ -102,32 +107,28 @@ public class AuthServiceImpl implements AuthService {
         Member savedMember = memberRepository.save(member);
 
         // 7. 페르소나 결과 member_persona_results 에 저장
-        MembersPersonasResult personaResult = MembersPersonasResult.create(savedMember.getId(), persona);
-        memberPersonaResultRepository.save(personaResult);
+        MemberPersonaResults personaResult = MemberPersonaResults.create(savedMember.getId(), persona);
+        memberPersonaResultsRepository.save(personaResult);
 
         // 8. 약관 동의 저장
         saveTermAgreements(savedMember, agreedMap);
 
-        return AuthSignUpResDTO.builder()
-                .memberId(savedMember.getId())
-                .email(savedMember.getEmail())
-                .nickname(savedMember.getNickname())
-                .personaId(persona.getId())
-                .build();
+        return AuthConverter.toSignUpResDTO(savedMember, persona.getId());
     }
 
     /** 로그인 **/
     @Override
-    public LoginTokens login(AuthLoginReqDTO request){
-        // 멤버 매칭
+    public LoginTokens login(AuthLoginReqDTO request) {
+
+        // 1) 멤버 매칭
         Member member = memberRepository.findByEmail(request.getEmail())
                 .orElseThrow(() -> new CustomException(AuthErrorCode.INVALID_LOGIN_PASSWORD));
 
-        if(!passwordEncoder.matches(request.getPassword(), member.getPassword())){
+        if (!passwordEncoder.matches(request.getPassword(), member.getPassword())) {
             throw new CustomException(AuthErrorCode.INVALID_LOGIN_PASSWORD);
         }
 
-        // 토큰 발급
+        // 2) 토큰 발급
         String accessToken = jwtProvider.createAccessToken(member.getId(), member.getEmail());
         String refreshToken = jwtProvider.createRefreshToken(member.getId(), member.getEmail());
 
@@ -139,21 +140,15 @@ public class AuthServiceImpl implements AuthService {
         member.updateRefreshToken(refreshToken, refreshExpiredAt);
         memberRepository.save(member);
 
-        AuthLoginResDTO result = AuthLoginResDTO.builder()
-                .accessToken(accessToken)
-                .member(AuthLoginResDTO.MemberInfo.builder()
-                        .memberId(member.getId())
-                        .email(member.getEmail())
-                        .nickname(member.getNickname())
-                        .build())
-                .build();
-
+        // 3) max-age 계산
         long refreshMaxAgeSeconds = Math.max(
                 0,
-                (jwtProvider.getExpiration(refreshToken).getTime() - System.currentTimeMillis())/1000
+                (jwtProvider.getExpiration(refreshToken).getTime() - System.currentTimeMillis()) / 1000
         );
 
-        return new LoginTokens(result, refreshToken, refreshMaxAgeSeconds);
+        AuthLoginResDTO body = AuthConverter.toLoginResDTO(accessToken, member);
+
+        return new LoginTokens(body, refreshToken, refreshMaxAgeSeconds);
     }
 
     /** 토큰 재발급 **/
@@ -173,7 +168,7 @@ public class AuthServiceImpl implements AuthService {
             throw new CustomException(AuthErrorCode.REFRESH_TOKEN_MISSING);
         }
 
-        // 1) refresh 토큰 1차 검증 (서명/만료/type=refresh) + 만료/무효 매핑
+        // 1) refresh 토큰 1차 검증 (서명/만료/type=refresh)
         try {
             jwtProvider.assertRefreshToken(rawRefreshToken);
         } catch (ExpiredJwtException e) {
@@ -213,16 +208,15 @@ public class AuthServiceImpl implements AuthService {
                 ZoneId.systemDefault()
         );
 
-        // 6) CAS로 refreshToken 회전 (경쟁 조건 차단)
+        // 6) CAS로 refreshToken 회전
         int updated = memberRepository.rotateRefreshToken(
                 memberId,
-                rawRefreshToken,     // old token
-                newRefreshToken,     // new token
+                rawRefreshToken,
+                newRefreshToken,
                 newRefreshExpiredAt
         );
 
         if (updated == 0) {
-            // 동시에 다른 요청이 먼저 회전시켰거나, 서버 저장 토큰과 불일치
             throw new CustomException(AuthErrorCode.REFRESH_TOKEN_MISMATCH);
         }
 
@@ -236,17 +230,19 @@ public class AuthServiceImpl implements AuthService {
 
     /** 로그아웃 **/
     @Override
-    public void logout(HttpServletResponse response){
+    public void logout(HttpServletResponse response) {
         Long memberId = SecurityUtil.getCurrentMemberId();
 
         Member member = memberRepository.findById(memberId)
-                .orElseThrow(()-> new CustomException(AuthErrorCode.INVALID_ACCESS_TOKEN));
+                .orElseThrow(() -> new CustomException(AuthErrorCode.INVALID_ACCESS_TOKEN));
 
         member.clearRefreshToken();
+        memberRepository.save(member);
         cookieUtil.clearRefreshTokenCookie(response);
     }
 
     // -----------------------------------------------------------
+    /** 유효성 검사 **/
     private boolean isValidPassword(String raw) {
         return PasswordPolicy.isValid(raw);
     }
@@ -255,21 +251,21 @@ public class AuthServiceImpl implements AuthService {
         return nickname != null && nickname.matches(NICKNAME_REGEX);
     }
 
+    // 약관 동의 요청 리스트 맵으로 변환
     private Map<Long, Boolean> toAgreedMap(List<AuthSignUpReqDTO.TermAgreementReq> agreements) {
         if (agreements == null || agreements.isEmpty()) {
             throw new CustomException(AuthErrorCode.INVALID_TERM_REQUEST);
         }
 
-        // termId 중복 요청 방지 겸 정규화
         return agreements.stream().collect(Collectors.toMap(
                 AuthSignUpReqDTO.TermAgreementReq::getTermId,
                 a -> Boolean.TRUE.equals(a.getAgreed()),
-                (a, b) -> a // 중복이면 앞값 유지
+                (a, b) -> a
         ));
     }
 
+    // 필수 약관이 모두 True로 처리됐는지 검증
     private void validateRequiredTermsAgreed(Map<Long, Boolean> agreedMap) {
-        // 필수 termType들의 id를 구해서, 해당 id가 agreed=true인지 확인
         List<Term> requiredTerms = REQUIRED_TERMS.stream()
                 .map(tt -> termRepository.findByTermType(tt)
                         .orElseThrow(() -> new CustomException(AuthErrorCode.INVALID_TERM_REQUEST)))
@@ -284,27 +280,23 @@ public class AuthServiceImpl implements AuthService {
         }
     }
 
+    // 회원가입 시 제출된 페르소나 답변 리스트로부터 최종 페르소나 계산
     private Persona resolvePersonaFromSignup(List<PersonaAnswerReqDTO> answers) {
         if (answers == null || answers.isEmpty()) {
             throw new CustomException(AuthErrorCode.INVALID_PERSONA_ANSWERS);
         }
 
         List<PersonaAnswerReqDTO> convertedAnswers = answers.stream()
-                .map(a -> new PersonaAnswerReqDTO(
-                        a.getQuestionId(),
-                        a.getOptionId()
-                ))
+                .map(a -> new PersonaAnswerReqDTO(a.getQuestionId(), a.getOptionId()))
                 .toList();
 
         return personaScoringService.resolvePersona(convertedAnswers);
     }
 
+    // agreedMap 기반으로 members-terms 매핑 테이블에 저장
     private void saveTermAgreements(Member member, Map<Long, Boolean> agreedMap) {
-        List<Term> allTerms = termRepository.findAll();
-
         List<Long> termIds = new ArrayList<>(agreedMap.keySet());
 
-        // termId들이 실제 DB에 존재하는지 체크 + 매핑용 Map 구성
         Map<Long, Term> termMap = termRepository.findAllById(termIds).stream()
                 .collect(Collectors.toMap(Term::getId, Function.identity()));
 

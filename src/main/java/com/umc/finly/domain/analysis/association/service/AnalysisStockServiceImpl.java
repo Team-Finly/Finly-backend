@@ -1,7 +1,7 @@
 
 package com.umc.finly.domain.analysis.association.service;
 
-import com.umc.finly.domain.analysis.association.dto.AnalysisStockResDTO;
+import com.umc.finly.domain.analysis.association.dto.response.AnalysisStockResDTO;
 import com.umc.finly.domain.analysis.association.repository.AnalysisStockRepository;
 import lombok.RequiredArgsConstructor;
 import org.springframework.stereotype.Service;

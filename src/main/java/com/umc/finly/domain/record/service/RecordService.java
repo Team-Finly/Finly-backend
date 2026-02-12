@@ -1,14 +1,14 @@
 package com.umc.finly.domain.record.service;
 
-import com.umc.finly.domain.record.dto.req.RecordCreateReqDTO;
-import com.umc.finly.domain.record.dto.req.RecordUpdateReqDTO;
-import com.umc.finly.domain.record.dto.res.DailyReportResDTO;
-import com.umc.finly.domain.record.dto.res.RecentSearchResDTO;
-import com.umc.finly.domain.record.dto.res.RecordCreateResDTO;
-import com.umc.finly.domain.record.dto.res.RecordDetailResDTO;
-import com.umc.finly.domain.record.dto.res.RecordSearchResDTO;
-import com.umc.finly.domain.record.dto.res.RecordUpdateResDTO;
-import com.umc.finly.domain.record.dto.res.TodayRecordResDTO;
+import com.umc.finly.domain.record.dto.request.RecordCreateReqDTO;
+import com.umc.finly.domain.record.dto.request.RecordUpdateReqDTO;
+import com.umc.finly.domain.record.dto.response.DailyReportResDTO;
+import com.umc.finly.domain.record.dto.response.RecentSearchResDTO;
+import com.umc.finly.domain.record.dto.response.RecordCreateResDTO;
+import com.umc.finly.domain.record.dto.response.RecordDetailResDTO;
+import com.umc.finly.domain.record.dto.response.RecordSearchResDTO;
+import com.umc.finly.domain.record.dto.response.RecordUpdateResDTO;
+import com.umc.finly.domain.record.dto.response.TodayRecordResDTO;
 import com.umc.finly.domain.record.enums.EmotionCode;
 
 import java.time.LocalDate;
@@ -37,4 +37,7 @@ public interface RecordService {
 
     // 최근 검색 키워드 조회 (최대 3개)
     RecentSearchResDTO getRecentSearchKeywords(Long memberId);
+
+    // 특정 검색 키워드 삭제
+    void deleteSearchKeyword(Long memberId, String keyword);
 }

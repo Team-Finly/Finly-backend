@@ -1,7 +1,7 @@
 package com.umc.finly.domain.record.entity;
 
 import com.umc.finly.domain.record.enums.FeedbackStatus;
-import com.umc.finly.global.entity.CreatedUpdatedDeletedBaseEntity;
+import com.umc.finly.global.entity.BaseEntity;
 import jakarta.persistence.*;
 import lombok.*;
 
@@ -15,7 +15,7 @@ import lombok.*;
 @NoArgsConstructor(access = AccessLevel.PROTECTED)
 @AllArgsConstructor
 @Builder
-public class RecordFeedback extends CreatedUpdatedDeletedBaseEntity {
+public class RecordFeedback extends BaseEntity {
 
     @Id
     @GeneratedValue(strategy = GenerationType.IDENTITY)

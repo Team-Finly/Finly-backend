@@ -1,9 +1,9 @@
 package com.umc.finly.domain.analysis.association.service;
 
 import com.umc.finly.domain.analysis.association.converter.FearIndexConverter;
-import com.umc.finly.domain.analysis.association.dto.FearIndexResDTO;
+import com.umc.finly.domain.analysis.association.dto.response.FearIndexResDTO;
 import com.umc.finly.domain.analysis.association.entity.FearIndexResult;
-import com.umc.finly.domain.analysis.association.exception.FearIndexErrorCode;
+import com.umc.finly.domain.analysis.association.exception.code.FearIndexErrorCode;
 import com.umc.finly.domain.analysis.association.exception.FearIndexException;
 import com.umc.finly.domain.analysis.association.repository.FearIndexResultRepository;
 import lombok.RequiredArgsConstructor;

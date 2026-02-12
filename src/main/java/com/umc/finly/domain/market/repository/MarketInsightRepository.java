@@ -11,19 +11,22 @@ import java.util.List;
 
 public interface MarketInsightRepository extends JpaRepository<RecordEntry, Long> {
 
-    @Query("""
-        SELECT r.stockId           AS stockId,
-               s.name              AS stockName,
-               r.emotionCode       AS emotionCode,
-               COUNT(r.id)         AS buyCount
-        FROM RecordEntry r
-        JOIN Stock s ON r.stockId = s.id
-        WHERE r.tradeAction = com.umc.finly.domain.record.enums.TradeAction.BUY
-          AND r.recordDate >= :fromDate
-          AND r.deletedAt IS NULL
-          AND s.isActive = true
-        GROUP BY r.stockId, s.name, r.emotionCode
-    """)// 최근 N일 동안 유저들이 매수(BUY)할 때 느낀 감정을
+    @Query(
+            value = """
+            SELECT
+                r.stock_id      AS stockId,
+                s.name          AS stockName,
+                r.emotion_code  AS emotionCode,
+                COUNT(r.id)     AS buyCount
+            FROM record_entry r
+            JOIN stock s ON r.stock_id = s.id
+            WHERE r.trade_action = 'BUY'
+              AND r.record_date >= :fromDate
+              AND s.is_active = true
+            GROUP BY r.stock_id, s.name, r.emotion_code
+        """,
+            nativeQuery = true
+    )// 최근 N일 동안 유저들이 매수(BUY)할 때 느낀 감정을
 // 종목 이름 기준으로 집계하여 실시간 인사이트 생성을 위한 쿼리
 
     List<StockEmotionBuyAggregation> aggregateBuyEmotionByStock(

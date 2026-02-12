@@ -1,7 +1,8 @@
 package com.umc.finly.domain.record.service;
 
-import com.umc.finly.domain.record.dto.res.FragmentListResDTO;
-import com.umc.finly.domain.record.dto.res.FragmentSummaryResDTO;
+import com.umc.finly.domain.record.dto.response.FragmentCalendarResDTO;
+import com.umc.finly.domain.record.dto.response.FragmentListResDTO;
+import com.umc.finly.domain.record.dto.response.FragmentSummaryResDTO;
 import com.umc.finly.domain.record.enums.EmotionCode;
 import com.umc.finly.domain.record.enums.FragmentPeriodKey;
 
@@ -15,4 +16,8 @@ public interface FragmentService {
 
     // 조각 모음함 리스트 조회 (감정/기간 필터링 가능)
     FragmentListResDTO getFragmentList(Long memberId, EmotionCode boxType, FragmentPeriodKey periodKey);
+
+    // 기록 홈 캘린더용 날짜별 조각 집계 조회 (yyyy-MM 기준)
+    FragmentCalendarResDTO getFragmentCalendar(Long memberId, String yearMonth);
+
 }

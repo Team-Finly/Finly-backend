@@ -1,19 +1,20 @@
 package com.umc.finly.domain.home.service;
 
-import com.umc.finly.domain.home.dto.res.HomeMindDetailResDTO;
-import com.umc.finly.domain.home.dto.res.HomeMindResDTO;
+import com.umc.finly.domain.analysis.association.entity.ConvictionScoreResult;
+import com.umc.finly.domain.analysis.association.entity.FearIndexResult;
+import com.umc.finly.domain.home.converter.HomeMindConverter;
+import com.umc.finly.domain.home.dto.response.HomeMindDetailResDTO;
+import com.umc.finly.domain.home.dto.response.HomeMindResDTO;
 import com.umc.finly.domain.home.exception.code.HomeErrorCode;
 import com.umc.finly.domain.home.repository.HomeMindRepository;
 import com.umc.finly.domain.member.entity.Member;
 import com.umc.finly.domain.member.entity.Persona;
 import com.umc.finly.domain.member.repository.MemberRepository;
 import com.umc.finly.domain.member.repository.PersonaRepository;
-import com.umc.finly.domain.record.entity.RecordEntry;
-import com.umc.finly.domain.record.enums.EmotionCode;
-import com.umc.finly.domain.record.enums.TradeAction;
 import com.umc.finly.global.apiPayload.exception.CustomException;
 import lombok.RequiredArgsConstructor;
 import org.springframework.stereotype.Service;
+import org.springframework.transaction.annotation.Transactional;
 
 import java.time.LocalDate;
 import java.util.List;
@@ -50,17 +51,20 @@ public class HomeMindServiceImpl implements HomeMindService {
           int cScore = (int) ((double) recordedDays / now.lengthOfMonth() * 100);
 
           /* ========= A. 하락장 회복탄력성 ========= */
-          int aScore = homeMindRepository
-                  .findLatestFearIndexResult(memberId)
-                  // 공포지수 ↑ = 회복탄력성 ↓
-                  .map(r -> Math.max(0, 100 - r.getFearIndex().intValue()))
-                  .orElse(0);
+          List<FearIndexResult> fearResults =
+                  homeMindRepository.findLatestFearIndexResults(memberId);
+
+          int aScore = fearResults.isEmpty()
+                  ? 0
+                  : Math.max(0, 100 - fearResults.get(0).getFearIndex().intValue());
 
           /* ========= B. 매수 확신도 ========= */
-          int bScore = homeMindRepository
-                  .findLatestConvictionScoreResult(memberId)
-                  .map(r -> r.getConvictionScore().intValue())
-                  .orElse(0);
+          List<ConvictionScoreResult> convictionResults =
+                  homeMindRepository.findLatestConvictionScoreResults(memberId);
+
+          int bScore = convictionResults.isEmpty()
+                  ? 0
+                  : convictionResults.get(0).getConvictionScore().intValue();
 
           int fmi = (int) (
                   aScore * 0.4 +
@@ -76,6 +80,8 @@ public class HomeMindServiceImpl implements HomeMindService {
           return result;
       }
 
+      //Home 진입 시 → FMI 계산 → Member에 저장
+    @Transactional
     @Override
     public HomeMindResDTO getHomeMind(Long memberId) {//금융 마음 지수 조회 서비스 로직
 
@@ -87,19 +93,15 @@ public class HomeMindServiceImpl implements HomeMindService {
 
         MindScoreResult score = calculateMindScores(memberId);
 
-        return HomeMindResDTO.builder()
-                .memberName(member.getNickname())
-                .persona(
-                        persona == null ? null :
-                                HomeMindResDTO.Persona.builder()
-                                        .personaType(persona.getPersonaType().name())
-                                        .personaTitle(persona.getTitle())
-                                        .build()
-                )
-                .fmiScore(score.fmi)
-                .fmiLevel(resolveFmiLevel(score.fmi))
-                .fmiComment(resolveFmiComment(score.fmi))
-                .build();
+        member.updateFinMindIdx(score.fmi);//
+
+        return HomeMindConverter.toHomeMindRes(
+                member,
+                persona,
+                score.fmi,
+                resolveFmiLevel(score.fmi),
+                resolveFmiComment(score.fmi)
+        );
     }
 
 
@@ -114,32 +116,33 @@ public class HomeMindServiceImpl implements HomeMindService {
 
         MindScoreResult score = calculateMindScores(memberId);
 
-        return HomeMindDetailResDTO.builder()
-                .memberName(member.getNickname())
-                .persona(
-                        persona == null ? null :
-                                HomeMindDetailResDTO.Persona.builder()
-                                        .personaTitle(persona.getTitle())
-                                        .description(persona.getDescription())
-                                        .build()
-                )
-                .fmiScore(score.fmi)
-                .fmiLevel(resolveFmiLevel(score.fmi))
-                .fmiComment(resolveFmiComment(score.fmi))
-                .scores(
-                        HomeMindDetailResDTO.Scores.builder()
-                                .downMarketResilience(
-                                        scoreDetail(score.a, resolveADescription(score.a))
+        HomeMindDetailResDTO.Scores scores =
+                HomeMindDetailResDTO.Scores.builder()
+                        .downMarketResilience(
+                                HomeMindConverter.toScoreDetail(
+                                        score.a, resolveADescription(score.a)
                                 )
-                                .decisionConsistency(
-                                        scoreDetail(score.b, resolveBDescription(score.b))
+                        )
+                        .decisionConsistency(
+                                HomeMindConverter.toScoreDetail(
+                                        score.b, resolveBDescription(score.b)
                                 )
-                                .recordConsistency(
-                                        scoreDetail(score.c, resolveCDescription(score.c))
+                        )
+                        .recordConsistency(
+                                HomeMindConverter.toScoreDetail(
+                                        score.c, resolveCDescription(score.c)
                                 )
-                                .build()
-                )
-                .build();
+                        )
+                        .build();
+
+        return HomeMindConverter.toHomeMindDetailRes(
+                member,
+                persona,
+                score.fmi,
+                resolveFmiLevel(score.fmi),
+                resolveFmiComment(score.fmi),
+                scores
+        );
     }
 
     // FMI 라벨 / 설명

@@ -1,6 +1,7 @@
 package com.umc.finly.domain.home.service;
 
-import com.umc.finly.domain.home.dto.res.HomeWeeklyMoodResDTO;
+import com.umc.finly.domain.home.converter.HomeWeeklyMoodConverter;
+import com.umc.finly.domain.home.dto.response.HomeWeeklyMoodResDTO;
 import com.umc.finly.domain.home.exception.code.HomeErrorCode;
 import com.umc.finly.domain.home.repository.HomeRecordRepository;
 import com.umc.finly.domain.record.entity.RecordEntry;
@@ -48,50 +49,18 @@ public class HomeWeeklyMoodServiceImpl implements HomeWeeklyMoodService {
 
         for (DayOfWeek day : DayOfWeek.values()) {
 
-            // 해당 요일의 기록 목록 (없으면 빈 리스트로 반환)
             List<RecordEntry> dayRecords =
                     grouped.getOrDefault(day, List.of());
-
-            //해당 요일에 기록이 없는 경우 null, false로 설정
             if (dayRecords.isEmpty()) {
-                days.add(HomeWeeklyMoodResDTO.DayMood.builder()
-                        .dayOfWeek(day.name().substring(0, 3))
-                        .hasRecord(false)
-                        .emotion(null)
-                        .build());
-                continue;
+                days.add(HomeWeeklyMoodConverter.toEmptyDayMood(day));
+            } else {
+                days.add(HomeWeeklyMoodConverter.toDayMood(day, dayRecords));
             }
-
-            //해당 요일에 여러 개의 기록이 있는 경우 가장 마지막(createdAt 기준) 기록을 선택
-            RecordEntry lastRecord =
-                    dayRecords.stream()
-                            .max(Comparator.comparing(RecordEntry::getCreatedAt))
-                            .orElseThrow();
-
-            days.add(HomeWeeklyMoodResDTO.DayMood.builder()
-                    .dayOfWeek(toKoreanDay(day))
-                    .hasRecord(true)
-                    .emotion(lastRecord.getEmotionCode())
-                    .build());
         }
 
         return HomeWeeklyMoodResDTO.builder()
                 .days(days)
                 .build();
-    }
-
-
-    // 한글 요일 변환 유틸 메서드
-    private String toKoreanDay(DayOfWeek day) {
-        return switch (day) {
-            case MONDAY -> "월";
-            case TUESDAY -> "화";
-            case WEDNESDAY -> "수";
-            case THURSDAY -> "목";
-            case FRIDAY -> "금";
-            case SATURDAY -> "토";
-            case SUNDAY -> "일";
-        };
     }
 
 

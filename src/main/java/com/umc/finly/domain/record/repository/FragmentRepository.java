@@ -21,10 +21,13 @@ public interface FragmentRepository extends JpaRepository<RecordEntry, Long> {
 
     // 감정 타입별 기록 개수 집계 (조각 모음함 요약용)
     @Query("""
-        select r.emotionCode as emotionCode, count(r) as count
-        from RecordEntry r
-        where r.memberId = :memberId
-        group by r.emotionCode
+    select
+        r.emotionCode as emotionCode,
+        count(r) as count,
+        max(r.createdAt) as latestAt
+    from RecordEntry r
+    where r.memberId = :memberId
+    group by r.emotionCode
     """)
     List<EmotionCountProjection> countGroupByEmotionCode(@Param("memberId") Long memberId);
 
@@ -72,12 +75,45 @@ public interface FragmentRepository extends JpaRepository<RecordEntry, Long> {
             @Param("toDate") LocalDate toDate
     );
 
+    // 캘린더용 날짜별/감정별 조각 개수 집계
+    // 특정 기간(from~to) 내 recordDate + emotionCode 기준으로 그룹핑하여 count를 반환
+    @Query("""
+    select r.recordDate as recordDate, r.emotionCode as emotionCode, count(r) as count
+    from RecordEntry r
+    where r.memberId = :memberId
+      and r.recordDate >= :fromDate
+      and r.recordDate <= :toDate
+    group by r.recordDate, r.emotionCode
+    order by r.recordDate asc
+    """)
+    List<CalendarCountProjection> countCalendarByDateAndEmotion(
+            @Param("memberId") Long memberId,
+            @Param("fromDate") LocalDate fromDate,
+            @Param("toDate") LocalDate toDate
+    );
+
+    // 캘린더 범위(from~to) 내 전체 기록 수 조회
+    @Query("""
+    select count(r)
+    from RecordEntry r
+    where r.memberId = :memberId
+      and r.recordDate >= :fromDate
+      and r.recordDate <= :toDate
+    """)
+    long countByMemberIdAndRecordDateBetween(
+            @Param("memberId") Long memberId,
+            @Param("fromDate") LocalDate fromDate,
+            @Param("toDate") LocalDate toDate
+    );
+
+
     // ===== Projection Interfaces =====
 
     // 감정별 개수 집계 결과를 받기 위한 Projection
     interface EmotionCountProjection {
-        EmotionCode getEmotionCode(); // 감정 코드
-        Long getCount();              // 해당 감정의 기록 개수
+        EmotionCode getEmotionCode();           // 감정 코드
+        Long getCount();                        // 해당 감정의 기록 개수
+        java.time.LocalDateTime getLatestAt();  // 해당 감정의 최신 기록 시각
     }
 
     // 조각 리스트 조회 결과를 담는 Projection (Stock 조인 포함)
@@ -91,5 +127,12 @@ public interface FragmentRepository extends JpaRepository<RecordEntry, Long> {
         BigDecimal getQuantity();     // 수량
         String getMemo();             // 메모
         EmotionCode getEmotionCode(); // 감정 코드
+    }
+
+    // 캘린더 집계 결과를 받기 위한 Projection
+    interface CalendarCountProjection {
+        LocalDate getRecordDate();    // 기록 날짜
+        EmotionCode getEmotionCode(); // 감정 코드
+        Long getCount();              // 해당 날짜/감정의 기록 개수
     }
 }
