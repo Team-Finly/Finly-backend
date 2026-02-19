@@ -3,6 +3,7 @@ package com.umc.finly.domain.analysis.association.service;
 import com.umc.finly.domain.analysis.association.converter.FearIndexConverter;
 import com.umc.finly.domain.analysis.association.dto.response.FearIndexResDTO;
 import com.umc.finly.domain.analysis.association.entity.FearIndexResult;
+import com.umc.finly.domain.analysis.association.enums.ChangeDirection;
 import com.umc.finly.domain.analysis.association.exception.code.FearIndexErrorCode;
 import com.umc.finly.domain.analysis.association.exception.FearIndexException;
 import com.umc.finly.domain.analysis.association.repository.FearIndexResultRepository;
@@ -29,20 +30,24 @@ public class FearIndexServiceImpl implements FearIndexService {
 
     @Override
     public FearIndexResDTO getFearIndex(Long memberId) {
-        // 1. 가장 최근에 저장된 분석 결과 조회
-        FearIndexResult currentResult = fearIndexResultRepository.findFirstByMemberIdOrderByEndDateDesc(memberId)
-                .orElseThrow(() -> new FearIndexException(FearIndexErrorCode.FEAR_INDEX_NOT_FOUND));
+        // 가장 최근 분석 결과 조회
+        return fearIndexResultRepository.findFirstByMemberIdOrderByEndDateDesc(memberId)
+                .map(currentResult -> {
+                    // [결과 데이터가 있는 경우]
+                    // 이전 데이터 조회 로직 진행
+                    int prevScore = fearIndexResultRepository.findFirstByMemberIdAndEndDateBeforeOrderByEndDateDesc(
+                                    memberId, currentResult.getStartDate())
+                            .map(FearIndexResult::getFearIndex)
+                            .orElse(currentResult.getFearIndex());  // 이전 기록 없으면 현재와 동일 처리
 
-        // 2. 해당 결과의 시작일(startDate)을 기준으로 그보다 이전의 마지막 데이터 조회 (변화량 비교용)
-        int prevScore = fearIndexResultRepository.findFirstByMemberIdAndEndDateBeforeOrderByEndDateDesc(
-                        memberId, currentResult.getStartDate())
-                .map(FearIndexResult::getFearIndex)
-                .orElse(currentResult.getFearIndex()); // 이전 기록 없으면 현재와 동일 처리
-
-        // 3. 컨버터를 통해 DTO로 변환하여 반환
-        return FearIndexConverter.toFearIndexResDTO(
-                currentResult.getFearIndex(),
-                prevScore
-        );
+                    return FearIndexConverter.toFearIndexResDTO(currentResult.getFearIndex(), prevScore);
+                })
+                // [결과 데이터가 없는 경우]
+                .orElseGet(() -> FearIndexResDTO.builder()
+                        .fearIndex(0)
+                        .changeDirection(ChangeDirection.SAME)
+                        .changeValue(0)
+                        .phrase("분석을 위해 데이터를 모으는 중이에요")
+                        .build());
     }
 }
