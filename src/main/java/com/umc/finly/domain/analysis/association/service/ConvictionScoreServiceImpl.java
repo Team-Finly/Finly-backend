@@ -15,6 +15,7 @@ import java.time.LocalDate;
 
 @Service
 @RequiredArgsConstructor
+@Transactional(readOnly = true)
 public class ConvictionScoreServiceImpl implements ConvictionScoreService {
 
     private final ConvictionScoreResultRepository convictionScoreResultRepository;
