@@ -3,6 +3,7 @@ package com.umc.finly.domain.analysis.association.service;
 import com.umc.finly.domain.analysis.association.converter.ConvictionScoreConverter;
 import com.umc.finly.domain.analysis.association.dto.response.ConvictionScoreResDTO;
 import com.umc.finly.domain.analysis.association.entity.ConvictionScoreResult;
+import com.umc.finly.domain.analysis.association.enums.Status;
 import com.umc.finly.domain.analysis.association.exception.code.ConvictionScoreErrorCode;
 import com.umc.finly.domain.analysis.association.exception.ConvictionScoreException;
 import com.umc.finly.domain.analysis.association.repository.ConvictionScoreResultRepository;
@@ -14,6 +15,7 @@ import java.time.LocalDate;
 
 @Service
 @RequiredArgsConstructor
+@Transactional(readOnly = true)
 public class ConvictionScoreServiceImpl implements ConvictionScoreService {
 
     private final ConvictionScoreResultRepository convictionScoreResultRepository;
@@ -29,10 +31,16 @@ public class ConvictionScoreServiceImpl implements ConvictionScoreService {
     @Override
     public ConvictionScoreResDTO getConvictionScore(Long memberId) {
         // 가장 최신 매수 확신도 결과 조회
-        ConvictionScoreResult currentResult = convictionScoreResultRepository.findFirstByMemberIdOrderByEndDateDesc(memberId)
-                .orElseThrow(() -> new ConvictionScoreException(ConvictionScoreErrorCode.CONVICTION_SCORE_NOT_FOUND));
-
-        return ConvictionScoreConverter.toConvictionScoreResDTO(currentResult.getConvictionScore());
+        return convictionScoreResultRepository.findFirstByMemberIdOrderByEndDateDesc(memberId)
+                .map(currentResult ->
+                        ConvictionScoreConverter.toConvictionScoreResDTO(currentResult.getConvictionScore())
+                )
+                // 결과 데이터가 없을 경우 기본값 반환
+                .orElseGet(() -> ConvictionScoreResDTO.builder()
+                        .convictionScore(0)
+                        .status(Status.LOW)
+                        .phrase("분석을 위해 데이터를 모으는 중이에요")
+                        .build());
     }
 
 }
